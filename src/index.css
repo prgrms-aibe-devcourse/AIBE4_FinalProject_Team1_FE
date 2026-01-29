@@ -1,3 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import url("https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.css");
+
+@layer base {
+    html {
+        font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+        "Noto Sans KR", "Malgun Gothic", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+}
