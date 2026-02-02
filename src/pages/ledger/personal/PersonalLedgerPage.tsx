@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import {useMemo, useState} from "react";
 import {
     Calendar,
     CalendarDetail,
@@ -46,24 +46,24 @@ export default function PersonalLedgerPage() {
             },
             {
                 date: "2023-10-08",
-                txs: [{ id: "t3", title: "급여", category: "수입", time: "오전 09:00", amount: 3117000 }],
+                txs: [{id: "t3", title: "급여", category: "수입", time: "오전 09:00", amount: 3117000}],
             },
-            { date: "2023-10-09", txs: [{ id: "t4", title: "편의점", category: "식비", time: "오후 08:10", amount: -4200 }] },
-            { date: "2023-10-10", txs: [{ id: "t5", title: "버스", category: "교통", time: "오전 08:20", amount: -1500 }] },
-            { date: "2023-10-13", txs: [{ id: "t6", title: "점심", category: "식비", time: "오후 12:30", amount: -7200 }] },
-            { date: "2023-10-14", txs: [{ id: "t7", title: "중고거래", category: "기타수입", time: "오후 03:00", amount: 73500 }] },
-            { date: "2023-10-19", txs: [{ id: "t8", title: "구독", category: "고정비", time: "오전 10:00", amount: -14400 }] },
+            {date: "2023-10-09", txs: [{id: "t4", title: "편의점", category: "식비", time: "오후 08:10", amount: -4200}]},
+            {date: "2023-10-10", txs: [{id: "t5", title: "버스", category: "교통", time: "오전 08:20", amount: -1500}]},
+            {date: "2023-10-13", txs: [{id: "t6", title: "점심", category: "식비", time: "오후 12:30", amount: -7200}]},
+            {date: "2023-10-14", txs: [{id: "t7", title: "중고거래", category: "기타수입", time: "오후 03:00", amount: 73500}]},
+            {date: "2023-10-19", txs: [{id: "t8", title: "구독", category: "고정비", time: "오전 10:00", amount: -14400}]},
             {
                 date: "2023-10-23",
                 txs: [
-                    { id: "t9", title: "보너스", category: "수입", time: "오후 01:00", amount: 3000000 },
-                    { id: "t10", title: "장보기", category: "식비", time: "오후 06:40", amount: -181411 },
+                    {id: "t9", title: "보너스", category: "수입", time: "오후 01:00", amount: 3000000},
+                    {id: "t10", title: "장보기", category: "식비", time: "오후 06:40", amount: -181411},
                 ],
             },
-            { date: "2023-10-27", txs: [{ id: "t11", title: "택시", category: "교통", time: "오후 11:20", amount: -32400 }] },
-            { date: "2023-10-28", txs: [{ id: "t12", title: "환급", category: "기타수입", time: "오전 10:10", amount: 294000 }] },
-            { date: "2023-10-30", txs: [{ id: "t13", title: "식비", category: "식비", time: "오후 07:30", amount: -36000 }] },
-            { date: "2023-10-31", txs: [{ id: "t14", title: "카페", category: "카페/간식", time: "오후 02:10", amount: -28800 }] },
+            {date: "2023-10-27", txs: [{id: "t11", title: "택시", category: "교통", time: "오후 11:20", amount: -32400}]},
+            {date: "2023-10-28", txs: [{id: "t12", title: "환급", category: "기타수입", time: "오전 10:10", amount: 294000}]},
+            {date: "2023-10-30", txs: [{id: "t13", title: "식비", category: "식비", time: "오후 07:30", amount: -36000}]},
+            {date: "2023-10-31", txs: [{id: "t14", title: "카페", category: "카페/간식", time: "오후 02:10", amount: -28800}]},
         ],
         []
     );
@@ -106,9 +106,9 @@ export default function PersonalLedgerPage() {
             if (t.amount >= 0) continue;
             map.set(t.category, (map.get(t.category) ?? 0) + Math.abs(t.amount));
         }
-        let best = { category: "없음", amount: 0 };
+        let best = {category: "없음", amount: 0};
         for (const [k, v] of map.entries()) {
-            if (v > best.amount) best = { category: k, amount: v };
+            if (v > best.amount) best = {category: k, amount: v};
         }
         return best;
     }, [monthTxs]);
@@ -134,8 +134,8 @@ export default function PersonalLedgerPage() {
 
     const goals = useMemo(
         () => [
-            { id: "g1", title: "무지출 데이 6회 달성", meta: "이번 달 목표", progress: 4, total: 6 },
-            { id: "g2", title: "저축 300,000원", meta: "자산 목표", progress: 180000, total: 300000, isMoney: true as const },
+            {id: "g1", title: "무지출 데이 6회 달성", meta: "이번 달 목표", progress: 4, total: 6},
+            {id: "g2", title: "저축 300,000원", meta: "자산 목표", progress: 180000, total: 300000, isMoney: true as const},
         ],
         []
     );
@@ -183,7 +183,8 @@ export default function PersonalLedgerPage() {
                     <div className="flex items-center justify-between">
                         <div className="text-sm font-extrabold text-slate-900">이번 달 예산</div>
 
-                        <button type="button" className="text-xs font-semibold hover:opacity-80" style={{ color: NEUTRAL_ACTION }}>
+                        <button type="button" className="text-xs font-semibold hover:opacity-80"
+                                style={{color: NEUTRAL_ACTION}}>
                             관리
                         </button>
                     </div>
@@ -202,12 +203,15 @@ export default function PersonalLedgerPage() {
 
                     <div className="mt-3 flex items-end justify-between">
                         <div className="text-xs text-slate-500">남은 예산</div>
-                        <div className="text-sm font-extrabold text-slate-900 [font-variant-numeric:tabular-nums]">700,000</div>
+                        <div
+                            className="text-sm font-extrabold text-slate-900 [font-variant-numeric:tabular-nums]">700,000
+                        </div>
                     </div>
 
                     <div className="mt-1 text-xs text-slate-400">
                         총 예산{" "}
-                        <span className="font-semibold text-slate-600 [font-variant-numeric:tabular-nums]">1,300,000</span>
+                        <span
+                            className="font-semibold text-slate-600 [font-variant-numeric:tabular-nums]">1,300,000</span>
                     </div>
                 </div>
 
@@ -233,7 +237,8 @@ export default function PersonalLedgerPage() {
                                             <div className="mt-0.5 text-xs text-slate-500">{g.meta}</div>
                                         </div>
 
-                                        <div className="text-xs font-extrabold [font-variant-numeric:tabular-nums]" style={{ color: NEUTRAL_TEXT }}>
+                                        <div className="text-xs font-extrabold [font-variant-numeric:tabular-nums]"
+                                             style={{color: NEUTRAL_TEXT}}>
                                             {progressText}
                                         </div>
                                     </div>
@@ -241,7 +246,7 @@ export default function PersonalLedgerPage() {
                                     <div className="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
                                         <div
                                             className="h-full rounded-full transition-[width] duration-500 ease-out"
-                                            style={{ width: `${ratio}%`, backgroundImage: GOAL_PROGRESS_GRADIENT }}
+                                            style={{width: `${ratio}%`, backgroundImage: GOAL_PROGRESS_GRADIENT}}
                                         />
                                     </div>
 
@@ -264,13 +269,16 @@ export default function PersonalLedgerPage() {
                             <div className="text-xs text-slate-500">이번 달 지출 Top</div>
                             <div className="mt-1 font-bold text-slate-900">
                                 {topExpenseCategory.category}{" "}
-                                <span className="text-rose-600 [font-variant-numeric:tabular-nums]">-{formatNum(topExpenseCategory.amount)}</span>
+                                <span
+                                    className="text-rose-600 [font-variant-numeric:tabular-nums]">-{formatNum(topExpenseCategory.amount)}</span>
                             </div>
                         </div>
 
                         <div className="rounded-xl bg-slate-50/70 border border-slate-200 p-3">
                             <div className="text-xs text-slate-500">지출 발생일</div>
-                            <div className="mt-1 font-bold text-slate-900 [font-variant-numeric:tabular-nums]">{expenseDaysCount}일</div>
+                            <div
+                                className="mt-1 font-bold text-slate-900 [font-variant-numeric:tabular-nums]">{expenseDaysCount}일
+                            </div>
                         </div>
 
                         <div className="rounded-xl bg-slate-50/70 border border-slate-200 p-3">
@@ -294,14 +302,17 @@ export default function PersonalLedgerPage() {
                 >
                     <div className="flex items-center justify-between">
                         <div>
-                            <div className={cn("text-sm font-extrabold", monthlyReportAvailable ? "text-slate-900" : "text-slate-400")}>
+                            <div
+                                className={cn("text-sm font-extrabold", monthlyReportAvailable ? "text-slate-900" : "text-slate-400")}>
                                 월간 리포트
                             </div>
-                            <div className="mt-1 text-xs text-slate-500">{monthlyReportAvailable ? `${monthLabel} 자세히 보기` : "아직 데이터가 없어요"}</div>
+                            <div
+                                className="mt-1 text-xs text-slate-500">{monthlyReportAvailable ? `${monthLabel} 자세히 보기` : "아직 데이터가 없어요"}</div>
                         </div>
 
                         {monthlyReportAvailable && (
-                            <div className="h-9 w-9 rounded-xl border border-slate-200 bg-white grid place-items-center text-slate-700">
+                            <div
+                                className="h-9 w-9 rounded-xl border border-slate-200 bg-white grid place-items-center text-slate-700">
                                 <span className="text-lg">›</span>
                             </div>
                         )}
@@ -327,7 +338,7 @@ export default function PersonalLedgerPage() {
 
             {/* Right: 상세 내역 */}
             <aside className="lg:col-span-3">
-                <CalendarDetail selectedDate={selectedDate} selectedData={selectedData} />
+                <CalendarDetail selectedDate={selectedDate} selectedData={selectedData}/>
             </aside>
         </div>
     );
