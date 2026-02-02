@@ -1,6 +1,9 @@
-import { useMemo } from "react";
-import type { DayData, CalendarCell } from "./types";
-import { cn, formatKRW, formatNum, sumIncome, sumExpense, toISODate } from "./utils";
+import {useMemo, useRef, useEffect} from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import type {DayData} from "./types";
+import {cn, formatKRW, formatNum, sumIncome, sumExpense} from "./utils";
 
 type CalendarProps = {
     year: number;
@@ -15,8 +18,6 @@ type CalendarProps = {
     onReceiptScanClick?: () => void;
 };
 
-const weekdayLabels = ["일", "월", "화", "수", "목", "금", "토"];
-
 export default function Calendar({
                                      year,
                                      month0,
@@ -29,13 +30,12 @@ export default function Calendar({
                                      onRecordClick,
                                      onReceiptScanClick,
                                  }: CalendarProps) {
-    const firstDay = useMemo(() => new Date(year, month0, 1), [year, month0]);
-    const daysInMonth = useMemo(() => new Date(year, month0 + 1, 0).getDate(), [year, month0]);
-    const startWeekday = useMemo(() => firstDay.getDay(), [firstDay]);
+    const calendarRef = useRef<FullCalendar>(null);
 
     const monthLabel = useMemo(() => `${year}년 ${month0 + 1}월`, [year, month0]);
     const monthKey = useMemo(() => `${year}-${String(month0 + 1).padStart(2, "0")}`, [year, month0]);
 
+    // 1. 월별 합계 계산 (기존 로직 유지)
     const monthTxs = useMemo(() => {
         const all: DayData["txs"] = [];
         for (const [date, day] of dataMap.entries()) {
@@ -48,25 +48,53 @@ export default function Calendar({
     const monthExpense = useMemo(() => sumExpense(monthTxs), [monthTxs]);
     const monthNet = useMemo(() => monthIncome - monthExpense, [monthIncome, monthExpense]);
 
-    const gridCells = useMemo(() => {
-        const cells: CalendarCell[] = [];
-        const total = startWeekday + daysInMonth;
-        const rows = Math.ceil(total / 7);
-        const cellCount = rows * 7;
+    // 2. FullCalendar용 이벤트 데이터로 변환
+    const events = useMemo(() => {
+        const evtList = [];
+        for (const [date, dayData] of dataMap.entries()) {
+            const income = sumIncome(dayData.txs);
+            const expense = sumExpense(dayData.txs);
 
-        for (let i = 0; i < cellCount; i += 1) {
-            const dayNum = i - startWeekday + 1;
-            if (dayNum < 1 || dayNum > daysInMonth) {
-                cells.push({});
-            } else {
-                cells.push({ day: dayNum, iso: toISODate(year, month0, dayNum) });
+            // 수입 (파란색)
+            if (income > 0) {
+                evtList.push({
+                    title: `+${formatNum(income)}`,
+                    start: date,
+                    textColor: '#1d4ed8', // blue-700 (파랑)
+                    classNames: ['font-extrabold', 'text-[11px]', 'income-event'],
+                    display: 'list-item'
+                });
+            }
+            // 지출 (빨간색)
+            if (expense > 0) {
+                evtList.push({
+                    title: `-${formatNum(expense)}`,
+                    start: date,
+                    textColor: '#e11d48', // rose-600 (빨강)
+                    classNames: ['font-extrabold', 'text-[11px]', 'expense-event'],
+                    display: 'list-item'
+                });
             }
         }
-        return cells;
-    }, [startWeekday, daysInMonth, year, month0]);
+        return evtList;
+    }, [dataMap]);
+
+    // 3. Props(year, month0)가 바뀌면 캘린더 날짜도 이동
+    useEffect(() => {
+        if (calendarRef.current) {
+            const calendarApi = calendarRef.current.getApi();
+            const currentDate = calendarApi.getDate();
+            const targetDate = new Date(year, month0, 1);
+
+            // 달이 다를 때만 이동
+            if (currentDate.getMonth() !== targetDate.getMonth() || currentDate.getFullYear() !== targetDate.getFullYear()) {
+                calendarApi.gotoDate(targetDate);
+            }
+        }
+    }, [year, month0]);
 
     return (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col h-full">
             {/* Header */}
             <div className="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -101,19 +129,21 @@ export default function Calendar({
                 </div>
             </div>
 
-            {/* 월별 요약: 수입/지출/합계 */}
+            {/* 월별 요약 */}
             <div className="px-4 py-3 border-b border-slate-200 bg-white">
                 <div className="grid grid-cols-3 gap-3">
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                         <div className="text-xs font-semibold text-slate-500">수입</div>
-                        <div className="mt-1 text-base font-extrabold text-blue-700 [font-variant-numeric:tabular-nums]">
+                        <div
+                            className="mt-1 text-base font-extrabold text-blue-700 [font-variant-numeric:tabular-nums]">
                             {formatKRW(monthIncome)}
                         </div>
                     </div>
 
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                         <div className="text-xs font-semibold text-slate-500">지출</div>
-                        <div className="mt-1 text-base font-extrabold text-rose-600 [font-variant-numeric:tabular-nums]">
+                        <div
+                            className="mt-1 text-base font-extrabold text-rose-600 [font-variant-numeric:tabular-nums]">
                             {formatKRW(monthExpense)}
                         </div>
                     </div>
@@ -132,66 +162,30 @@ export default function Calendar({
                 </div>
             </div>
 
-            {/* Calendar Grid */}
-            <div className="p-4">
-                {/* 요일 */}
-                <div className="grid grid-cols-7 text-xs font-extrabold text-slate-500 mb-2">
-                    {weekdayLabels.map((w, idx) => (
-                        <div
-                            key={w}
-                            className={cn("px-1", idx === 0 && "text-rose-600", idx === 6 && "text-blue-700")}
-                        >
-                            {w}
-                        </div>
-                    ))}
-                </div>
+            {/* FullCalendar */}
+            <div className="p-4 flex-1 calendar-wrapper">
+                <FullCalendar
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, interactionPlugin]}
+                    initialView="dayGridMonth"
+                    locale="ko"
+                    headerToolbar={false}
+                    events={events}
+                    dateClick={(arg) => onSelectDate(arg.dateStr)}
+                    height="auto"
+                    contentHeight="auto"
+                    dayCellClassNames={(arg) => {
+                        const offset = arg.date.getTimezoneOffset() * 60000;
+                        const localDate = new Date(arg.date.getTime() - offset);
+                        const dateStr = localDate.toISOString().split('T')[0];
 
-                <div className="grid grid-cols-7 gap-2">
-                    {gridCells.map((cell, idx) => {
-                        const iso = cell.iso;
-                        const dayNum = cell.day;
-                        const day = iso ? dataMap.get(iso) : undefined;
-
-                        const txs = day?.txs ?? [];
-                        const income = sumIncome(txs);
-                        const expense = sumExpense(txs);
-
-                        const isSelected = !!iso && iso === selectedDate;
-
-                        return (
-                            <button
-                                key={idx}
-                                type="button"
-                                disabled={!iso}
-                                onClick={() => iso && onSelectDate(iso)}
-                                className={cn(
-                                    "h-[98px] rounded-2xl border text-left p-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-200 focus-visible:ring-offset-0",
-                                    iso ? "border-slate-200 hover:bg-slate-50 bg-white" : "border-transparent bg-transparent",
-                                    isSelected && "border-slate-300 bg-slate-50 shadow-sm"
-                                )}
-                            >
-                                {dayNum ? (
-                                    <div className="flex flex-col h-full">
-                                        <div className="text-sm font-extrabold text-slate-900">{dayNum}</div>
-
-                                        <div className="mt-auto space-y-1">
-                                            {income > 0 && (
-                                                <div className="inline-flex max-w-full truncate items-center px-2 py-1 rounded-lg text-[11px] font-extrabold text-blue-700 [font-variant-numeric:tabular-nums]">
-                                                    +{formatNum(income)}
-                                                </div>
-                                            )}
-                                            {expense > 0 && (
-                                                <div className="inline-flex max-w-full truncate items-center px-2 py-1 rounded-lg text-[11px] font-extrabold text-rose-600 [font-variant-numeric:tabular-nums]">
-                                                    -{formatNum(expense)}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                ) : null}
-                            </button>
-                        );
-                    })}
-                </div>
+                        return dateStr === selectedDate
+                            ? 'fc-day-selected'
+                            : '';
+                    }}
+                    fixedWeekCount={false}
+                    showNonCurrentDates={false}
+                />
 
                 {/* 하단 CTA */}
                 {(onRecordClick || onReceiptScanClick) && (
