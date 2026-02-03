@@ -11,7 +11,7 @@ const OAuth2RedirectHandler = () => {
 
     if (code) {
       axios
-        .get(`/api/v1/auths/login?code=${code}`)
+        .get(`/api/v1/auth/login?code=${code}`)
         .then((res) => {
           const accessToken =
             res.headers["authorization"] || res.headers["Authorization"];
