@@ -7,3 +7,79 @@
         "Noto Sans KR", "Malgun Gothic", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 }
+
+/* FullCalendar 커스텀 스타일 */
+@layer components {
+    /* 테두리 색상 조정 (Tailwind slate-200) */
+    .fc-theme-standard td,
+    .fc-theme-standard th {
+        border-color: #e2e8f0;
+    }
+
+    /* 요일 헤더 스타일 */
+    .fc-col-header-cell-cushion {
+        color: #64748b; /* slate-500 */
+        font-size: 0.75rem; /* text-xs */
+        font-weight: 800;
+        text-decoration: none;
+        padding: 8px 0;
+    }
+
+    /* 날짜 숫자 기본 스타일 */
+    .fc-daygrid-day-number {
+        color: #0f172a; /* slate-900 */
+        font-size: 0.875rem; /* text-sm */
+        font-weight: 800;
+        text-decoration: none;
+        padding: 8px;
+    }
+
+    /* 오늘 날짜 스타일 */
+    .fc-day-today {
+        background-color: #f8fafc !important; /* slate-50 */
+    }
+
+    /* 요일별 색상 (일요일: 빨강, 토요일: 파랑) - 헤더 */
+    .fc-day-sun .fc-col-header-cell-cushion { color: #e11d48; } /* rose-600 */
+    .fc-day-sat .fc-col-header-cell-cushion { color: #1d4ed8; } /* blue-700 */
+
+    /* 요일별 색상 (일요일: 빨강, 토요일: 파랑) - 날짜 숫자 */
+    .fc-day-sun .fc-daygrid-day-number { color: #e11d48; } /* rose-600 */
+    .fc-day-sat .fc-daygrid-day-number { color: #1d4ed8; } /* blue-700 */
+
+    /* 공휴일 스타일 (숫자 빨간색) - 토요일 파란색보다 우선 적용됨 */
+    .fc-day-holiday .fc-daygrid-day-number {
+        color: #e11d48 !important; /* rose-600 */
+    }
+
+    /* 이벤트(수입/지출) 공통 스타일 */
+    .fc-event {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        pointer-events: none; /* 클릭 이벤트 무시 (날짜 셀 클릭으로 통과됨) */
+    }
+
+    /* 이벤트 텍스트 색상 강제 적용 */
+    .income-event .fc-event-title {
+        color: #1d4ed8 !important; /* blue-700 (수입: 파랑) */
+    }
+
+    .expense-event .fc-event-title {
+        color: #e11d48 !important; /* rose-600 (지출: 빨강) */
+    }
+
+    .fc-daygrid-event-dot {
+        display: none; /* 기본 점 숨기기 */
+    }
+
+    /* 선택된 날짜 하이라이트 */
+    .fc-day-selected {
+        background-color: #f1f5f9 !important; /* slate-100 */
+    }
+
+    /* 날짜 셀에 마우스 올렸을 때 커서 모양 */
+    .fc-daygrid-day-frame {
+        cursor: pointer;
+    }
+}
