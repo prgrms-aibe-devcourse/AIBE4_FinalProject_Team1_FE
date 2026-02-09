@@ -70,7 +70,7 @@ function IconChevronDown({ className }: { className?: string }) {
   );
 }
 
-type MenuKey = "personal" | "shared" | "profile" | null;
+type MenuKey = "sales" | "inventory" | "orders" | "documents" | "analytics" | "profile" | null;
 
 type MenuItem = {
   label: string;
@@ -229,41 +229,97 @@ export default function Navbar() {
     setOpenMenu((prev) => (prev === key ? null : key));
   };
 
-  const personalSections: MenuSection[] = useMemo(
+  const salesSections: MenuSection[] = useMemo(
     () => [
-      { title: "기록", items: [{ label: "캘린더", path: "/ledger" }] },
       {
-        title: "관리",
+        title: "매출",
         items: [
-          { label: "예산", path: "/ledger/budget" },
-          { label: "고정비", path: "/ledger/fixed" },
-          { label: "목표", path: "/ledger/goals" },
+          { label: "매출 업로드", path: "/sales/upload" },
+          { label: "매출 내역", path: "/sales/list" },
+          { label: "매출 분석", path: "/analytics/sales" },
         ],
       },
-      { title: "분석", items: [{ label: "리포트", path: "/ledger/report" }] },
+      {
+        title: "메뉴",
+        items: [
+          { label: "메뉴 관리", path: "/sales/menu" },
+          { label: "차감 기준", path: "/sales/deduction-rules" },
+        ],
+      },
     ],
     [],
   );
 
-  const sharedSections: MenuSection[] = useMemo(
+  const inventorySections: MenuSection[] = useMemo(
     () => [
-      { title: "기록", items: [{ label: "캘린더", path: "/shared" }] },
       {
-        title: "팀",
+        title: "재고",
         items: [
-          { label: "팀 관리", path: "/shared/team" },
-          { label: "정산", path: "/shared/settlement" }, // 팀 아래로 이동
+          { label: "재고 현황", path: "/inventory" },
+          { label: "실사 재고 등록", path: "/inventory/stock-count" },
+          { label: "입고 관리", path: "/inventory/receiving" },
+          { label: "폐기 관리", path: "/inventory/disposal" },
+        ],
+      }
+    ],
+    [],
+  );
+
+  const ordersSections: MenuSection[] = useMemo(
+    () => [
+      {
+        title: "발주",
+        items: [
+          { label: "발주 목록", path: "/orders" },
+          { label: "발주 등록", path: "/orders/create" },
         ],
       },
       {
-        title: "관리",
+        title: "추천",
         items: [
-          { label: "예산", path: "/shared/budget" },
-          { label: "고정비", path: "/shared/fixed" },
-          { label: "목표", path: "/shared/goals" },
+          { label: "발주 추천", path: "/orders/recommendations" },
+          { label: "추천 히스토리", path: "/orders/history" },
         ],
       },
-      { title: "분석", items: [{ label: "리포트", path: "/shared/report" }] },
+      {
+        title: "거래처",
+        items: [
+          { label: "거래처", path: "/orders/vendors" },
+        ],
+      },
+    ],
+    [],
+  );
+
+  const documentSections: MenuSection[] = useMemo(
+    () => [
+      {
+        title: "문서",
+        items: [
+          { label: "영수증/명세서 업로드", path: "/documents/upload" },
+          { label: "업로드 내역", path: "/documents/history" },
+        ],
+      },
+    ],
+    [],
+  );
+
+  const analyticsSections: MenuSection[] = useMemo(
+    () => [
+      {
+        title: "분석",
+        items: [
+          { label: "재고 분석", path: "/analytics/inventory" },
+          { label: "원가 분석", path: "/analytics/cost" },
+        ],
+      },
+      {
+        title: "리포트",
+        items: [
+          { label: "운영 리포트", path: "/reports" },
+          { label: "리포트 발행", path: "/reports/generate" },
+        ],
+      },
     ],
     [],
   );
@@ -315,29 +371,29 @@ export default function Navbar() {
         {/* Left: Brand */}
         <button
           type="button"
-          onClick={() => handleProtectedNav("/ledger")}
+          onClick={() => handleProtectedNav("/home")}
           className="flex items-center shrink-0"
         >
           <img
-            src="/images/dont_worry_logo.png"
+            src="/images/logo.png"
             alt="Don't Worry"
             // nav 높이 확장에 맞춰 로고도 살짝 키움
             className="h-16 w-auto object-contain block"
           />
         </button>
 
-        {/* Center: Nav (활성 색상 제거: hover만 회색) */}
+        {/* Center: Nav */}
         <div className="flex items-center gap-1">
           <button
             type="button"
             data-menu-toggle
-            onClick={() => toggleMenu("personal")}
-            className={cn(topItemBase, openMenu === "personal" && topItemOpen)}
-            aria-expanded={openMenu === "personal"}
+            onClick={() => toggleMenu("sales")}
+            className={cn(topItemBase, openMenu === "sales" && topItemOpen)}
+            aria-expanded={openMenu === "sales"}
             aria-haspopup="menu"
           >
             <span className="inline-flex items-center gap-1">
-              가계부
+              매출
               <IconChevronDown className="h-4 w-4" />
             </span>
           </button>
@@ -345,35 +401,69 @@ export default function Navbar() {
           <button
             type="button"
             data-menu-toggle
-            onClick={() => toggleMenu("shared")}
-            className={cn(topItemBase, openMenu === "shared" && topItemOpen)}
-            aria-expanded={openMenu === "shared"}
+            onClick={() => toggleMenu("inventory")}
+            className={cn(topItemBase, openMenu === "inventory" && topItemOpen)}
+            aria-expanded={openMenu === "inventory"}
             aria-haspopup="menu"
           >
             <span className="inline-flex items-center gap-1">
-              공유가계부
+              재고
               <IconChevronDown className="h-4 w-4" />
             </span>
           </button>
 
           <button
             type="button"
-            onClick={() => handleProtectedNav("/challenge")}
-            className={topItemBase}
+            data-menu-toggle
+            onClick={() => toggleMenu("orders")}
+            className={cn(topItemBase, openMenu === "orders" && topItemOpen)}
+            aria-expanded={openMenu === "orders"}
+            aria-haspopup="menu"
           >
-            챌린지
+            <span className="inline-flex items-center gap-1">
+              발주
+              <IconChevronDown className="h-4 w-4" />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            data-menu-toggle
+            onClick={() => toggleMenu("documents")}
+            className={cn(topItemBase, openMenu === "documents" && topItemOpen)}
+            aria-expanded={openMenu === "documents"}
+            aria-haspopup="menu"
+          >
+            <span className="inline-flex items-center gap-1">
+              문서
+              <IconChevronDown className="h-4 w-4" />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            data-menu-toggle
+            onClick={() => toggleMenu("analytics")}
+            className={cn(topItemBase, openMenu === "analytics" && topItemOpen)}
+            aria-expanded={openMenu === "analytics"}
+            aria-haspopup="menu"
+          >
+            <span className="inline-flex items-center gap-1">
+              분석
+              <IconChevronDown className="h-4 w-4" />
+            </span>
           </button>
 
           <button
             type="button"
             onClick={() =>
               isAuthed
-                ? window.alert("AI 월렛봇 연결 예정")
+                ? window.alert("챗봇 연결 예정")
                 : navigate("/login")
             }
             className="text-sm font-extrabold px-3 py-2 rounded-md transition-colors text-slate-900 hover:bg-slate-100"
           >
-            AI 월렛봇
+            챗봇
           </button>
         </div>
 
@@ -438,13 +528,25 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mega Menus (세로로 길어지지 않게: 내용만큼만, 가로 한 줄 유지) */}
-      {openMenu === "personal" && (
-        <MegaMenu sections={personalSections} onNavigate={handleMenuNav} />
+      {/* Mega Menus */}
+      {openMenu === "sales" && (
+        <MegaMenu sections={salesSections} onNavigate={handleMenuNav} />
       )}
 
-      {openMenu === "shared" && (
-        <MegaMenu sections={sharedSections} onNavigate={handleMenuNav} />
+      {openMenu === "inventory" && (
+        <MegaMenu sections={inventorySections} onNavigate={handleMenuNav} />
+      )}
+
+      {openMenu === "orders" && (
+        <MegaMenu sections={ordersSections} onNavigate={handleMenuNav} />
+      )}
+
+      {openMenu === "documents" && (
+        <MegaMenu sections={documentSections} onNavigate={handleMenuNav} />
+      )}
+
+      {openMenu === "analytics" && (
+        <MegaMenu sections={analyticsSections} onNavigate={handleMenuNav} />
       )}
     </nav>
   );
