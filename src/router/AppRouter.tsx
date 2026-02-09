@@ -1,8 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./layout/MainLayout";
-import PersonalLedgerPage from "../pages/ledger/personal/PersonalLedgerPage";
-import SharedPage from "../pages/ledger/shared/SharedPage.tsx";
-import ChallengePage from "../pages/challenge/ChallengePage";
+import HomePage from "../pages/home/HomePage";
 import MyPage from "../pages/me/MyPage";
 import LoginPage from "../pages/auth/LoginPage.tsx";
 import OAuth2RedirectHandler from "../pages/auth/OAuth2RedirectHandler.tsx";
@@ -14,12 +12,12 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
         <Route element={<MainLayout />}>
-          {/* 기본 진입: 개인 가계부(캘린더) */}
+          {/* 기본 진입: 홈 */}
           <Route
             index
             element={
               isAuthed ? (
-                <Navigate to="/ledger" replace />
+                <Navigate to="/home" replace />
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -30,15 +28,29 @@ export default function AppRouter() {
 
           <Route path="/oauth/redirect" element={<OAuth2RedirectHandler />} />
 
-          {/* 개인 가계부 (캘린더) */}
-          <Route path="/ledger" element={<PersonalLedgerPage />} />
+          {/* 홈 */}
+          <Route path="/home" element={<HomePage />} />
 
-          {/* 공유 가계부 (공유 캘린더) */}
-          <Route path="/shared" element={<SharedPage />} />
-          <Route path="/shared/:sharedLedgerId" element={<SharedPage />} />
+          {/* TODO: 재고 관리 */}
+          {/* <Route path="/inventory" element={<InventoryPage />} /> */}
+          {/* <Route path="/inventory/receiving" element={<ReceivingPage />} /> */}
+          {/* <Route path="/inventory/disposal" element={<DisposalPage />} /> */}
 
-          {/* 챌린지 */}
-          <Route path="/challenge" element={<ChallengePage />} />
+          {/* TODO: 매출 관리 */}
+          {/* <Route path="/sales/upload" element={<SalesUploadPage />} /> */}
+          {/* <Route path="/sales/list" element={<SalesListPage />} /> */}
+          {/* <Route path="/analytics/sales" element={<SalesAnalyticsPage />} /> */}
+
+          {/* TODO: 문서 OCR */}
+          {/* <Route path="/documents/upload" element={<DocumentUploadPage />} /> */}
+          {/* <Route path="/documents/history" element={<DocumentHistoryPage />} /> */}
+
+          {/* TODO: 발주 */}
+          {/* <Route path="/orders" element={<OrdersPage />} /> */}
+          {/* <Route path="/orders/recommendations" element={<RecommendationsPage />} /> */}
+
+          {/* TODO: 대시보드 */}
+          {/* <Route path="/analytics" element={<AnalyticsPage />} /> */}
 
           {/* 마이페이지 */}
           <Route path="/me" element={<MyPage />} />
