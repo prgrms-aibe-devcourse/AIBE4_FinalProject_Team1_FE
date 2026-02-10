@@ -8,6 +8,9 @@ import {
     sumExpense,
     toISODate,
 } from "../../../components/calendar";
+import ReceiptScanModal from "../../../components/receipt/ReceiptScanModal";
+import TransactionRecordModal from "../../../components/form/TransactionRecordModal";
+import type {TransactionFormData} from "../../../components/form/TransactionForm";
 
 const NEUTRAL_ACTION = "#0F172A";
 const NEUTRAL_TEXT = "#0F172A";
@@ -18,6 +21,8 @@ const GOAL_PROGRESS_GRADIENT = `linear-gradient(90deg, rgba(105,175,255,0.95) 0%
 export default function PersonalLedgerPage() {
     const [year, setYear] = useState(2023);
     const [month0, setMonth0] = useState(9); // 0-index, 9=10월
+    const [isReceiptScanModalOpen, setReceiptScanModalOpen] = useState(false);
+    const [isRecordModalOpen, setRecordModalOpen] = useState(false);
 
     // 샘플 데이터
     const sampleData: DayData[] = useMemo(
@@ -163,151 +168,158 @@ export default function PersonalLedgerPage() {
     };
 
     const handleRecordClick = () => {
-        window.alert("지출/수입 기록: (직접 입력) 연결 예정");
+        setRecordModalOpen(true);
     };
 
     const handleReceiptScanClick = () => {
-        window.alert("영수증 스캔: (OCR) 연결 예정");
+        setReceiptScanModalOpen(true);
     };
 
     const handleMonthlyReportClick = () => {
         window.alert("월간 리포트: 연결 예정");
     };
 
+    const handleTransactionSubmit = (data: TransactionFormData) => {
+        // TODO: 실제 데이터 저장 로직 구현
+        console.log("New transaction:", data);
+        window.alert(JSON.stringify(data, null, 2));
+    };
+
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left: 사이드바 */}
-            <aside className="lg:col-span-3 space-y-4">
-                {/* 이번 달 예산 카드 */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div className="text-sm font-extrabold text-slate-900">이번 달 예산</div>
+        <>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Left: 사이드바 */}
+                <aside className="lg:col-span-3 space-y-4">
+                    {/* 이번 달 예산 카드 */}
+                    <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm font-extrabold text-slate-900">이번 달 예산</div>
 
-                        <button type="button" className="text-xs font-semibold hover:opacity-80"
-                                style={{color: NEUTRAL_ACTION}}>
-                            관리
-                        </button>
-                    </div>
+                            <button type="button" className="text-xs font-semibold hover:opacity-80"
+                                    style={{color: NEUTRAL_ACTION}}>
+                                관리
+                            </button>
+                        </div>
 
-                    <div className="mt-3 text-xs text-slate-500">사용률 65%</div>
+                        <div className="mt-3 text-xs text-slate-500">사용률 65%</div>
 
-                    <div className="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
-                        <div
-                            className="h-full w-[65%] rounded-full"
-                            style={{
-                                backgroundColor: NEUTRAL_BAR,
-                                opacity: 0.55,
-                            }}
-                        />
-                    </div>
+                        <div className="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
+                            <div
+                                className="h-full w-[65%] rounded-full"
+                                style={{
+                                    backgroundColor: NEUTRAL_BAR,
+                                    opacity: 0.55,
+                                }}
+                            />
+                        </div>
 
-                    <div className="mt-3 flex items-end justify-between">
-                        <div className="text-xs text-slate-500">남은 예산</div>
-                        <div
-                            className="text-sm font-extrabold text-slate-900 [font-variant-numeric:tabular-nums]">700,000
+                        <div className="mt-3 flex items-end justify-between">
+                            <div className="text-xs text-slate-500">남은 예산</div>
+                            <div
+                                className="text-sm font-extrabold text-slate-900 [font-variant-numeric:tabular-nums]">700,000
+                            </div>
+                        </div>
+
+                        <div className="mt-1 text-xs text-slate-400">
+                            총 예산{" "}
+                            <span
+                                className="font-semibold text-slate-600 [font-variant-numeric:tabular-nums]">1,300,000</span>
                         </div>
                     </div>
 
-                    <div className="mt-1 text-xs text-slate-400">
-                        총 예산{" "}
-                        <span
-                            className="font-semibold text-slate-600 [font-variant-numeric:tabular-nums]">1,300,000</span>
-                    </div>
-                </div>
+                    {/* 목표 */}
+                    <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm font-extrabold text-slate-900">목표</div>
+                            <button type="button" className="text-xs font-semibold text-slate-500 hover:text-slate-700">
+                                관리
+                            </button>
+                        </div>
 
-                {/* 목표 */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div className="text-sm font-extrabold text-slate-900">목표</div>
-                        <button type="button" className="text-xs font-semibold text-slate-500 hover:text-slate-700">
-                            관리
-                        </button>
-                    </div>
+                        <div className="mt-3 space-y-3">
+                            {goals.map((g) => {
+                                const ratio = g.total === 0 ? 0 : Math.min(100, Math.round((g.progress / g.total) * 100));
+                                const progressText = g.isMoney ? `${formatNum(g.progress)} / ${formatNum(g.total)}원` : `${g.progress} / ${g.total}`;
 
-                    <div className="mt-3 space-y-3">
-                        {goals.map((g) => {
-                            const ratio = g.total === 0 ? 0 : Math.min(100, Math.round((g.progress / g.total) * 100));
-                            const progressText = g.isMoney ? `${formatNum(g.progress)} / ${formatNum(g.total)}원` : `${g.progress} / ${g.total}`;
+                                return (
+                                    <div key={g.id} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div>
+                                                <div className="text-sm font-extrabold text-slate-900">{g.title}</div>
+                                                <div className="mt-0.5 text-xs text-slate-500">{g.meta}</div>
+                                            </div>
 
-                            return (
-                                <div key={g.id} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div>
-                                            <div className="text-sm font-extrabold text-slate-900">{g.title}</div>
-                                            <div className="mt-0.5 text-xs text-slate-500">{g.meta}</div>
+                                            <div className="text-xs font-extrabold [font-variant-numeric:tabular-nums]"
+                                                 style={{color: NEUTRAL_TEXT}}>
+                                                {progressText}
+                                            </div>
                                         </div>
 
-                                        <div className="text-xs font-extrabold [font-variant-numeric:tabular-nums]"
-                                             style={{color: NEUTRAL_TEXT}}>
-                                            {progressText}
+                                        <div className="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
+                                            <div
+                                                className="h-full rounded-full transition-[width] duration-500 ease-out"
+                                                style={{width: `${ratio}%`, backgroundImage: GOAL_PROGRESS_GRADIENT}}
+                                            />
                                         </div>
-                                    </div>
 
-                                    <div className="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
-                                        <div
-                                            className="h-full rounded-full transition-[width] duration-500 ease-out"
-                                            style={{width: `${ratio}%`, backgroundImage: GOAL_PROGRESS_GRADIENT}}
-                                        />
+                                        <div className="mt-1 text-[11px] text-slate-400">달성률 {ratio}%</div>
                                     </div>
+                                );
+                            })}
+                        </div>
+                    </div>
 
-                                    <div className="mt-1 text-[11px] text-slate-400">달성률 {ratio}%</div>
+                    {/* AI 요약(인사이트) */}
+                    <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm font-extrabold text-slate-900">AI 요약</div>
+                            <span className="text-xs font-semibold text-slate-400">Beta</span>
+                        </div>
+
+                        <div className="mt-3 space-y-2 text-sm text-slate-700">
+                            <div className="rounded-xl bg-slate-50/70 border border-slate-200 p-3">
+                                <div className="text-xs text-slate-500">이번 달 지출 Top</div>
+                                <div className="mt-1 font-bold text-slate-900">
+                                    {topExpenseCategory.category}{" "}
+                                    <span
+                                        className="text-rose-600 [font-variant-numeric:tabular-nums]">-{formatNum(topExpenseCategory.amount)}</span>
                                 </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* AI 요약(인사이트) */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div className="text-sm font-extrabold text-slate-900">AI 요약</div>
-                        <span className="text-xs font-semibold text-slate-400">Beta</span>
-                    </div>
-
-                    <div className="mt-3 space-y-2 text-sm text-slate-700">
-                        <div className="rounded-xl bg-slate-50/70 border border-slate-200 p-3">
-                            <div className="text-xs text-slate-500">이번 달 지출 Top</div>
-                            <div className="mt-1 font-bold text-slate-900">
-                                {topExpenseCategory.category}{" "}
-                                <span
-                                    className="text-rose-600 [font-variant-numeric:tabular-nums]">-{formatNum(topExpenseCategory.amount)}</span>
                             </div>
-                        </div>
 
-                        <div className="rounded-xl bg-slate-50/70 border border-slate-200 p-3">
-                            <div className="text-xs text-slate-500">지출 발생일</div>
-                            <div
-                                className="mt-1 font-bold text-slate-900 [font-variant-numeric:tabular-nums]">{expenseDaysCount}일
+                            <div className="rounded-xl bg-slate-50/70 border border-slate-200 p-3">
+                                <div className="text-xs text-slate-500">지출 발생일</div>
+                                <div
+                                    className="mt-1 font-bold text-slate-900 [font-variant-numeric:tabular-nums]">{expenseDaysCount}일
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="rounded-xl bg-slate-50/70 border border-slate-200 p-3">
-                            <div className="text-xs text-slate-500">추천</div>
-                            <div className="mt-1 text-slate-700">
-                                이번 달은 <span className="font-semibold">고정비</span>를 먼저 점검하고, 지출이 큰 카테고리를 1개만 줄여보세요.
+                            <div className="rounded-xl bg-slate-50/70 border border-slate-200 p-3">
+                                <div className="text-xs text-slate-500">추천</div>
+                                <div className="mt-1 text-slate-700">
+                                    이번 달은 <span className="font-semibold">고정비</span>를 먼저 점검하고, 지출이 큰 카테고리를 1개만 줄여보세요.
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* 월간 리포트 */}
-                <button
-                    type="button"
-                    onClick={handleMonthlyReportClick}
-                    disabled={!monthlyReportAvailable}
-                    className={cn(
-                        "w-full text-left rounded-2xl p-4 border shadow-sm transition-colors",
-                        monthlyReportAvailable ? "bg-white border-slate-200 hover:bg-slate-50" : "bg-slate-100 border-slate-200 cursor-not-allowed"
-                    )}
-                >
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <div
-                                className={cn("text-sm font-extrabold", monthlyReportAvailable ? "text-slate-900" : "text-slate-400")}>
-                                월간 리포트
-                            </div>
-                            <div
-                                className="mt-1 text-xs text-slate-500">{monthlyReportAvailable ? `${monthLabel} 자세히 보기` : "아직 데이터가 없어요"}</div>
+                    {/* 월간 리포트 */}
+                    <button
+                        type="button"
+                        onClick={handleMonthlyReportClick}
+                        disabled={!monthlyReportAvailable}
+                        className={cn(
+                            "w-full text-left rounded-2xl p-4 border shadow-sm transition-colors",
+                            monthlyReportAvailable ? "bg-white border-slate-200 hover:bg-slate-50" : "bg-slate-100 border-slate-200 cursor-not-allowed"
+                        )}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <div
+                                    className={cn("text-sm font-extrabold", monthlyReportAvailable ? "text-slate-900" : "text-slate-400")}>
+                                    월간 리포트
+                                </div>
+                                <div
+                                    className="mt-1 text-xs text-slate-500">{monthlyReportAvailable ? `${monthLabel} 자세히 보기` : "아직 데이터가 없어요"}</div>
                         </div>
 
                         {monthlyReportAvailable && (
@@ -341,5 +353,18 @@ export default function PersonalLedgerPage() {
                 <CalendarDetail selectedDate={selectedDate} selectedData={selectedData}/>
             </aside>
         </div>
+        
+        {isReceiptScanModalOpen && (
+            <ReceiptScanModal onClose={() => setReceiptScanModalOpen(false)} />
+        )}
+
+        {isRecordModalOpen && (
+            <TransactionRecordModal
+                onClose={() => setRecordModalOpen(false)}
+                onSubmit={handleTransactionSubmit}
+                initialDate={selectedDate}
+            />
+        )}
+    </>
     );
 }
