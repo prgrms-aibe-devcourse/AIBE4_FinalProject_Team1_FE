@@ -1,6 +1,6 @@
 import {useEffect} from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
-import axios from "axios";
+import apiClient from "@/services/api/client";
 
 const OAuth2RedirectHandler = () => {
     const [searchParams] = useSearchParams();
@@ -10,7 +10,7 @@ const OAuth2RedirectHandler = () => {
         const code = searchParams.get("code");
 
         if (code) {
-            axios
+            apiClient
                 .get(`/api/auth/login?code=${code}`)
                 .then((res) => {
                     const accessToken =
