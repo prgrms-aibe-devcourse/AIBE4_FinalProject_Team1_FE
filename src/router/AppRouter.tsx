@@ -5,7 +5,10 @@ import MyPage from "../pages/me/MyPage";
 import LoginPage from "../pages/auth/LoginPage.tsx";
 import OAuth2RedirectHandler from "../pages/auth/OAuth2RedirectHandler.tsx";
 import ReceivingPage from "../pages/stock/ReceivingPage.tsx";
-import StockPage from "../pages/stock/StockPage.tsx";
+import ReceiveRegistrationPage from "@/pages/stock/ReceiveRegistrationPage.tsx";
+import StockDocumentsPage from "@/pages/stock/StockDocumentsPage.tsx";
+import DisposalPage from "@/pages/stock/DisposalPage.tsx";
+import StockPage from "@/pages/stock/StockPage.tsx";
 
 export default function AppRouter() {
     // const isAuthed = !!localStorage.getItem("accessToken");
@@ -36,7 +39,9 @@ export default function AppRouter() {
                     {/* TODO: 재고 관리 */}
                     <Route path="/stock" element={<StockPage/>}/>
                     <Route path="/stock/receiving" element={<ReceivingPage/>}/>
-                    {/* <Route path="/stock/disposal" element={<DisposalPage />} /> */}
+                    <Route path="/stock/receiveRegister" element={<ReceiveRegistrationPage/>}/>
+                    <Route path="/stock/documents" element={<StockDocumentsPage/>}/>
+                    <Route path="/stock/disposal" element={<DisposalPage/>}/>
 
                     {/* TODO: 매출 관리 */}
                     {/* <Route path="/sales/upload" element={<SalesUploadPage />} /> */}
