@@ -16,10 +16,9 @@ FROM nginx:1.27-alpine
 # Vite build output -> nginx html root
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# NOTE:
-# nginx config(default.conf)는 backend repo의 docker-compose에서
-# /etc/nginx/conf.d/default.conf 로 마운트하여 덮어씁니다.
-# 이 이미지에는 nginx.conf를 포함하지 않습니다.
+# nginx 설정 복사 ($connection_upgrade 변수 포함)
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
