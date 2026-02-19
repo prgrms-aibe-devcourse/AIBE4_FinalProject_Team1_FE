@@ -5,7 +5,8 @@ type SocialProvider = "google" | "kakao";
 const LoginPage: React.FC = () => {
   const handleLogin = (provider: SocialProvider): void => {
     console.log(`${provider} 로그인 시도`);
-    window.location.href = `http://localhost/oauth2/authorization/${provider}`;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost';
+    window.location.href = `${baseUrl}/oauth2/authorization/${provider}`;
   };
 
   return (
