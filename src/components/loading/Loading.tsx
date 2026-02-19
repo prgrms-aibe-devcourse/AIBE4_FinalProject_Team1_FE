@@ -1,6 +1,6 @@
 import Lottie from 'react-lottie-player';
 // 영수증 관련 로띠 파일이 있다면 그걸 쓰고, 없으면 기존 loading.json 재사용
-import loadingJson from '../../components/loading/Loading.json';
+import loadingJson from '../../components/loading/loading.json';
 
 export default function Loading() {
     return (

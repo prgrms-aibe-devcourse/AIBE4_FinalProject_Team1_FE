@@ -18,7 +18,7 @@ export const analyzeReceipt = async (files: File[], signal?: AbortSignal): Promi
         formData.append("files", file);
     });
 
-    const response = await axios.post<OcrResponse>("http://localhost:8080/api/v1/ocr", formData, {
+    const response = await axios.post<OcrResponse>("http://localhost:8080/api/ocr", formData, {
         headers: {
             "Content-Type": "multipart/form-data",
         },
