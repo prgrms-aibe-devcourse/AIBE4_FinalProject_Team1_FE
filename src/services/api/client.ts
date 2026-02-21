@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAccessToken, setAccessToken, removeAccessToken, extractToken } from '../../utils/auth';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -27,9 +28,10 @@ const processQueue = (error: any, token: string | null = null) => {
 
 // JWT 토큰 자동 첨부
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
+  const token = getAccessToken();
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    // 이미 'Bearer '가 포함되어 있는지 확인하여 중복 방지 (유틸리티에서 처리하지만 인터셉터 수준에서도 안전장치)
+    config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
   }
   return config;
 });
@@ -71,11 +73,11 @@ apiClient.interceptors.response.use(
         const { reissue } = await import('./auth');
         const response = await reissue();
 
-        // 응답 헤더나 바디에서 access token 추출
-        const newAccessToken = response.headers['authorization']?.split(' ')[1];
+        // 응답 헤더나 바디에서 access token 추출 (유틸리티 사용)
+        const newAccessToken = extractToken(response.headers['authorization'] || response.headers['Authorization']);
 
         if (newAccessToken) {
-          localStorage.setItem('accessToken', newAccessToken);
+          setAccessToken(newAccessToken);
           apiClient.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
@@ -84,7 +86,7 @@ apiClient.interceptors.response.use(
         }
       } catch (refreshError) {
         processQueue(refreshError, null);
-        localStorage.removeItem('accessToken');
+        removeAccessToken();
         window.location.href = '/login';
         return Promise.reject(refreshError);
       } finally {

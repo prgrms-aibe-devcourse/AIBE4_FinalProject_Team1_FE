@@ -1,6 +1,7 @@
-import {useEffect} from "react";
-import {useNavigate, useSearchParams} from "react-router-dom";
-import apiClient from "@/services/api/client";
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { socialLogin } from "@/services/api/auth";
+import { setAccessToken } from "@/utils/auth";
 
 const OAuth2RedirectHandler = () => {
     const [searchParams] = useSearchParams();
@@ -10,14 +11,13 @@ const OAuth2RedirectHandler = () => {
         const code = searchParams.get("code");
 
         if (code) {
-            apiClient
-                .get(`/api/auth/login?code=${code}`)
+            socialLogin(code)
                 .then((res) => {
                     const accessToken =
                         res.headers["authorization"] || res.headers["Authorization"];
 
                     if (accessToken) {
-                        localStorage.setItem("accessToken", accessToken);
+                        setAccessToken(accessToken);
                         window.location.href = "/ledger";
                     }
                 })

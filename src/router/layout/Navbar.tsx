@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../services/api/auth";
+import { getAccessToken, removeAccessToken } from "../../utils/auth";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -178,7 +179,7 @@ export default function Navbar() {
   const rootRef = useRef<HTMLElement | null>(null);
   const profileWrapRef = useRef<HTMLDivElement | null>(null);
 
-  const isAuthed = !!localStorage.getItem("accessToken");
+  const isAuthed = !!getAccessToken();
 
   // TODO: 실제 유저 정보로 교체
   const user = {
@@ -206,7 +207,7 @@ export default function Navbar() {
     } catch (error) {
       console.error("Logout API failed:", error);
     } finally {
-      localStorage.removeItem("accessToken");
+      removeAccessToken();
       navigate("/login");
     }
   };
