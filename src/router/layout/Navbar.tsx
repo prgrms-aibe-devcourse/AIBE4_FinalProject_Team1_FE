@@ -217,12 +217,14 @@ export default function Navbar() {
   const topItemOpen = "bg-slate-100 text-slate-900";
 
   const handleProtectedNav = (path: string) => {
+    console.log("Navigating to:", path, "isAuthed:", isAuthed);
     if (location.pathname === "/login") {
       navigate(path);
       return;
     }
 
     if (!isAuthed) {
+      console.warn("User not authenticated, redirecting to login");
       navigate(`/login?redirect=${encodeURIComponent(path)}`);
       return;
     }
@@ -230,6 +232,7 @@ export default function Navbar() {
   };
 
   const handleMenuNav = (path: string) => {
+    console.log("Menu item clicked:", path);
     setOpenMenu(null);
     handleProtectedNav(path);
   };

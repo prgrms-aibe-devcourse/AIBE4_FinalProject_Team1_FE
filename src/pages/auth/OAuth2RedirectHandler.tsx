@@ -18,7 +18,7 @@ const OAuth2RedirectHandler = () => {
 
                     if (accessToken) {
                         setAccessToken(accessToken);
-                        window.location.href = "/ledger";
+                        window.location.href = "/home";
                     }
                 })
                 .catch((err) => {
