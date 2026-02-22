@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     ClipboardCheck,
     Save,
@@ -13,6 +14,7 @@ import {
  * 실사 재고 관리 메인 컴포넌트
  */
 const StocktakePage: React.FC = () => {
+    const navigate = useNavigate();
     // --- 상태 관리 ---
     const [storePublicId] = useState("b58e82a3-764c-4740-9b4e-8f199b1c1234"); // 실제 환경에선 URL 파라미터 등에서 추출
     const [title, setTitle] = useState(`${new Date().toLocaleDateString()} 정기 재고 실사`);
@@ -143,6 +145,13 @@ const StocktakePage: React.FC = () => {
             <header className="sticky top-0 z-10 bg-white border-b border-slate-200 shadow-sm px-6 py-4">
                 <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => navigate("/inventory/stocktakes")}
+                            className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition"
+                            title="목록으로"
+                        >
+                            <ArrowLeftRight size={20} />
+                        </button>
                         <div className="bg-emerald-100 p-2 rounded-lg text-emerald-600">
                             <ClipboardCheck size={24} />
                         </div>

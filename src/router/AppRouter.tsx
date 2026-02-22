@@ -6,6 +6,7 @@ import MyPage from "../pages/me/MyPage";
 import LoginPage from "../pages/auth/LoginPage";
 import OAuth2RedirectHandler from "../pages/auth/OAuth2RedirectHandler";
 import StocktakePage from "../pages/inventory/StocktakePage";
+import StocktakeListPage from "../pages/inventory/StocktakeListPage";
 
 export default function AppRouter() {
   const isAuthed = !!getAccessToken();
@@ -34,7 +35,8 @@ export default function AppRouter() {
           <Route path="/home" element={<HomePage />} />
 
           {/* 재고 관리 */}
-          <Route path="/inventory/stock-count" element={<StocktakePage />} />
+          <Route path="/inventory/stocktakes" element={<StocktakeListPage />} />
+          <Route path="/inventory/stocktakes/new" element={<StocktakePage />} />
           {/* <Route path="/inventory" element={<InventoryPage />} /> */}
           {/* <Route path="/inventory/receiving" element={<ReceivingPage />} /> */}
           {/* <Route path="/inventory/disposal" element={<DisposalPage />} /> */}
