@@ -217,15 +217,14 @@ export default function Navbar() {
   const topItemOpen = "bg-slate-100 text-slate-900";
 
   const handleProtectedNav = (path: string) => {
-    console.log("Navigating to:", path, "isAuthed:", isAuthed);
-    if (location.pathname === "/login") {
-      navigate(path);
-      return;
-    }
+    const currentAuthed = !!getAccessToken();
+    console.log("Navigating to:", path, "currentAuthed:", currentAuthed);
 
-    if (!isAuthed) {
+    if (!currentAuthed) {
       console.warn("User not authenticated, redirecting to login");
-      navigate(`/login?redirect=${encodeURIComponent(path)}`);
+      if (location.pathname !== "/login") {
+        navigate(`/login?redirect=${encodeURIComponent(path)}`);
+      }
       return;
     }
     navigate(path);
@@ -383,7 +382,7 @@ export default function Navbar() {
         {/* Left: Brand */}
         <button
           type="button"
-          onClick={() => handleProtectedNav("/home")}
+          onClick={() => handleProtectedNav("/")}
           className="flex items-center shrink-0"
         >
           <img
