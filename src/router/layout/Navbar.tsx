@@ -286,6 +286,7 @@ export default function Navbar() {
         title: "재고",
         items: [
           { label: "재고 현황", path: "/inventory" },
+          { label: "재료 관리", path: "/inventory/ingredients" },
           { label: "실사 재고 관리", path: "/inventory/stocktakes" },
           { label: "입고 관리", path: "/inventory/receiving" },
           { label: "폐기 관리", path: "/inventory/disposal" },
