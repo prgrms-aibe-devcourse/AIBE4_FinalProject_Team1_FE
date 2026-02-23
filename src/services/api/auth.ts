@@ -7,6 +7,9 @@ export const login = (credentials: { email: string; password: string }) =>
 // 로그아웃
 export const logout = () => apiClient.post('/api/auth/logout');
 
+// 토큰 재발급
+export const reissue = () => apiClient.post('/api/auth/reissue');
+
 // 사용자 정보 조회
 export const getMe = () => apiClient.get('/api/auth/me');
 

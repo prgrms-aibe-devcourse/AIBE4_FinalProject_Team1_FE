@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { logout } from "../../services/api/auth";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -198,9 +199,16 @@ export default function Navbar() {
     setOpenMenu(null);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     closeAll();
-    window.alert("로그아웃 연결 예정");
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout API failed:", error);
+    } finally {
+      localStorage.removeItem("accessToken");
+      navigate("/login");
+    }
   };
 
   const topItemBase =
@@ -501,30 +509,40 @@ export default function Navbar() {
           </button>
 
           {/* Profile */}
-          <div ref={profileWrapRef} className="relative">
+          {isAuthed ? (
+            <div ref={profileWrapRef} className="relative">
+              <button
+                type="button"
+                className="h-10 w-10 rounded-full bg-slate-100 border border-slate-200 text-slate-900 font-bold grid place-items-center"
+                onClick={toggleProfile}
+                aria-label="프로필"
+                aria-haspopup="menu"
+                aria-expanded={profileOpen}
+              >
+                <span className="text-sm">S</span>
+              </button>
+
+              {profileOpen && (
+                <ProfileDropdown
+                  name={user.name}
+                  email={user.email}
+                  onMyPage={() => {
+                    closeAll();
+                    handleProtectedNav("/me");
+                  }}
+                  onLogout={handleLogout}
+                />
+              )}
+            </div>
+          ) : (
             <button
               type="button"
-              className="h-10 w-10 rounded-full bg-slate-100 border border-slate-200 text-slate-900 font-bold grid place-items-center"
-              onClick={toggleProfile}
-              aria-label="프로필"
-              aria-haspopup="menu"
-              aria-expanded={profileOpen}
+              onClick={() => navigate("/login")}
+              className="px-4 py-2 text-sm font-bold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-colors shrink-0"
             >
-              <span className="text-sm">S</span>
+              로그인
             </button>
-
-            {profileOpen && (
-              <ProfileDropdown
-                name={user.name}
-                email={user.email}
-                onMyPage={() => {
-                  closeAll();
-                  handleProtectedNav("/me");
-                }}
-                onLogout={handleLogout}
-              />
-            )}
-          </div>
+          )}
         </div>
       </div>
 
