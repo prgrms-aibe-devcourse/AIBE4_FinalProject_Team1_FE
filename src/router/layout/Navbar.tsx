@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../services/api/auth";
+import { getAccessToken, removeAccessToken } from "../../utils/auth";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -178,7 +179,7 @@ export default function Navbar() {
   const rootRef = useRef<HTMLElement | null>(null);
   const profileWrapRef = useRef<HTMLDivElement | null>(null);
 
-  const isAuthed = !!localStorage.getItem("accessToken");
+  const isAuthed = !!getAccessToken();
 
   // TODO: 실제 유저 정보로 교체
   const user = {
@@ -206,7 +207,7 @@ export default function Navbar() {
     } catch (error) {
       console.error("Logout API failed:", error);
     } finally {
-      localStorage.removeItem("accessToken");
+      removeAccessToken();
       navigate("/login");
     }
   };
@@ -216,12 +217,14 @@ export default function Navbar() {
   const topItemOpen = "bg-slate-100 text-slate-900";
 
   const handleProtectedNav = (path: string) => {
+    console.log("Navigating to:", path, "isAuthed:", isAuthed);
     if (location.pathname === "/login") {
       navigate(path);
       return;
     }
 
     if (!isAuthed) {
+      console.warn("User not authenticated, redirecting to login");
       navigate(`/login?redirect=${encodeURIComponent(path)}`);
       return;
     }
@@ -229,6 +232,7 @@ export default function Navbar() {
   };
 
   const handleMenuNav = (path: string) => {
+    console.log("Menu item clicked:", path);
     setOpenMenu(null);
     handleProtectedNav(path);
   };
@@ -264,7 +268,7 @@ export default function Navbar() {
         title: "재고",
         items: [
           { label: "재고 현황", path: "/inventory" },
-          { label: "실사 재고 등록", path: "/inventory/stock-count" },
+          { label: "실사 재고 관리", path: "/inventory/stocktakes" },
           { label: "입고 관리", path: "/inventory/receiving" },
           { label: "폐기 관리", path: "/inventory/disposal" },
         ],

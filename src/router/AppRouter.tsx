@@ -1,12 +1,15 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { getAccessToken } from "../utils/auth";
 import MainLayout from "./layout/MainLayout";
 import HomePage from "../pages/home/HomePage";
 import MyPage from "../pages/me/MyPage";
-import LoginPage from "../pages/auth/LoginPage.tsx";
-import OAuth2RedirectHandler from "../pages/auth/OAuth2RedirectHandler.tsx";
+import LoginPage from "../pages/auth/LoginPage";
+import OAuth2RedirectHandler from "../pages/auth/OAuth2RedirectHandler";
+import StocktakePage from "../pages/inventory/StocktakePage";
+import StocktakeListPage from "../pages/inventory/StocktakeListPage";
 
 export default function AppRouter() {
-  const isAuthed = !!localStorage.getItem("accessToken");
+  const isAuthed = !!getAccessToken();
 
   return (
     <BrowserRouter>
@@ -31,7 +34,9 @@ export default function AppRouter() {
           {/* 홈 */}
           <Route path="/home" element={<HomePage />} />
 
-          {/* TODO: 재고 관리 */}
+          {/* 재고 관리 */}
+          <Route path="/inventory/stocktakes" element={<StocktakeListPage />} />
+          <Route path="/inventory/stocktakes/new" element={<StocktakePage />} />
           {/* <Route path="/inventory" element={<InventoryPage />} /> */}
           {/* <Route path="/inventory/receiving" element={<ReceivingPage />} /> */}
           {/* <Route path="/inventory/disposal" element={<DisposalPage />} /> */}

@@ -4,6 +4,10 @@ import apiClient from './client';
 export const login = (credentials: { email: string; password: string }) =>
   apiClient.post('/api/auth/login', credentials);
 
+// 소셜 로그인 (OAuth2)
+export const socialLogin = (code: string) =>
+  apiClient.get(`/api/auth/login?code=${code}`);
+
 // 로그아웃
 export const logout = () => apiClient.post('/api/auth/logout');
 
