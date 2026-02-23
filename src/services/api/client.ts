@@ -30,8 +30,9 @@ const processQueue = (error: any, token: string | null = null) => {
 apiClient.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token) {
+    const cleanToken = token.replace(/^"(.*)"$/, '$1');
     // 이미 'Bearer '가 포함되어 있는지 확인하여 중복 방지 (유틸리티에서 처리하지만 인터셉터 수준에서도 안전장치)
-    config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    config.headers.Authorization = cleanToken.startsWith('Bearer ') ? cleanToken : `Bearer ${cleanToken}`;
   }
   return config;
 });
@@ -77,11 +78,13 @@ apiClient.interceptors.response.use(
         const newAccessToken = extractToken(response.headers['authorization'] || response.headers['Authorization']);
 
         if (newAccessToken) {
-          setAccessToken(newAccessToken);
-          apiClient.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          const cleanNewToken = newAccessToken.replace(/^"(.*)"$/, '$1');
+          setAccessToken(cleanNewToken);
 
-          processQueue(null, newAccessToken);
+          apiClient.defaults.headers.common['Authorization'] = `Bearer ${cleanNewToken}`;
+          originalRequest.headers.Authorization = `Bearer ${cleanNewToken}`;
+
+          processQueue(null, cleanNewToken);
           return apiClient(originalRequest);
         }
       } catch (refreshError) {

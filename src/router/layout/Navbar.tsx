@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../services/api/auth";
+import { getUserProfile } from "../../services/api/user";
 import { getAccessToken, removeAccessToken } from "../../utils/auth";
 
 function cn(...classes: Array<string | false | null | undefined>) {
@@ -181,12 +182,29 @@ export default function Navbar() {
 
   const isAuthed = !!getAccessToken();
 
-  // TODO: 실제 유저 정보로 교체
-  const user = {
-    name: "김소명",
-    email: "thaud9696@naver.com",
-    avatarUrl: "/images/profile.jpg", // 또는 서버에서 내려주는 URL
-  };
+  const [user, setUser] = useState<{
+    name: string;
+    email: string;
+    avatarUrl?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (isAuthed) {
+      getUserProfile()
+        .then((data) => {
+          setUser({
+            name: data.name || "사용자",
+            email: data.email || "",
+            avatarUrl: data.avatarUrl,
+          });
+        })
+        .catch((err) => {
+          console.error("Failed to fetch user profile:", err);
+        });
+    } else {
+      setUser(null);
+    }
+  }, [isAuthed]);
 
   const [openMenu, setOpenMenu] = useState<MenuKey>(null);
 
@@ -208,6 +226,7 @@ export default function Navbar() {
       console.error("Logout API failed:", error);
     } finally {
       removeAccessToken();
+      setUser(null);
       navigate("/login");
     }
   };
@@ -516,19 +535,27 @@ export default function Navbar() {
             <div ref={profileWrapRef} className="relative">
               <button
                 type="button"
-                className="h-10 w-10 rounded-full bg-slate-100 border border-slate-200 text-slate-900 font-bold grid place-items-center"
+                className="h-10 w-10 rounded-full bg-slate-100 border border-slate-200 overflow-hidden text-slate-900 font-bold grid place-items-center"
                 onClick={toggleProfile}
                 aria-label="프로필"
                 aria-haspopup="menu"
                 aria-expanded={profileOpen}
               >
-                <span className="text-sm">S</span>
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover" />
+                ) : (
+                  <img
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "U")}&background=random&color=fff`}
+                    alt={user?.name}
+                    className="h-full w-full object-cover"
+                  />
+                )}
               </button>
 
               {profileOpen && (
                 <ProfileDropdown
-                  name={user.name}
-                  email={user.email}
+                  name={user?.name || "사용자"}
+                  email={user?.email || "로딩 중..."}
                   onMyPage={() => {
                     closeAll();
                     handleProtectedNav("/me");
