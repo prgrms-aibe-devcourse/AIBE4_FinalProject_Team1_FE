@@ -1,7 +1,7 @@
 import apiClient from './client';
 
 // --- 식재료(Ingredient) 관련 타입 정의 ---
-export type IngredientUnit = 'EA' | 'KG' | 'L';
+export type IngredientUnit = 'EA' | 'G' | 'ML';
 export type IngredientStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface IngredientResponse {

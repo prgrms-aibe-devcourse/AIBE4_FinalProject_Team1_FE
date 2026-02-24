@@ -7,6 +7,7 @@ import {
     ChevronRight,
     LayoutList
 } from 'lucide-react';
+import { getStorePublicId } from '../../utils/store';
 
 /**
  * 실사 재고 관리 시스템 리스트 컴포넌트
@@ -15,7 +16,7 @@ const StocktakeListPage = () => {
     const navigate = useNavigate();
 
     // --- 데이터 상태 ---
-    const [storePublicId] = useState("b58e82a3-764c-4740-9b4e-8f199b1c1234");
+    const storePublicId = getStorePublicId();
     const [sheets] = useState([
         { sheetId: 1, title: "2월 정기 재고 실사", status: "CONFIRMED", confirmedAt: "2024-02-15T10:00:00Z", createdAt: "2024-02-15T09:00:00Z" },
         { sheetId: 2, title: "우유류 긴급 실사", status: "CONFIRMED", confirmedAt: "2024-02-20T15:30:00Z", createdAt: "2024-02-20T15:00:00Z" },

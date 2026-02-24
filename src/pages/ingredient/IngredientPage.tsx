@@ -20,13 +20,15 @@ import {
     type IngredientStatus
 } from '../../services/api/ingredient';
 
-const INGREDIENT_UNITS: IngredientUnit[] = ["EA", "KG", "L"];
+import { getStorePublicId } from '../../utils/store';
+
+const INGREDIENT_UNITS: IngredientUnit[] = ["EA", "G", "ML"];
 const INGREDIENT_STATUS: IngredientStatus[] = ["ACTIVE", "INACTIVE"];
 
 const UNIT_LABELS: Record<IngredientUnit, string> = {
     EA: "개(EA)",
-    KG: "kg",
-    L: "L"
+    G: "g",
+    ML: "ml"
 };
 
 const StatusBadge = ({ status }: { status: IngredientStatus }) => {
@@ -42,7 +44,7 @@ const StatusBadge = ({ status }: { status: IngredientStatus }) => {
 };
 
 export default function IngredientPage() {
-    const storePublicId = "fe9b14cd-55ed-4006-bf20-c1a2697c06db"; // 데모용 고정 ID
+    const storePublicId = getStorePublicId();
 
     // --- State ---
     const [view, setView] = useState<'LIST' | 'CREATE' | 'EDIT'>('LIST');

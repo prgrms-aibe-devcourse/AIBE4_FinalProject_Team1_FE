@@ -8,6 +8,7 @@ import OAuth2RedirectHandler from "../pages/auth/OAuth2RedirectHandler";
 import StocktakePage from "../pages/inventory/StocktakePage";
 import StocktakeListPage from "../pages/inventory/StocktakeListPage";
 import IngredientPage from "../pages/ingredient/IngredientPage";
+import MenuPage from "../pages/menu/MenuPage";
 
 export default function AppRouter() {
   const isAuthed = !!getAccessToken();
@@ -44,6 +45,7 @@ export default function AppRouter() {
           {/* <Route path="/inventory/disposal" element={<DisposalPage />} /> */}
 
           {/* TODO: 매출 관리 */}
+          <Route path="/sales/menu" element={<MenuPage />} />
           {/* <Route path="/sales/upload" element={<SalesUploadPage />} /> */}
           {/* <Route path="/sales/list" element={<SalesListPage />} /> */}
           {/* <Route path="/analytics/sales" element={<SalesAnalyticsPage />} /> */}

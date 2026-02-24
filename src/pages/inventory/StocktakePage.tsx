@@ -9,6 +9,7 @@ import {
     History,
     ArrowLeftRight,
 } from 'lucide-react';
+import { getStorePublicId } from '../../utils/store';
 
 /**
  * 실사 재고 관리 메인 컴포넌트
@@ -16,7 +17,7 @@ import {
 const StocktakePage: React.FC = () => {
     const navigate = useNavigate();
     // --- 상태 관리 ---
-    const [storePublicId] = useState("b58e82a3-764c-4740-9b4e-8f199b1c1234"); // 실제 환경에선 URL 파라미터 등에서 추출
+    const storePublicId = getStorePublicId();
     const [title, setTitle] = useState(`${new Date().toLocaleDateString()} 정기 재고 실사`);
     const [items, setItems] = useState([
         { ingredientId: 101, name: "에스프레소 원두(A)", unit: "kg", theoreticalQty: 12.50, stocktakeQty: "" },
