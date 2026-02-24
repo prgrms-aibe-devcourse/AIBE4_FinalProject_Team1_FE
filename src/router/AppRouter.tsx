@@ -9,6 +9,7 @@ import StocktakePage from "../pages/inventory/StocktakePage";
 import StocktakeListPage from "../pages/inventory/StocktakeListPage";
 import IngredientPage from "../pages/ingredient/IngredientPage";
 import MenuPage from "../pages/menu/MenuPage";
+import VendorPage from "../pages/vendor/VendorPage";
 
 export default function AppRouter() {
   const isAuthed = !!getAccessToken();
@@ -53,6 +54,9 @@ export default function AppRouter() {
           {/* TODO: 문서 OCR */}
           {/* <Route path="/documents/upload" element={<DocumentUploadPage />} /> */}
           {/* <Route path="/documents/history" element={<DocumentHistoryPage />} /> */}
+
+          {/* 거래처 관리 */}
+          <Route path="/vendors" element={<VendorPage />} />
 
           {/* TODO: 발주 */}
           {/* <Route path="/orders" element={<OrdersPage />} /> */}
