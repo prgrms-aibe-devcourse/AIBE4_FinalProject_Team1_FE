@@ -1,5 +1,5 @@
 const STORE_ID_KEY = 'store_public_id';
-const DEFAULT_STORE_ID = 'fe9b14cd-55ed-4006-bf20-c1a2697c06db';
+const DEFAULT_STORE_ID = 'd85c1fff-1600-408c-899c-69083a688a94';
 
 /**
  * 현재 선택된 매장의 Public ID를 반환합니다.

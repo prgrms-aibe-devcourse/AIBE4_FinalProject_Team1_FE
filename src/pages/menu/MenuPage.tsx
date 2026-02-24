@@ -9,7 +9,8 @@ import {
     DollarSign,
     Layers,
     ArrowLeft,
-    Loader2
+    Loader2,
+    AlertCircle
 } from 'lucide-react';
 import {
     getMenus,
@@ -20,6 +21,10 @@ import {
     type MenuStatus,
     type Ingredient
 } from '../../services/api/menu';
+import {
+    getIngredients,
+    type IngredientResponse
+} from '../../services/api/ingredient';
 
 import { getStorePublicId } from '../../utils/store';
 
@@ -33,10 +38,11 @@ const MenuPage: React.FC = () => {
     const storePublicId = getStorePublicId();
 
     // 단위 목록 정의 (Enum 대응)
-    const UNIT_OPTIONS = ["EA", "KG", "L"];
+    // const UNIT_OPTIONS = ["EA", "KG", "L"];
 
     // --- 데이터 상태 ---
     const [menus, setMenus] = useState<MenuResponse[]>([]);
+    const [availableIngredients, setAvailableIngredients] = useState<IngredientResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentMenu, setCurrentMenu] = useState<MenuResponse | null>(null);
@@ -50,21 +56,34 @@ const MenuPage: React.FC = () => {
     });
 
     // --- API 호출 ---
-    const fetchMenus = async () => {
+    const fetchData = async () => {
         setIsLoading(true);
         try {
-            const data = await getMenus(storePublicId);
-            setMenus(data);
+            const [menuData, ingredientData] = await Promise.all([
+                getMenus(storePublicId),
+                getIngredients(storePublicId)
+            ]);
+            setMenus(menuData);
+            setAvailableIngredients(ingredientData.data);
         } catch (error) {
-            console.error("Failed to fetch menus:", error);
-            alert("메뉴 목록을 불러오는 중 오류가 발생했습니다.");
+            console.error("Failed to fetch data:", error);
+            alert("데이터를 불러오는 중 오류가 발생했습니다.");
         } finally {
             setIsLoading(false);
         }
     };
 
+    const fetchMenus = async () => {
+        try {
+            const data = await getMenus(storePublicId);
+            setMenus(data);
+        } catch (error) {
+            console.error("Failed to fetch menus:", error);
+        }
+    };
+
     useEffect(() => {
-        fetchMenus();
+        fetchData();
     }, []);
 
     // --- 비즈니스 로직 ---
@@ -111,10 +130,26 @@ const MenuPage: React.FC = () => {
         setFormData((prev: any) => ({ ...prev, ingredients: updated }));
     };
 
-    // 식재료 값 변경
-    const handleIngredientChange = (index: number, field: string, value: any) => {
+    // 식재료 선택 핸들러
+    const handleSelectIngredient = (index: number, ingredientName: string) => {
+        const targetIngredient = availableIngredients.find(ing => ing.name === ingredientName);
+        const updated = formData.ingredients.map((ing: any, i: number) => {
+            if (i === index) {
+                return {
+                    ...ing,
+                    name: ingredientName,
+                    unit: targetIngredient ? targetIngredient.unit : "EA"
+                };
+            }
+            return ing;
+        });
+        setFormData((prev: any) => ({ ...prev, ingredients: updated }));
+    };
+
+    // 식재료 수량 변경 핸들러
+    const handleIngredientAmountChange = (index: number, value: string) => {
         const updated = formData.ingredients.map((ing: any, i: number) =>
-            i === index ? { ...ing, [field]: value } : ing
+            i === index ? { ...ing, amount: value } : ing
         );
         setFormData((prev: any) => ({ ...prev, ingredients: updated }));
     };
@@ -376,32 +411,41 @@ const MenuPage: React.FC = () => {
                                 <div className="space-y-3">
                                     {formData.ingredients.map((ing: Ingredient, index: number) => (
                                         <div key={index} className="flex gap-3 animate-in fade-in zoom-in duration-300">
+                                            {/* 재료명: DB 목록 선택 */}
+                                            <div className="flex-[2.5] relative">
+                                                <select
+                                                    required
+                                                    value={ing.name}
+                                                    onChange={(e) => handleSelectIngredient(index, e.target.value)}
+                                                    className="w-full bg-slate-50 rounded-xl p-3 text-sm font-bold focus:bg-white border border-transparent focus:border-slate-200 outline-none transition-all appearance-none cursor-pointer"
+                                                >
+                                                    <option value="" disabled>식재료 선택</option>
+                                                    {availableIngredients.map(available => (
+                                                        <option key={available.ingredientPublicId} value={available.name}>
+                                                            {available.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300">
+                                                    <Search size={14} />
+                                                </div>
+                                            </div>
+
+                                            {/* 수량 입력 */}
                                             <input
-                                                type="text"
-                                                placeholder="재료명"
-                                                value={ing.name}
-                                                onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                                                className="flex-[2.5] bg-slate-50 rounded-xl p-3 text-sm font-bold focus:bg-white border border-transparent focus:border-slate-200 outline-none transition-all"
-                                            />
-                                            <input
+                                                required
                                                 type="number"
                                                 step="0.001"
                                                 placeholder="수량"
                                                 value={ing.amount}
-                                                onChange={(e) => handleIngredientChange(index, 'amount', e.target.value)}
+                                                onChange={(e) => handleIngredientAmountChange(index, e.target.value)}
                                                 className="flex-1 bg-slate-50 rounded-xl p-3 text-sm font-bold focus:bg-white border border-transparent focus:border-slate-200 outline-none transition-all text-center"
                                             />
 
-                                            {/* 단위 입력 방식 변경: input -> select (EA, KG, L) */}
-                                            <select
-                                                value={ing.unit}
-                                                onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                                                className="flex-1 bg-slate-50 rounded-xl p-3 text-sm font-bold focus:bg-white border border-transparent focus:border-slate-200 outline-none transition-all appearance-none cursor-pointer text-center"
-                                            >
-                                                {UNIT_OPTIONS.map(opt => (
-                                                    <option key={opt} value={opt}>{opt}</option>
-                                                ))}
-                                            </select>
+                                            {/* 단위: 선택 시 자동 지정 */}
+                                            <div className="flex-1 bg-slate-100 rounded-xl p-3 text-xs font-black text-slate-400 flex items-center justify-center border border-transparent">
+                                                {ing.unit || "단위"}
+                                            </div>
 
                                             <button
                                                 type="button"
@@ -418,6 +462,10 @@ const MenuPage: React.FC = () => {
                                         </div>
                                     )}
                                 </div>
+                                <p className="mt-4 text-[10px] text-slate-400 flex items-center gap-1">
+                                    <AlertCircle size={10} />
+                                    식재료는 '식재료 관리' 탭에 등록된 항목만 선택할 수 있습니다.
+                                </p>
                             </div>
 
                             {/* 하단 버튼 */}
