@@ -14,11 +14,13 @@ import {
     getIngredients,
     createIngredient,
     updateIngredient,
-    deleteIngredient,
-    type IngredientResponse,
-    type IngredientUnit,
-    type IngredientStatus
-} from '../../services/api/ingredient';
+    deleteIngredient
+} from '@/api/ingredient';
+import type {
+    IngredientResponse,
+    IngredientUnit,
+    IngredientStatus
+} from '@/types';
 
 const INGREDIENT_UNITS: IngredientUnit[] = ["EA", "KG", "L"];
 const INGREDIENT_STATUS: IngredientStatus[] = ["ACTIVE", "INACTIVE"];
@@ -30,11 +32,11 @@ const UNIT_LABELS: Record<IngredientUnit, string> = {
 };
 
 const StatusBadge = ({ status }: { status: IngredientStatus }) => {
-    const styles = {
+    const styles: Record<IngredientStatus, string> = {
         ACTIVE: "bg-emerald-100 text-emerald-700 border border-emerald-200",
         INACTIVE: "bg-slate-100 text-slate-500 border border-slate-200"
     };
-    const labels = {
+    const labels: Record<IngredientStatus, string> = {
         ACTIVE: "활성",
         INACTIVE: "비활성"
     };
@@ -55,8 +57,8 @@ export default function IngredientPage() {
     const loadIngredients = async () => {
         setIsLoading(true);
         try {
-            const response = await getIngredients(storePublicId);
-            setIngredients(response.data);
+            const data = await getIngredients(storePublicId);
+            setIngredients(data);
         } catch (error) {
             console.error("Failed to load ingredients:", error);
             alert("데이터를 불러오는 중 오류가 발생했습니다.");
@@ -70,7 +72,7 @@ export default function IngredientPage() {
     }, []);
 
     // --- Handlers ---
-    const handleCreate = async (newData: { name: string; unit: IngredientUnit; lowStockThreshold: number }) => {
+    const handleCreate = async (newData: { name: string; unit: IngredientUnit; lowStockThreshold: number | null }) => {
         try {
             await createIngredient(storePublicId, newData);
             alert("새 식재료가 등록되었습니다.");
@@ -212,10 +214,21 @@ export default function IngredientPage() {
 
         const handleSubmit = (e: React.FormEvent) => {
             e.preventDefault();
-            if (mode === 'EDIT' && form.ingredientPublicId) {
-                handleUpdate(form as IngredientResponse);
+            // Validate that required fields are present
+            if (!form.name || !form.unit || form.lowStockThreshold === undefined || (form.lowStockThreshold !== null && form.lowStockThreshold < 0)) {
+                alert("모든 필수 항목을 올바르게 입력해주세요.");
+                return;
+            }
+
+            if (mode === 'EDIT' && form.ingredientPublicId && currentIngredient) {
+                // Merge original data with form changes to create a complete object
+                const dataToUpdate: IngredientResponse = {
+                    ...currentIngredient,
+                    ...form,
+                };
+                handleUpdate(dataToUpdate);
             } else {
-                handleCreate(form as { name: string; unit: IngredientUnit; lowStockThreshold: number });
+                handleCreate({ name: form.name, unit: form.unit, lowStockThreshold: form.lowStockThreshold ?? null });
             }
         };
 
@@ -260,9 +273,13 @@ export default function IngredientPage() {
                                 <label className="block text-sm font-bold text-gray-700 mb-2">저재고 경고 기준</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none bg-gray-50 focus:bg-white"
-                                    value={form.lowStockThreshold}
-                                    onChange={(e) => setForm({ ...form, lowStockThreshold: Number(e.target.value) })}
+                                    value={form.lowStockThreshold ?? ''}
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value, 10);
+                                        setForm({ ...form, lowStockThreshold: isNaN(value) || value < 0 ? 0 : value });
+                                    }}
                                 />
                             </div>
                         </div>

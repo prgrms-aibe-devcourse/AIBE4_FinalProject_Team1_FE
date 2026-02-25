@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { logout } from "../../services/api/auth";
-import { getUserProfile } from "../../services/api/user";
-import { getAccessToken, removeAccessToken } from "../../utils/auth";
+import { logout } from "@/api/auth";
+import { getUserProfile } from "@/api/user";
+import { getAccessToken, removeAccessToken } from "@/utils/auth.ts";
+import type { UserProfileResponse } from "@/types";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -181,32 +182,27 @@ export default function Navbar() {
   const profileWrapRef = useRef<HTMLDivElement | null>(null);
 
   const isAuthed = !!getAccessToken();
-
-  const [user, setUser] = useState<{
-    name: string;
-    email: string;
-    avatarUrl?: string;
-  } | null>(null);
-
-  useEffect(() => {
-    if (isAuthed) {
-      getUserProfile()
-        .then((data) => {
-          setUser({
-            name: data.name || "사용자",
-            email: data.email || "",
-            avatarUrl: data.avatarUrl,
-          });
-        })
-        .catch((err) => {
-          console.error("Failed to fetch user profile:", err);
-        });
-    } else {
-      setUser(null);
-    }
-  }, [isAuthed]);
+  const [user, setUser] = useState<UserProfileResponse | null>(null);
 
   const [openMenu, setOpenMenu] = useState<MenuKey>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = getAccessToken();
+      if (!token) {
+        setUser(null);
+        return;
+      }
+      try {
+        const userData = await getUserProfile();
+        setUser(userData);
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error);
+        setUser(null);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const profileOpen = openMenu === "profile";
 
@@ -226,7 +222,6 @@ export default function Navbar() {
       console.error("Logout API failed:", error);
     } finally {
       removeAccessToken();
-      setUser(null);
       navigate("/login");
     }
   };
