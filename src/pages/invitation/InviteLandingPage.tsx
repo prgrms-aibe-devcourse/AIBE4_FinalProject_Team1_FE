@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { acceptInvitation } from '@/api/invitation';
 import { setDefaultStore } from '@/api/store';
 import { CheckCircle, XCircle, Loader2, UserPlus } from 'lucide-react';
+import axios from 'axios';
+import type { ApiError } from '@/types/common';
 
 type InviteStatus = 'loading' | 'success' | 'error';
 
@@ -47,14 +49,18 @@ const InviteLandingPage = () => {
         setTimeout(() => {
           navigate('/dashboard', { replace: true });
         }, 3000);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setStatus('error');
-        if (err.response?.status === 404) {
-          setErrorMessage('유효하지 않은 초대입니다. 초대가 만료되었거나 이미 사용되었을 수 있습니다.');
-        } else if (err.response?.status === 400) {
-          setErrorMessage('잘못된 초대 정보입니다.');
+        if (axios.isAxiosError<ApiError>(err)) {
+          if (err.response?.status === 404) {
+            setErrorMessage('유효하지 않은 초대입니다. 초대가 만료되었거나 이미 사용되었을 수 있습니다.');
+          } else if (err.response?.status === 400) {
+            setErrorMessage('잘못된 초대 정보입니다.');
+          } else {
+            setErrorMessage(err.response?.data?.message || '초대 처리 중 오류가 발생했습니다.');
+          }
         } else {
-          setErrorMessage(err.response?.data?.message || '초대 처리 중 오류가 발생했습니다.');
+          setErrorMessage('초대 처리 중 예상치 못한 오류가 발생했습니다.');
         }
       }
     };

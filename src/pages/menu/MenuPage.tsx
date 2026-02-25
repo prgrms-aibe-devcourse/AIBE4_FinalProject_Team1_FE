@@ -29,6 +29,16 @@ import {
 import { requireStorePublicId } from '@/utils/store.ts';
 
 /**
+ * 메뉴 폼 데이터 인터페이스
+ */
+interface MenuFormData {
+    name: string;
+    basePrice: string | number;
+    status: MenuStatus;
+    ingredients: Ingredient[];
+}
+
+/**
  * 메뉴 관리 시스템 메인 컴포넌트
  */
 const MenuPage: React.FC = () => {
@@ -118,7 +128,7 @@ const MenuPage: React.FC = () => {
 
     // 식재료 행 추가
     const addIngredientRow = () => {
-        setFormData((prev: any) => ({
+        setFormData((prev: MenuFormData) => ({
             ...prev,
             ingredients: [...prev.ingredients, { name: "", amount: "", unit: "EA" }]
         }));
@@ -126,14 +136,14 @@ const MenuPage: React.FC = () => {
 
     // 식재료 행 삭제
     const removeIngredientRow = (index: number) => {
-        const updated = formData.ingredients.filter((_: any, i: number) => i !== index);
-        setFormData((prev: any) => ({ ...prev, ingredients: updated }));
+        const updated = formData.ingredients.filter((_: Ingredient, i: number) => i !== index);
+        setFormData((prev: MenuFormData) => ({ ...prev, ingredients: updated }));
     };
 
     // 식재료 선택 핸들러
     const handleSelectIngredient = (index: number, ingredientName: string) => {
         const targetIngredient = availableIngredients.find(ing => ing.name === ingredientName);
-        const updated = formData.ingredients.map((ing: any, i: number) => {
+        const updated = formData.ingredients.map((ing: Ingredient, i: number) => {
             if (i === index) {
                 return {
                     ...ing,
@@ -143,15 +153,15 @@ const MenuPage: React.FC = () => {
             }
             return ing;
         });
-        setFormData((prev: any) => ({ ...prev, ingredients: updated }));
+        setFormData((prev: MenuFormData) => ({ ...prev, ingredients: updated }));
     };
 
     // 식재료 수량 변경 핸들러
     const handleIngredientAmountChange = (index: number, value: string) => {
-        const updated = formData.ingredients.map((ing: any, i: number) =>
+        const updated = formData.ingredients.map((ing: Ingredient, i: number) =>
             i === index ? { ...ing, amount: value } : ing
         );
-        setFormData((prev: any) => ({ ...prev, ingredients: updated }));
+        setFormData((prev: MenuFormData) => ({ ...prev, ingredients: updated }));
     };
 
     // [POST/PUT] 저장 핸들러
