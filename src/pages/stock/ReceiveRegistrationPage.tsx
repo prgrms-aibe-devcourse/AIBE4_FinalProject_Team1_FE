@@ -1,10 +1,15 @@
+import {analyzeReceipt} from "@/services/api/ocr";
+import type {ReceiptResponse} from "@/types";
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
+
 
 export default function ReceiveRegistrationPage() {
     const navigate = useNavigate();
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [showToast, setShowToast] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const toggleOCRPanel = () => {
         setIsPanelOpen(!isPanelOpen);
@@ -41,6 +46,8 @@ export default function ReceiveRegistrationPage() {
         const file = event.target.files?.[0];
         if (!file) return;
 
+        setSelectedFile(file);
+
         const reader = new FileReader();
         reader.onload = function (e) {
             const img = document.getElementById("ocrPreviewImg") as HTMLImageElement;
@@ -57,55 +64,47 @@ export default function ReceiveRegistrationPage() {
         reader.readAsDataURL(file);
     };
 
-    const processOCR = () => {
-        const mockData = {
-            vendorName: {value: "에이치 식자재 컴퍼니", status: "GREEN"},
-            date: {value: "2024-05-21", status: "GREEN"},
-            amount: {value: "85,400", status: "GREEN"},
-            items: [
-                {
-                    id: 101,
-                    name: {value: "냉동 닭가슴살 5kg", status: "GREEN"},
-                    quantity: {value: "2", status: "GREEN"},
-                    rawCapacity: {value: "박스", status: "GREEN"},
-                    costPrice: {value: "32,000", status: "GREEN"},
-                    totalPrice: {value: "64,000", status: "GREEN"},
-                    expirationDate: {value: "2025-10-12", status: "GREEN"},
-                },
-                {
-                    id: 102,
-                    name: {value: "무농약 방울토마토", status: "YELLOW", message: "품목 매칭 불확실"},
-                    quantity: {value: "3", status: "GREEN"},
-                    rawCapacity: {value: "kg", status: "GREEN"},
-                    costPrice: {value: "7,130", status: "GREEN"},
-                    totalPrice: {value: "21,390", status: "GREEN"},
-                    expirationDate: {value: "2024-05-30", status: "GREEN"},
-                },
-            ],
-        };
+    const processOCR = async () => {
+        if (!selectedFile) return;
 
-        // Update form fields
-        (document.getElementById("vendorName") as HTMLInputElement).value = mockData.vendorName.value;
-        (document.getElementById("receiptDate") as HTMLInputElement).value = mockData.date.value;
-        (document.getElementById("totalAmount") as HTMLInputElement).value = mockData.amount.value;
-        document.getElementById("aiStatus")?.classList.remove("hidden");
+        try {
+            setIsProcessing(true);
 
-        // Update items table
-        const newItems = mockData.items.map((item) => ({
-            id: item.id,
-            name: item.name.value,
-            nameStatus: item.name.status,
-            nameMessage: (item.name as any).message,
-            quantity: item.quantity.value,
-            unit: item.rawCapacity.value,
-            costPrice: item.costPrice.value,
-            totalPrice: item.totalPrice.value,
-            expirationDate: item.expirationDate.value,
-        }));
-        setItems(newItems);
+            const data: ReceiptResponse = await analyzeReceipt(selectedFile);
 
-        toggleOCRPanel();
-        handleConfirmStock();
+            (document.getElementById("vendorName") as HTMLInputElement).value =
+                data.vendorName.value ?? "";
+
+            (document.getElementById("receiptDate") as HTMLInputElement).value =
+                data.date.value ?? "";
+
+            (document.getElementById("totalAmount") as HTMLInputElement).value =
+                data.amount.value ?? "";
+
+            document.getElementById("aiStatus")?.classList.remove("hidden");
+
+            const newItems = data.items.map((item) => ({
+                id: Date.now() + Math.random(),
+                name: item.name.value ?? "",
+                nameStatus: item.name.status,
+                nameMessage: item.name.message,
+                quantity: item.quantity.value ?? "",
+                unit: item.rawCapacity.value ?? "",
+                costPrice: item.costPrice.value ?? "",
+                totalPrice: item.totalPrice.value ?? "",
+                expirationDate: item.expirationDate.value ?? "",
+            }));
+
+            setItems(newItems);
+
+            toggleOCRPanel();
+            handleConfirmStock();
+
+        } catch (error) {
+            console.error("OCR 처리 실패:", error);
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     return (
@@ -439,11 +438,13 @@ export default function ReceiveRegistrationPage() {
                                 className="absolute top-0 left-0 w-full h-1 bg-black shadow-[0_0_15px_rgba(0,0,0,0.8)] hidden"
                             ></div>
                         </div>
-                        <div className="bg-gray-900 p-4 rounded-xl text-center">
-                            <p className="text-sm font-bold text-white animate-pulse">
-                                데이터 추출 중...
-                            </p>
-                        </div>
+                        {isProcessing && (
+                            <div className="bg-gray-900 p-4 rounded-xl text-center">
+                                <p className="text-sm font-bold text-white animate-pulse">
+                                    데이터 추출 중...
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
