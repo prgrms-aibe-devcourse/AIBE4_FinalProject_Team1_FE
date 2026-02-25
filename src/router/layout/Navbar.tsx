@@ -66,11 +66,13 @@ type MenuSection = {
 function ProfileDropdown({
   name,
   email,
+  onMyPage,
   onStoreManage,
   onLogout,
 }: {
   name: string;
   email: string;
+  onMyPage: () => void;
   onStoreManage: () => void;
   onLogout: () => void;
 }) {
@@ -81,6 +83,13 @@ function ProfileDropdown({
         <div className="text-xs text-slate-500 mt-0.5">{email}</div>
       </div>
       <div className="pt-2 space-y-1">
+        <button
+          type="button"
+          onClick={onMyPage}
+          className="w-full text-left rounded-xl px-2 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+        >
+          마이페이지
+        </button>
         <button
           type="button"
           onClick={onStoreManage}
@@ -240,6 +249,7 @@ export default function Navbar() {
         items: [
           { label: "재료 관리", path: "/stock/ingredients" },
           { label: "메뉴 관리", path: "/sales/menu" },
+          { label: "차감 기준", path: "/sales/deduction-rules" },
         ],
       },
       {
@@ -555,6 +565,10 @@ export default function Navbar() {
                 <ProfileDropdown
                   name={user?.name || "사용자"}
                   email={user?.email || "로딩 중..."}
+                  onMyPage={() => {
+                    closeAll();
+                    handleProtectedNav("/me");
+                  }}
                   onStoreManage={() => {
                     closeAll();
                     handleProtectedNav("/stores/manage");
@@ -567,7 +581,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => navigate("/login")}
-              className="px-4 py-2 text-sm font-bold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-colors shrink-0"
+              className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800 transition-all active:scale-95"
             >
               로그인
             </button>
@@ -591,7 +605,6 @@ export default function Navbar() {
       {openMenu === "inventory" && (
         <MegaMenu sections={inventorySections} onNavigate={handleMenuNav} />
       )}
-
 
       {openMenu === "sales" && (
         <MegaMenu sections={salesSections} onNavigate={handleMenuNav} />

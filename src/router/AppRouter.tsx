@@ -34,6 +34,9 @@ import StockDocumentsPage from "../pages/stock/StockDocumentsPage";
 import DisposalPage from "../pages/stock/DisposalPage";
 import StockPage from "../pages/stock/StockPage";
 
+// Dining
+import DiningTablePage from "../pages/dining/diningTablePage";
+
 // Common
 import NotFoundPage from "../pages/common/NotFoundPage";
 
@@ -88,6 +91,9 @@ export default function AppRouter() {
 
             {/* 매출 관리 */}
             <Route path="/sales/menu" element={<MenuPage />} />
+
+            {/* 주문 관리 */}
+            <Route path="/orders/tables" element={<DiningTablePage />} />
 
             {/* 거래처 관리 */}
             <Route path="/vendors" element={<VendorPage />} />
