@@ -21,6 +21,7 @@ import type {
     IngredientUnit,
     IngredientStatus
 } from '@/types';
+import { requireStorePublicId } from '@/utils/store';
 
 const INGREDIENT_UNITS: IngredientUnit[] = ["EA", "KG", "L"];
 const INGREDIENT_STATUS: IngredientStatus[] = ["ACTIVE", "INACTIVE"];
@@ -44,7 +45,7 @@ const StatusBadge = ({ status }: { status: IngredientStatus }) => {
 };
 
 export default function IngredientPage() {
-    const storePublicId = "fe9b14cd-55ed-4006-bf20-c1a2697c06db"; // 데모용 고정 ID
+    const storePublicId = requireStorePublicId();
 
     // --- State ---
     const [view, setView] = useState<'LIST' | 'CREATE' | 'EDIT'>('LIST');
@@ -258,7 +259,7 @@ interface FormViewInnerProps {
     currentIngredient: IngredientResponse | null;
     setView: (view: 'LIST' | 'CREATE' | 'EDIT') => void;
     handleUpdate: (data: IngredientResponse) => Promise<void>;
-    handleCreate: (data: { name: string; unit: IngredientUnit; lowStockThreshold: number }) => Promise<void>;
+    handleCreate: (data: { name: string; unit: IngredientUnit; lowStockThreshold: number | null }) => Promise<void>;
 }
 
 const FormViewInner: React.FC<FormViewInnerProps> = ({ mode, currentIngredient, setView, handleUpdate, handleCreate }) => {

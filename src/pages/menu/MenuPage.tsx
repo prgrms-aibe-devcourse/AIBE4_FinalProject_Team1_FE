@@ -20,13 +20,13 @@ import {
     type MenuResponse,
     type MenuStatus,
     type Ingredient
-} from '../../api/menu';
+} from '@/api';
 import {
     getIngredients,
     type IngredientResponse
-} from '../../api/ingredient';
+} from '@/api';
 
-import { getStorePublicId } from '../../utils/store';
+import { requireStorePublicId } from '@/utils/store.ts';
 
 /**
  * 메뉴 관리 시스템 메인 컴포넌트
@@ -35,7 +35,7 @@ const MenuPage: React.FC = () => {
     console.log("MenuPage mounting...");
     // --- 화면 상태 관리 ---
     const [viewMode, setViewMode] = useState<"LIST" | "CREATE" | "EDIT">("LIST");
-    const storePublicId = getStorePublicId();
+    const storePublicId = requireStorePublicId();
 
     // 단위 목록 정의 (Enum 대응)
     // const UNIT_OPTIONS = ["EA", "KG", "L"];
