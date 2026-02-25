@@ -20,11 +20,11 @@ import {
     type MenuResponse,
     type MenuStatus,
     type Ingredient
-} from '../../services/api/menu';
+} from '../../api/menu';
 import {
     getIngredients,
     type IngredientResponse
-} from '../../services/api/ingredient';
+} from '../../api/ingredient';
 
 import { getStorePublicId } from '../../utils/store';
 
@@ -64,7 +64,7 @@ const MenuPage: React.FC = () => {
                 getIngredients(storePublicId)
             ]);
             setMenus(menuData);
-            setAvailableIngredients(ingredientData.data);
+            setAvailableIngredients(ingredientData);
         } catch (error) {
             console.error("Failed to fetch data:", error);
             alert("데이터를 불러오는 중 오류가 발생했습니다.");
@@ -197,7 +197,7 @@ const MenuPage: React.FC = () => {
 
     // 상태 배지 렌더러
     const StatusBadge = ({ status }: { status: MenuStatus }) => {
-        const styles = {
+        const styles: Record<MenuStatus, string> = {
             ACTIVE: "bg-emerald-100 text-emerald-700 border-emerald-200",
             INACTIVE: "bg-amber-100 text-amber-700 border-amber-200",
             DELETED: "bg-red-100 text-red-700 border-red-200"

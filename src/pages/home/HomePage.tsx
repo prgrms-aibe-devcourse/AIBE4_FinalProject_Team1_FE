@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LineChart,
@@ -11,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { KPICard, ActionButton } from "../../components/home";
+import { getMyStores } from "@/api/store";
 
 // 아이콘 컴포넌트들
 function IconUpload() {
@@ -119,6 +121,29 @@ function IconBox() {
 export default function HomePage() {
   const navigate = useNavigate();
 
+  // 매장 상태 체크 및 적절한 페이지로 리다이렉트
+  useEffect(() => {
+    const checkStoreStatus = async () => {
+      try {
+        const stores = await getMyStores();
+
+        if (stores.length === 0) {
+          // 0개 → 시작하기 (온보딩)
+          navigate("/onboarding", { replace: true });
+        } else {
+          // 1개 이상 → 대시보드로 자동 진입
+          navigate("/dashboard", { replace: true });
+        }
+      } catch (err) {
+        console.error("Failed to check store status:", err);
+        // 에러 발생 시 온보딩으로
+        navigate("/onboarding", { replace: true });
+      }
+    };
+
+    checkStoreStatus();
+  }, [navigate]);
+
   // 매출 추이 데이터 (최근 7일)
   const salesTrendData = [
     { date: "2/3", sales: 850000 },
@@ -160,7 +185,7 @@ export default function HomePage() {
   const lastUpdated = "14:20";
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-6">
+    <div className="min-h-screen bg-gray-100 py-8 px-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* 상단 헤더 */}
         <div className="flex items-center justify-between">
