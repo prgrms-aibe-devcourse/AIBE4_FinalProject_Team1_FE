@@ -9,7 +9,7 @@ import {
     History,
     ArrowLeftRight,
 } from 'lucide-react';
-import { getStorePublicId } from '../../utils/store';
+import { requireStorePublicId } from '@/utils/store.ts';
 
 /**
  * 실사 재고 관리 메인 컴포넌트
@@ -17,7 +17,7 @@ import { getStorePublicId } from '../../utils/store';
 const StocktakePage: React.FC = () => {
     const navigate = useNavigate();
     // --- 상태 관리 ---
-    const storePublicId = getStorePublicId();
+    const storePublicId = requireStorePublicId();
     const [title, setTitle] = useState(`${new Date().toLocaleDateString()} 정기 재고 실사`);
     const [items, setItems] = useState([
         { ingredientId: 101, name: "에스프레소 원두(A)", unit: "kg", theoreticalQty: 12.50, stocktakeQty: "" },
