@@ -16,9 +16,11 @@ import MyPage from "../pages/user/MyPage";
 // Store
 import StoreManagePage from "../pages/store/StoreManagePage";
 import OnboardingPage from "../pages/store/OnboardingPage";
+import StoreMemberPage from "../pages/store/StoreMemberPage";
 
 // Invitation
 import InviteLandingPage from "../pages/invitation/InviteLandingPage";
+import InvitationManagePage from "../pages/invitation/InvitationManagePage";
 
 // Inventory (Stock)
 import StocktakePage from "../pages/stock/StocktakePage";
@@ -66,6 +68,8 @@ export default function AppRouter() {
 
             {/* 매장 관리 */}
             <Route path="/stores/manage" element={<StoreManagePage />} />
+            <Route path="/stores/members" element={<StoreMemberPage />} />
+            <Route path="/stores/invitations" element={<InvitationManagePage />} />
 
             {/* 재고 관리 */}
             <Route path="/inventory/stocktakes" element={<StocktakeListPage />} />

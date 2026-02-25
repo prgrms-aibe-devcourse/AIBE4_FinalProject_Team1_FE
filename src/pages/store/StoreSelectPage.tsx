@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyStores, setDefaultStore } from '@/api/store';
+import { setStorePublicId } from '@/utils/store';
 import type { MyStoreResponse } from '@/types';
 import { Store as StoreIcon, CheckCircle, Loader2 } from 'lucide-react';
 
 const StoreSelectPage = () => {
   const navigate = useNavigate();
   const [stores, setStores] = useState<MyStoreResponse[]>([]);
-  const [selectedStoreId, setSelectedStoreId] = useState<number | null>(null);
+  const [selectedStorePublicId, setSelectedStorePublicId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -27,7 +28,7 @@ const StoreSelectPage = () => {
 
         // 매장이 1개면 자동 선택
         if (data.length === 1) {
-          setSelectedStoreId(data[0].storeId);
+          setSelectedStorePublicId(data[0].storePublicId);
         }
       } catch (err) {
         console.error('Failed to fetch stores:', err);
@@ -41,7 +42,7 @@ const StoreSelectPage = () => {
   }, [navigate]);
 
   const handleSubmit = async () => {
-    if (!selectedStoreId) {
+    if (!selectedStorePublicId) {
       setError('매장을 선택해주세요.');
       return;
     }
@@ -50,7 +51,8 @@ const StoreSelectPage = () => {
     setError('');
 
     try {
-      await setDefaultStore(selectedStoreId);
+      await setDefaultStore(selectedStorePublicId);
+      setStorePublicId(selectedStorePublicId);
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
       console.error('Failed to set default store:', err);
@@ -94,9 +96,9 @@ const StoreSelectPage = () => {
             {stores.map((store) => (
               <button
                 key={store.storeId}
-                onClick={() => setSelectedStoreId(store.storeId)}
+                onClick={() => setSelectedStorePublicId(store.storePublicId)}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                  selectedStoreId === store.storeId
+                  selectedStorePublicId === store.storePublicId
                     ? 'border-indigo-500 bg-indigo-50'
                     : 'border-gray-200 hover:border-gray-300 bg-white'
                 }`}
@@ -107,7 +109,7 @@ const StoreSelectPage = () => {
                       <h3 className="text-lg font-semibold text-gray-900">
                         {store.storeName}
                       </h3>
-                      {selectedStoreId === store.storeId && (
+                      {selectedStorePublicId === store.storePublicId && (
                         <CheckCircle className="w-5 h-5 text-indigo-600" />
                       )}
                     </div>
@@ -133,7 +135,7 @@ const StoreSelectPage = () => {
           {/* Submit Button */}
           <button
             onClick={handleSubmit}
-            disabled={!selectedStoreId || submitting}
+            disabled={!selectedStorePublicId || submitting}
             className="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {submitting ? (
