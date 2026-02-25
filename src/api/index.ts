@@ -7,4 +7,5 @@ export * from './store.ts';
 export * from './invitation.ts';
 export * from './vendor.ts';
 export * from './menu.ts';
+export * from './diningTable.ts';
 export { default as apiClient } from './client.ts';
