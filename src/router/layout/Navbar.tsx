@@ -74,7 +74,7 @@ function IconChevronDown({ className }: { className?: string }) {
   );
 }
 
-type MenuKey = "sales" | "inventory" | "orders" | "customer_orders" | "analytics" | "standards" | "profile" | null;
+type MenuKey = "sales" | "stock" | "orders" | "customer_orders" | "analytics" | "standards" | "profile" | null;
 
 type MenuItem = {
   label: string;
@@ -98,7 +98,8 @@ function ProfileDropdown({
   onLogout: () => void;
 }) {
   return (
-    <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white shadow-lg p-3 z-50">
+    <div
+      className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white shadow-lg p-3 z-50">
       <div className="px-2 pb-3 border-b border-slate-100">
         <div className="text-sm font-bold text-slate-900">{name}</div>
         <div className="text-xs text-slate-500 mt-0.5">{email}</div>
@@ -131,24 +132,18 @@ function MegaMenu({
   onNavigate: (path: string) => void;
 }) {
   return (
-    // nav 높이를 72px로 올렸으니 MegaMenu top도 동일하게 맞춤
     <div
       data-mega-menu
       className="fixed left-0 right-0 top-[72px] z-40 border-b border-slate-200 bg-white/95 backdrop-blur"
     >
-      {/* 너무 가득 차 보이지 않게 컨텐츠는 중앙/적당한 폭으로 제한 */}
       <div className="mx-auto max-w-5xl px-6 py-6">
         <div className="flex justify-center">
-          {/* 한 줄 유지: grid-flow-col + auto-cols-max */}
           <div className="grid grid-flow-col auto-cols-max gap-x-16">
             {sections.map((sec) => (
               <div key={sec.title} className="min-w-[120px]">
-                {/* 큰 카테고리(굵게/조금 크게) */}
                 <div className="text-[14px] font-extrabold text-slate-400">
                   {sec.title}
                 </div>
-
-                {/* 하위 메뉴(작게) */}
                 <ul className="mt-3 space-y-2">
                   {sec.items.map((it) => (
                     <li key={it.label}>
@@ -232,10 +227,7 @@ export default function Navbar() {
 
   const handleProtectedNav = (path: string) => {
     const currentAuthed = !!getAccessToken();
-    console.log("Navigating to:", path, "currentAuthed:", currentAuthed);
-
     if (!currentAuthed) {
-      console.warn("User not authenticated, redirecting to login");
       if (location.pathname !== "/login") {
         navigate(`/login?redirect=${encodeURIComponent(path)}`);
       }
@@ -245,7 +237,6 @@ export default function Navbar() {
   };
 
   const handleMenuNav = (path: string) => {
-    console.log("Menu item clicked:", path);
     setOpenMenu(null);
     handleProtectedNav(path);
   };
@@ -259,7 +250,7 @@ export default function Navbar() {
       {
         title: "기준정보",
         items: [
-          { label: "재료 관리", path: "/inventory/ingredients" },
+          { label: "재료 관리", path: "/stock/ingredients" },
           { label: "메뉴 관리", path: "/sales/menu" },
           { label: "차감 기준", path: "/sales/deduction-rules" },
         ],
@@ -296,22 +287,22 @@ export default function Navbar() {
     [],
   );
 
-  const inventorySections: MenuSection[] = useMemo(
+  const stockSections: MenuSection[] = useMemo(
     () => [
       {
         title: "재고",
         items: [
-          { label: "재고 현황", path: "/inventory" },
-          { label: "실사 재고 관리", path: "/inventory/stocktakes" },
-          { label: "폐기 관리", path: "/inventory/disposal" },
+          { label: "재고 현황", path: "/stock" },
+          { label: "실사 재고 관리", path: "/stock/stocktakes" },
+          { label: "폐기 관리", path: "/stock/disposal" },
         ],
       },
       {
         title: "입고",
         items: [
-          { label: "입고 목록", path: "/inventory/receiving" },
-          { label: "입고 등록", path: "/inventory/receiving/new" },
-          { label: "증빙 보관함", path: "/inventory/receiving/documents" },
+          { label: "입고 목록", path: "/stock/receiving" },
+          { label: "입고 등록", path: "/stock/receiving/new" },
+          { label: "증빙 보관함", path: "/stock/receiving/documents" },
         ],
       },
     ],
@@ -342,7 +333,7 @@ export default function Navbar() {
       {
         title: "분석",
         items: [
-          { label: "재고 분석", path: "/analytics/inventory" },
+          { label: "재고 분석", path: "/analytics/stock" },
           { label: "원가 분석", path: "/analytics/cost" },
         ],
       },
@@ -357,21 +348,13 @@ export default function Navbar() {
     [],
   );
 
-  // 바깥 클릭 / ESC로 닫기
   useEffect(() => {
     const onMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-
-      // 프로필 드롭다운 내부 클릭은 무시
       if (profileWrapRef.current?.contains(target)) return;
-
-      // 메가메뉴 내부 클릭은 무시
       const megaMenu = document.querySelector("[data-mega-menu]");
       if (megaMenu?.contains(target)) return;
-
-      // 토글 버튼 클릭은 무시 (버튼이 자체 처리)
       if (target.closest("[data-menu-toggle]")) return;
-
       setOpenMenu(null);
     };
 
@@ -387,7 +370,6 @@ export default function Navbar() {
     };
   }, []);
 
-  // 라우트가 바뀌면 메뉴 닫기
   useEffect(() => {
     setOpenMenu(null);
   }, [location.pathname]);
@@ -397,11 +379,9 @@ export default function Navbar() {
       ref={(el) => {
         rootRef.current = el;
       }}
-      // h-16 -> h-[72px] 로 세로 높이만 약간 확장
       className="fixed top-0 left-0 right-0 z-50 h-[72px] border-b border-slate-200 bg-white/98 backdrop-blur"
     >
       <div className="mx-auto max-w-7xl h-full px-6 flex items-center justify-between gap-4">
-        {/* Left: Brand */}
         <button
           type="button"
           onClick={() => handleProtectedNav("/")}
@@ -410,12 +390,10 @@ export default function Navbar() {
           <img
             src="/images/logo.png"
             alt="Don't Worry"
-            // nav 높이 확장에 맞춰 로고도 살짝 키움
             className="h-16 w-auto object-contain block"
           />
         </button>
 
-        {/* Center: Nav */}
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -462,9 +440,9 @@ export default function Navbar() {
           <button
             type="button"
             data-menu-toggle
-            onClick={() => toggleMenu("inventory")}
-            className={cn(topItemBase, openMenu === "inventory" && topItemOpen)}
-            aria-expanded={openMenu === "inventory"}
+            onClick={() => toggleMenu("stock")}
+            className={cn(topItemBase, openMenu === "stock" && topItemOpen)}
+            aria-expanded={openMenu === "stock"}
             aria-haspopup="menu"
           >
             <span className="inline-flex items-center gap-1">
@@ -472,7 +450,6 @@ export default function Navbar() {
               <IconChevronDown className="h-4 w-4" />
             </span>
           </button>
-
 
           <button
             type="button"
@@ -515,10 +492,9 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Right: Utilities */}
         <div className="flex items-center gap-3">
-          {/* Search */}
-          <div className="hidden md:flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 h-10 w-[320px]">
+          <div
+            className="hidden md:flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 h-10 w-[320px]">
             <IconSearch className="h-4 w-4 text-slate-400" />
             <input
               className="w-full outline-none text-sm text-slate-700 placeholder:text-slate-400"
@@ -533,7 +509,6 @@ export default function Navbar() {
             />
           </div>
 
-          {/* Bell */}
           <button
             type="button"
             className="relative h-10 w-10 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 grid place-items-center transition-colors"
@@ -548,7 +523,6 @@ export default function Navbar() {
             <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-rose-500 ring-2 ring-white" />
           </button>
 
-          {/* Profile */}
           {isAuthed ? (
             <div ref={profileWrapRef} className="relative">
               <button
@@ -594,7 +568,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mega Menus */}
       {openMenu === "standards" && (
         <MegaMenu sections={standardsSections} onNavigate={handleMenuNav} />
       )}
@@ -603,14 +576,13 @@ export default function Navbar() {
         <MegaMenu sections={ordersSections} onNavigate={handleMenuNav} />
       )}
 
-      {openMenu === "inventory" && (
-        <MegaMenu sections={inventorySections} onNavigate={handleMenuNav} />
+      {openMenu === "stock" && (
+        <MegaMenu sections={stockSections} onNavigate={handleMenuNav} />
       )}
 
       {openMenu === "customer_orders" && (
         <MegaMenu sections={customerOrdersSections} onNavigate={handleMenuNav} />
       )}
-
 
       {openMenu === "sales" && (
         <MegaMenu sections={salesSections} onNavigate={handleMenuNav} />
