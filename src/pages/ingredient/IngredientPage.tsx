@@ -4,11 +4,11 @@ import {
     Plus,
     Trash2,
     X,
-    Printer,
     PackageSearch,
     PlusCircle,
     Edit,
-    Edit3
+    Edit3,
+    Leaf
 } from 'lucide-react';
 import {
     getIngredients,
@@ -114,15 +114,19 @@ export default function IngredientPage() {
         }
     };
 
+    // --- 검색 필터링 로직 개선 ---
     const filteredIngredients = useMemo(() => {
+        const target = searchTerm.trim().toLowerCase();
+        if (!target) return ingredients;
+
         return ingredients.filter(item =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase())
+            item.name.toLowerCase().includes(target)
         );
     }, [ingredients, searchTerm]);
 
-    const ListView = () => (
+    const renderListView = () => (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="relative w-full md:w-96">
                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                         <Search className="w-4 h-4" />
@@ -154,7 +158,7 @@ export default function IngredientPage() {
                                 <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase">단위</th>
                                 <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase">알림 임계치</th>
                                 <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase">상태</th>
-                                <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase text-right print:hidden">관리</th>
+                                <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase text-right">관리</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
@@ -170,7 +174,7 @@ export default function IngredientPage() {
                                     <td className="px-6 py-4">
                                         <StatusBadge status={item.status} />
                                     </td>
-                                    <td className="px-6 py-4 text-right print:hidden">
+                                    <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => { setCurrentIngredient(item); setView('EDIT'); }}
@@ -191,7 +195,7 @@ export default function IngredientPage() {
                                 <tr>
                                     <td colSpan={5} className="px-6 py-20 text-center text-gray-400">
                                         <PackageSearch className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                        등록된 식재료가 없습니다.
+                                        검색 결과가 없거나 등록된 식재료가 없습니다.
                                     </td>
                                 </tr>
                             )}
@@ -202,161 +206,163 @@ export default function IngredientPage() {
         </div>
     );
 
-    const FormView = ({ mode }: { mode: 'CREATE' | 'EDIT' }) => {
-        const [form, setForm] = useState<Partial<IngredientResponse>>(
-            mode === 'EDIT' && currentIngredient ? { ...currentIngredient } : {
-                name: '',
-                unit: 'EA' as IngredientUnit,
-                lowStockThreshold: 0,
-                status: 'ACTIVE' as IngredientStatus
-            }
-        );
-
-        const handleSubmit = (e: React.FormEvent) => {
-            e.preventDefault();
-            // Validate that required fields are present
-            if (!form.name || !form.unit || form.lowStockThreshold === undefined || (form.lowStockThreshold !== null && form.lowStockThreshold < 0)) {
-                alert("모든 필수 항목을 올바르게 입력해주세요.");
-                return;
-            }
-
-            if (mode === 'EDIT' && form.ingredientPublicId && currentIngredient) {
-                // Merge original data with form changes to create a complete object
-                const dataToUpdate: IngredientResponse = {
-                    ...currentIngredient,
-                    ...form,
-                };
-                handleUpdate(dataToUpdate);
-            } else {
-                handleCreate({ name: form.name, unit: form.unit, lowStockThreshold: form.lowStockThreshold ?? null });
-            }
-        };
-
+    const renderFormView = (mode: 'CREATE' | 'EDIT') => {
         return (
-            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-2xl mx-auto">
-                <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                    <div className="flex justify-between items-center mb-8">
-                        <h2 className="text-xl font-bold flex items-center gap-2">
-                            {mode === 'EDIT' ? <Edit className="text-slate-900" /> : <PlusCircle className="text-slate-900" />}
-                            {mode === 'EDIT' ? '식재료 정보 수정' : '신규 식재료 등록'}
-                        </h2>
-                        <button onClick={() => setView('LIST')} className="text-gray-400 hover:text-gray-600 p-1">
-                            <X className="w-6 h-6" />
-                        </button>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2">식재료 명칭 *</label>
-                            <input
-                                type="text"
-                                required
-                                placeholder="예: 국산 대파 1단"
-                                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none bg-gray-50 focus:bg-white transition-all"
-                                value={form.name}
-                                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">단위 (Unit)</label>
-                                <select
-                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none appearance-none bg-gray-50 focus:bg-white"
-                                    value={form.unit}
-                                    onChange={(e) => setForm({ ...form, unit: e.target.value as IngredientUnit })}
-                                >
-                                    {INGREDIENT_UNITS.map(u => <option key={u} value={u}>{UNIT_LABELS[u]}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">저재고 경고 기준</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none bg-gray-50 focus:bg-white"
-                                    value={form.lowStockThreshold ?? ''}
-                                    onChange={(e) => {
-                                        const value = parseInt(e.target.value, 10);
-                                        setForm({ ...form, lowStockThreshold: isNaN(value) || value < 0 ? 0 : value });
-                                    }}
-                                />
-                            </div>
-                        </div>
-
-                        {mode === 'EDIT' && (
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2">관리 상태</label>
-                                <div className="flex gap-3">
-                                    {INGREDIENT_STATUS.map(s => (
-                                        <button
-                                            key={s}
-                                            type="button"
-                                            onClick={() => setForm({ ...form, status: s as IngredientStatus })}
-                                            className={`flex-1 py-3 text-sm font-bold rounded-lg border transition-all ${form.status === s ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}`}
-                                        >
-                                            {s === 'ACTIVE' ? '활성 (ACTIVE)' : '비활성 (INACTIVE)'}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="pt-6 flex gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setView('LIST')}
-                                className="flex-1 py-3 border border-gray-200 rounded-lg font-bold text-gray-600 hover:bg-gray-50 transition"
-                            >
-                                취소
-                            </button>
-                            <button
-                                type="submit"
-                                className="flex-1 py-3 bg-slate-900 text-white rounded-lg font-bold hover:bg-slate-800 shadow-lg transition active:scale-[0.98]"
-                            >
-                                {mode === 'EDIT' ? '정보 업데이트' : '식재료 등록'}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+            <FormViewInner
+                mode={mode}
+                currentIngredient={currentIngredient}
+                setView={setView}
+                handleUpdate={handleUpdate}
+                handleCreate={handleCreate}
+            />
         );
     };
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
-            {/* Header */}
-            <header className="relative bg-gradient-to-br from-slate-800 to-slate-700 text-white py-12 px-6 mb-10 shadow-xl overflow-hidden">
-                <div className="absolute right-[-5%] top-[-20%] w-[300px] h-[300px] bg-white opacity-5 rounded-full pointer-events-none" />
-
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <span className="bg-white/20 px-3 py-1 rounded text-[10px] font-bold backdrop-blur-sm border border-white/10 uppercase">Catalog System</span>
-                            <span className="text-white/60 text-xs">STORE ID: {storePublicId.substring(0, 8)}...</span>
+            <header className="bg-white border-b border-gray-100 shadow-sm py-8 px-6 mb-10">
+                <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-100">
+                            <Leaf className="text-white w-6 h-6" />
                         </div>
-                        <h1 className="text-3xl md:text-4xl font-black tracking-tight">식재료 마스터 관리</h1>
-                        <p className="text-white/70 mt-2 font-light">매장 운영에 필요한 원재료의 단위와 관리 기준을 설정합니다.</p>
-                    </div>
-                    <div className="flex gap-3 print:hidden">
-                        <button onClick={() => window.print()} className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg backdrop-blur-md transition flex items-center gap-2 border border-white/20 shadow-sm">
-                            <Printer className="w-4 h-4" /> 리스트 PDF 출력
-                        </button>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                                <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border border-emerald-100">Inventory Management</span>
+                                <span className="text-slate-300 text-[10px] font-mono">ID: {storePublicId.substring(0, 8)}</span>
+                            </div>
+                            <p className="text-slate-400 text-xs mt-1 font-medium">실시간 식재료 재고 및 마스터 데이터 관리</p>
+                        </div>
                     </div>
                 </div>
             </header>
 
             {/* Main Content */}
             <main className="max-w-6xl mx-auto px-6">
-                {view === 'LIST' && <ListView />}
-                {view === 'CREATE' && <FormView mode="CREATE" />}
-                {view === 'EDIT' && <FormView mode="EDIT" />}
+                {view === 'LIST' && renderListView()}
+                {view === 'CREATE' && renderFormView('CREATE')}
+                {view === 'EDIT' && renderFormView('EDIT')}
             </main>
 
             {/* Footer */}
-            <footer className="max-w-6xl mx-auto px-6 mt-20 text-center text-gray-400 text-xs print:hidden">
+            <footer className="max-w-6xl mx-auto px-6 mt-20 text-center text-gray-400 text-xs">
                 <p>© {new Date().getFullYear()} Inventory Master System. Optimized for Spring Boot Backend Integration.</p>
             </footer>
         </div>
     );
 }
+
+// FormView의 상태 관리를 위해 별도 컴포넌트로 분리 (Remounting 방지)
+interface FormViewInnerProps {
+    mode: 'CREATE' | 'EDIT';
+    currentIngredient: IngredientResponse | null;
+    setView: (view: 'LIST' | 'CREATE' | 'EDIT') => void;
+    handleUpdate: (data: IngredientResponse) => Promise<void>;
+    handleCreate: (data: { name: string; unit: IngredientUnit; lowStockThreshold: number }) => Promise<void>;
+}
+
+const FormViewInner: React.FC<FormViewInnerProps> = ({ mode, currentIngredient, setView, handleUpdate, handleCreate }) => {
+    const [form, setForm] = useState<Partial<IngredientResponse>>(
+        mode === 'EDIT' && currentIngredient ? { ...currentIngredient } : {
+            name: '',
+            unit: 'EA' as IngredientUnit,
+            lowStockThreshold: 0,
+            status: 'ACTIVE' as IngredientStatus
+        }
+    );
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (mode === 'EDIT' && form.ingredientPublicId) {
+            handleUpdate(form as IngredientResponse);
+        } else {
+            handleCreate(form as { name: string; unit: IngredientUnit; lowStockThreshold: number });
+        }
+    };
+
+    return (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-2xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+                <div className="flex justify-between items-center mb-8">
+                    <h2 className="text-xl font-bold flex items-center gap-2">
+                        {mode === 'EDIT' ? <Edit className="text-slate-900" /> : <PlusCircle className="text-slate-900" />}
+                        {mode === 'EDIT' ? '식재료 정보 수정' : '신규 식재료 등록'}
+                    </h2>
+                    <button onClick={() => setView('LIST')} className="text-gray-400 hover:text-gray-600 p-1">
+                        <X className="w-6 h-6" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">식재료 명칭 *</label>
+                        <input
+                            type="text"
+                            required
+                            placeholder="예: 국산 대파 1단"
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none bg-gray-50 focus:bg-white transition-all"
+                            value={form.name || ''}
+                            onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">단위 (Unit)</label>
+                            <select
+                                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none appearance-none bg-gray-50 focus:bg-white"
+                                value={form.unit || 'EA'}
+                                onChange={(e) => setForm({ ...form, unit: e.target.value as IngredientUnit })}
+                            >
+                                {INGREDIENT_UNITS.map(u => <option key={u} value={u}>{UNIT_LABELS[u]}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">저재고 경고 기준</label>
+                            <input
+                                type="number"
+                                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:outline-none bg-gray-50 focus:bg-white"
+                                value={form.lowStockThreshold || 0}
+                                onChange={(e) => setForm({ ...form, lowStockThreshold: Number(e.target.value) })}
+                            />
+                        </div>
+                    </div>
+
+                    {mode === 'EDIT' && (
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">관리 상태</label>
+                            <div className="flex gap-3">
+                                {INGREDIENT_STATUS.map(s => (
+                                    <button
+                                        key={s}
+                                        type="button"
+                                        onClick={() => setForm({ ...form, status: s as IngredientStatus })}
+                                        className={`flex-1 py-3 text-sm font-bold rounded-lg border transition-all ${form.status === s ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}`}
+                                    >
+                                        {s === 'ACTIVE' ? '활성 (ACTIVE)' : '비활성 (INACTIVE)'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="pt-6 flex gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setView('LIST')}
+                            className="flex-1 py-3 border border-gray-200 rounded-lg font-bold text-gray-600 hover:bg-gray-50 transition"
+                        >
+                            취소
+                        </button>
+                        <button
+                            type="submit"
+                            className="flex-1 py-3 bg-slate-900 text-white rounded-lg font-bold hover:bg-slate-800 shadow-lg transition active:scale-[0.98]"
+                        >
+                            {mode === 'EDIT' ? '정보 업데이트' : '식재료 등록'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};

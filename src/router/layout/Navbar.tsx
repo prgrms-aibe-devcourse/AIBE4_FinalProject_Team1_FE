@@ -74,7 +74,7 @@ function IconChevronDown({ className }: { className?: string }) {
   );
 }
 
-type MenuKey = "sales" | "inventory" | "orders" | "analytics" | "profile" | null;
+type MenuKey = "sales" | "inventory" | "orders" | "analytics" | "standards" | "profile" | null;
 
 type MenuItem = {
   label: string;
@@ -254,6 +254,20 @@ export default function Navbar() {
     setOpenMenu((prev) => (prev === key ? null : key));
   };
 
+  const standardsSections: MenuSection[] = useMemo(
+    () => [
+      {
+        title: "기준정보",
+        items: [
+          { label: "재료 관리", path: "/inventory/ingredients" },
+          { label: "메뉴 관리", path: "/sales/menu" },
+          { label: "차감 기준", path: "/sales/deduction-rules" },
+        ],
+      },
+    ],
+    [],
+  );
+
   const salesSections: MenuSection[] = useMemo(
     () => [
       {
@@ -262,13 +276,6 @@ export default function Navbar() {
           { label: "매출 업로드", path: "/sales/upload" },
           { label: "매출 내역", path: "/sales/list" },
           { label: "매출 분석", path: "/analytics/sales" },
-        ],
-      },
-      {
-        title: "메뉴",
-        items: [
-          { label: "메뉴 관리", path: "/sales/menu" },
-          { label: "차감 기준", path: "/sales/deduction-rules" },
         ],
       },
     ],
@@ -281,12 +288,18 @@ export default function Navbar() {
         title: "재고",
         items: [
           { label: "재고 현황", path: "/inventory" },
-          { label: "재료 관리", path: "/inventory/ingredients" },
           { label: "실사 재고 관리", path: "/inventory/stocktakes" },
-          { label: "입고 관리", path: "/inventory/receiving" },
           { label: "폐기 관리", path: "/inventory/disposal" },
         ],
-      }
+      },
+      {
+        title: "입고",
+        items: [
+          { label: "입고 목록", path: "/inventory/receiving" },
+          { label: "입고 등록", path: "/inventory/receiving/new" },
+          { label: "증빙 보관함", path: "/inventory/receiving/documents" },
+        ],
+      },
     ],
     [],
   );
@@ -393,13 +406,27 @@ export default function Navbar() {
           <button
             type="button"
             data-menu-toggle
-            onClick={() => toggleMenu("sales")}
-            className={cn(topItemBase, openMenu === "sales" && topItemOpen)}
-            aria-expanded={openMenu === "sales"}
+            onClick={() => toggleMenu("standards")}
+            className={cn(topItemBase, openMenu === "standards" && topItemOpen)}
+            aria-expanded={openMenu === "standards"}
             aria-haspopup="menu"
           >
             <span className="inline-flex items-center gap-1">
-              매출
+              기준정보
+              <IconChevronDown className="h-4 w-4" />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            data-menu-toggle
+            onClick={() => toggleMenu("orders")}
+            className={cn(topItemBase, openMenu === "orders" && topItemOpen)}
+            aria-expanded={openMenu === "orders"}
+            aria-haspopup="menu"
+          >
+            <span className="inline-flex items-center gap-1">
+              발주
               <IconChevronDown className="h-4 w-4" />
             </span>
           </button>
@@ -418,16 +445,17 @@ export default function Navbar() {
             </span>
           </button>
 
+
           <button
             type="button"
             data-menu-toggle
-            onClick={() => toggleMenu("orders")}
-            className={cn(topItemBase, openMenu === "orders" && topItemOpen)}
-            aria-expanded={openMenu === "orders"}
+            onClick={() => toggleMenu("sales")}
+            className={cn(topItemBase, openMenu === "sales" && topItemOpen)}
+            aria-expanded={openMenu === "sales"}
             aria-haspopup="menu"
           >
             <span className="inline-flex items-center gap-1">
-              발주
+              매출
               <IconChevronDown className="h-4 w-4" />
             </span>
           </button>
@@ -539,13 +567,18 @@ export default function Navbar() {
       </div>
 
       {/* Mega Menus */}
-      {openMenu === "inventory" && (
-        <MegaMenu sections={inventorySections} onNavigate={handleMenuNav} />
+      {openMenu === "standards" && (
+        <MegaMenu sections={standardsSections} onNavigate={handleMenuNav} />
       )}
 
       {openMenu === "orders" && (
         <MegaMenu sections={ordersSections} onNavigate={handleMenuNav} />
       )}
+
+      {openMenu === "inventory" && (
+        <MegaMenu sections={inventorySections} onNavigate={handleMenuNav} />
+      )}
+
 
       {openMenu === "sales" && (
         <MegaMenu sections={salesSections} onNavigate={handleMenuNav} />
