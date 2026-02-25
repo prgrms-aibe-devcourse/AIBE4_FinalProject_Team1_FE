@@ -28,6 +28,11 @@ import StocktakeListPage from "../pages/stock/StocktakeListPage";
 import IngredientPage from "../pages/ingredient/IngredientPage";
 import MenuPage from "../pages/menu/MenuPage";
 import VendorPage from "../pages/vendor/VendorPage";
+import ReceivingPage from "../pages/stock/ReceivingPage";
+import ReceiveRegistrationPage from "../pages/stock/ReceiveRegistrationPage";
+import StockDocumentsPage from "../pages/stock/StockDocumentsPage";
+import DisposalPage from "../pages/stock/DisposalPage";
+import StockPage from "../pages/stock/StockPage";
 
 // Common
 import NotFoundPage from "../pages/common/NotFoundPage";
@@ -72,9 +77,14 @@ export default function AppRouter() {
             <Route path="/stores/invitations" element={<InvitationManagePage />} />
 
             {/* 재고 관리 */}
-            <Route path="/inventory/stocktakes" element={<StocktakeListPage />} />
-            <Route path="/inventory/stocktakes/new" element={<StocktakePage />} />
-            <Route path="/inventory/ingredients" element={<IngredientPage />} />
+            <Route path="/stock/" element={<StockPage />} />
+            <Route path="/stock/stocktakes" element={<StocktakeListPage />} />
+            <Route path="/stock/stocktakes/new" element={<StocktakePage />} />
+            <Route path="/stock/ingredients" element={<IngredientPage />} />
+            <Route path="/stock/receiving" element={<ReceivingPage />} />
+            <Route path="/stock/receiving/new" element={<ReceiveRegistrationPage />} />
+            <Route path="/stock/receiving/documents" element={<StockDocumentsPage />} />
+            <Route path="/stock/disposal" element={<DisposalPage />} />
 
             {/* 매출 관리 */}
             <Route path="/sales/menu" element={<MenuPage />} />

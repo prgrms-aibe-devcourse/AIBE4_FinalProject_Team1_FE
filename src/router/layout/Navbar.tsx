@@ -238,7 +238,7 @@ export default function Navbar() {
       {
         title: "기준정보",
         items: [
-          { label: "재료 관리", path: "/inventory/ingredients" },
+          { label: "재료 관리", path: "/stock/ingredients" },
           { label: "메뉴 관리", path: "/sales/menu" },
         ],
       },
@@ -272,17 +272,17 @@ export default function Navbar() {
       {
         title: "재고",
         items: [
-          { label: "재고 현황", path: "/inventory" },
-          { label: "실사 재고 관리", path: "/inventory/stocktakes" },
-          { label: "폐기 관리", path: "/inventory/disposal" },
+          { label: "재고 현황", path: "/stock" },
+          { label: "실사 재고 관리", path: "/stock/stocktakes" },
+          { label: "폐기 관리", path: "/stock/disposal" },
         ],
       },
       {
         title: "입고",
         items: [
-          { label: "입고 목록", path: "/inventory/receiving" },
-          { label: "입고 등록", path: "/inventory/receiving/new" },
-          { label: "증빙 보관함", path: "/inventory/receiving/documents" },
+          { label: "입고 목록", path: "/stock/receiving" },
+          { label: "입고 등록", path: "/stock/receiving/new" },
+          { label: "증빙 보관함", path: "/stock/receiving/documents" },
         ],
       },
     ],
@@ -327,7 +327,7 @@ export default function Navbar() {
       {
         title: "분석",
         items: [
-          { label: "재고 분석", path: "/analytics/inventory" },
+          { label: "재고 분석", path: "/analytics/stock" },
           { label: "원가 분석", path: "/analytics/cost" },
         ],
       },
