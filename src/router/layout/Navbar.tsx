@@ -74,7 +74,7 @@ function IconChevronDown({ className }: { className?: string }) {
   );
 }
 
-type MenuKey = "sales" | "inventory" | "orders" | "analytics" | "standards" | "profile" | null;
+type MenuKey = "sales" | "inventory" | "orders" | "customer_orders" | "analytics" | "standards" | "profile" | null;
 
 type MenuItem = {
   label: string;
@@ -268,6 +268,20 @@ export default function Navbar() {
     [],
   );
 
+  const customerOrdersSections: MenuSection[] = useMemo(
+    () => [
+      {
+        title: "주문",
+        items: [
+          { label: "주문 현황", path: "/orders/status" },
+          { label: "테이블 관리", path: "/orders/tables" },
+          { label: "QR 관리", path: "/orders/qr" },
+        ],
+      },
+    ],
+    [],
+  );
+
   const salesSections: MenuSection[] = useMemo(
     () => [
       {
@@ -434,6 +448,20 @@ export default function Navbar() {
           <button
             type="button"
             data-menu-toggle
+            onClick={() => toggleMenu("customer_orders")}
+            className={cn(topItemBase, openMenu === "customer_orders" && topItemOpen)}
+            aria-expanded={openMenu === "customer_orders"}
+            aria-haspopup="menu"
+          >
+            <span className="inline-flex items-center gap-1">
+              주문
+              <IconChevronDown className="h-4 w-4" />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            data-menu-toggle
             onClick={() => toggleMenu("inventory")}
             className={cn(topItemBase, openMenu === "inventory" && topItemOpen)}
             aria-expanded={openMenu === "inventory"}
@@ -577,6 +605,10 @@ export default function Navbar() {
 
       {openMenu === "inventory" && (
         <MegaMenu sections={inventorySections} onNavigate={handleMenuNav} />
+      )}
+
+      {openMenu === "customer_orders" && (
+        <MegaMenu sections={customerOrdersSections} onNavigate={handleMenuNav} />
       )}
 
 

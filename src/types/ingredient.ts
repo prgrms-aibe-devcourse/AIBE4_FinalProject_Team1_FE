@@ -1,5 +1,5 @@
 // --- Ingredient Types ---
-export type IngredientUnit = 'EA' | 'KG' | 'L';
+export type IngredientUnit = 'EA' | 'G' | 'ML';
 export type IngredientStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface IngredientResponse {
