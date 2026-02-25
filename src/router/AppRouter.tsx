@@ -24,6 +24,8 @@ import InviteLandingPage from "../pages/invitation/InviteLandingPage";
 import StocktakePage from "../pages/stock/StocktakePage";
 import StocktakeListPage from "../pages/stock/StocktakeListPage";
 import IngredientPage from "../pages/ingredient/IngredientPage";
+import MenuPage from "../pages/menu/MenuPage";
+import VendorPage from "../pages/vendor/VendorPage";
 
 // Common
 import NotFoundPage from "../pages/common/NotFoundPage";
@@ -70,6 +72,7 @@ export default function AppRouter() {
           <Route path="/inventory/ingredients" element={<IngredientPage />} />
 
           {/* TODO: 매출 관리 */}
+          <Route path="/sales/menu" element={<MenuPage />} />
           {/* <Route path="/sales/upload" element={<SalesUploadPage />} /> */}
           {/* <Route path="/sales/list" element={<SalesListPage />} /> */}
           {/* <Route path="/analytics/sales" element={<SalesAnalyticsPage />} /> */}
@@ -77,6 +80,9 @@ export default function AppRouter() {
           {/* TODO: 문서 OCR */}
           {/* <Route path="/documents/upload" element={<DocumentUploadPage />} /> */}
           {/* <Route path="/documents/history" element={<DocumentHistoryPage />} /> */}
+
+          {/* 거래처 관리 */}
+          <Route path="/vendors" element={<VendorPage />} />
 
           {/* TODO: 발주 */}
           {/* <Route path="/orders" element={<OrdersPage />} /> */}
