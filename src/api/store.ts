@@ -26,26 +26,26 @@ export async function createStore(data: CreateStoreRequest): Promise<StoreCreate
 
 /**
  * 매장 단건 조회
- * GET /api/stores/{storeId}
+ * GET /api/stores/{storePublicId}
  */
-export async function getStoreById(storeId: number): Promise<MyStoreResponse> {
-  const response = await apiClient.get(`/api/stores/${storeId}`);
+export async function getStoreByPublicId(storePublicId: string): Promise<MyStoreResponse> {
+  const response = await apiClient.get(`/api/stores/${storePublicId}`);
   return response.data;
 }
 
 /**
  * 매장 상호명 변경
- * PATCH /api/stores/{storeId}/name
+ * PATCH /api/stores/{storePublicId}/name
  */
-export async function updateStoreName(storeId: number, data: StoreNameUpdateRequest): Promise<MyStoreResponse> {
-  const response = await apiClient.patch(`/api/stores/${storeId}/name`, data);
+export async function updateStoreName(storePublicId: string, data: StoreNameUpdateRequest): Promise<MyStoreResponse> {
+  const response = await apiClient.patch(`/api/stores/${storePublicId}/name`, data);
   return response.data;
 }
 
 /**
  * 대표 매장 설정
- * POST /api/stores/{storeId}/default
+ * POST /api/stores/{storePublicId}/default
  */
-export async function setDefaultStore(storeId: number): Promise<void> {
-  await apiClient.post(`/api/stores/${storeId}/default`);
+export async function setDefaultStore(storePublicId: string): Promise<void> {
+  await apiClient.post(`/api/stores/${storePublicId}/default`);
 }

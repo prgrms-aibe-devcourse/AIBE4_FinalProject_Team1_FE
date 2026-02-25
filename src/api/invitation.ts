@@ -8,11 +8,11 @@ import type {
 
 /**
  * 초대 생성/갱신
- * POST /api/stores/{storeId}/invitations
+ * POST /api/stores/{storePublicId}/invitations
  * OWNER만 가능. 매장당 1개의 초대만 존재하며, 재발급 시 기존 초대가 자동으로 갱신됩니다.
  */
-export async function createInvitation(storeId: number): Promise<InvitationCreateResponse> {
-  const response = await apiClient.post(`/api/stores/${storeId}/invitations`);
+export async function createInvitation(storePublicId: string): Promise<InvitationCreateResponse> {
+  const response = await apiClient.post(`/api/stores/${storePublicId}/invitations`);
   return response.data;
 }
 
@@ -28,17 +28,17 @@ export async function acceptInvitation(data: InvitationAcceptRequest): Promise<I
 
 /**
  * 현재 초대 조회
- * GET /api/stores/{storeId}/invitations/active
+ * GET /api/stores/{storePublicId}/invitations/active
  */
-export async function getActiveInvitation(storeId: number): Promise<InvitationItemResponse> {
-  const response = await apiClient.get(`/api/stores/${storeId}/invitations/active`);
+export async function getActiveInvitation(storePublicId: string): Promise<InvitationItemResponse> {
+  const response = await apiClient.get(`/api/stores/${storePublicId}/invitations/active`);
   return response.data;
 }
 
 /**
  * 현재 초대 취소
- * DELETE /api/stores/{storeId}/invitations/active
+ * DELETE /api/stores/{storePublicId}/invitations/active
  */
-export async function revokeActiveInvitation(storeId: number): Promise<void> {
-  await apiClient.delete(`/api/stores/${storeId}/invitations/active`);
+export async function revokeActiveInvitation(storePublicId: string): Promise<void> {
+  await apiClient.delete(`/api/stores/${storePublicId}/invitations/active`);
 }

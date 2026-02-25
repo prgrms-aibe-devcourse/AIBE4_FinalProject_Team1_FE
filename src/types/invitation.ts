@@ -5,15 +5,17 @@ export type InvitationStatus = 'ACTIVE' | 'USED' | 'EXPIRED' | 'REVOKED';
 export interface InvitationCreateResponse {
   invitationId: number;
   storeId: number;
-  code: string;
+  inviteUrl: string;
+  inviteCode: string;
   expiresAt: string;
-  status: InvitationStatus;
 }
 
 export interface InvitationAcceptResponse {
   storeId: number;
+  storePublicId: string;
   storeName: string;
   role: string;
+  status: string;
 }
 
 export interface InvitationItemResponse {
@@ -26,6 +28,5 @@ export interface InvitationItemResponse {
 // --- Invitation Request Types ---
 export interface InvitationAcceptRequest {
   token?: string;
-  storeId?: number;
   code?: string;
 }
