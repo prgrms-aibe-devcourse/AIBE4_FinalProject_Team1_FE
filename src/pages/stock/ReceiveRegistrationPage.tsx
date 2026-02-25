@@ -1,8 +1,12 @@
-import {analyzeReceipt} from "@/services/api/ocr";
-import type {ReceiptResponse} from "@/types";
+import {analyzeReceipt} from "@/api/ocr";
+import type {ReceiptItem, ReceiptResponse, FieldStatus, Field} from "@/types";
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 
+// 화면 표시용으로 id를 추가한 타입
+interface DisplayReceiptItem extends ReceiptItem {
+    id: number;
+}
 
 export default function ReceiveRegistrationPage() {
     const navigate = useNavigate();
@@ -20,20 +24,26 @@ export default function ReceiveRegistrationPage() {
         setTimeout(() => setShowToast(false), 3000);
     };
 
-    const [items, setItems] = useState<any[]>([]);
+    const [items, setItems] = useState<DisplayReceiptItem[]>([]);
+
+    const emptyField = (value: string | null = ""): Field<string> => ({
+        value,
+        status: "GREEN" as FieldStatus,
+        message: null,
+    });
+
 
     const addNewRow = () => {
-        setItems([
-            ...items,
+        setItems((prev) => [
+            ...prev,
             {
-                id: Date.now(),
-                name: "",
-                quantity: 0,
-                unit: "",
-                costPrice: 0,
-                totalPrice: 0,
-                expirationDate: "",
-                status: "GREEN",
+                id: Date.now() + Math.random(),
+                name: emptyField(""),
+                quantity: emptyField("0"),
+                rawCapacity: emptyField(""),
+                costPrice: emptyField("0"),
+                totalPrice: emptyField("0"),
+                expirationDate: emptyField(""),
             },
         ]);
     };
@@ -83,16 +93,14 @@ export default function ReceiveRegistrationPage() {
 
             document.getElementById("aiStatus")?.classList.remove("hidden");
 
-            const newItems = data.items.map((item) => ({
+            const newItems: DisplayReceiptItem[] = data.items.map((item) => ({
                 id: Date.now() + Math.random(),
-                name: item.name.value ?? "",
-                nameStatus: item.name.status,
-                nameMessage: item.name.message,
-                quantity: item.quantity.value ?? "",
-                unit: item.rawCapacity.value ?? "",
-                costPrice: item.costPrice.value ?? "",
-                totalPrice: item.totalPrice.value ?? "",
-                expirationDate: item.expirationDate.value ?? "",
+                name: item.name,
+                quantity: item.quantity,
+                rawCapacity: item.rawCapacity,
+                costPrice: item.costPrice,
+                totalPrice: item.totalPrice,
+                expirationDate: item.expirationDate,
             }));
 
             setItems(newItems);
@@ -174,7 +182,7 @@ export default function ReceiveRegistrationPage() {
                             </h3>
                             <div
                                 id="aiStatus"
-                                className="hidden text-[10px] font-bold text-gray-600 bg-white px-3 py-1 rounded-full border border-gray-300 flex items-center gap-1 shadow-sm"
+                                className="hidden text-[10px] font-bold text-gray-600 bg-white px-3 py-1 rounded-full border border-gray-300 items-center gap-1 shadow-sm"
                             >
                                 <i className="ph-fill ph-magic-wand"></i> OCR 데이터 연동됨
                             </div>
@@ -278,7 +286,7 @@ export default function ReceiveRegistrationPage() {
                                                 <td className="px-4 py-4 text-center">
                                                     <i
                                                         className={`ph-fill ph-circle ${
-                                                            item.nameStatus === "GREEN" || !item.nameStatus
+                                                            item.name.status === "GREEN" || !item.name.status
                                                                 ? "text-emerald-500"
                                                                 : "text-amber-500"
                                                         }`}
@@ -287,22 +295,22 @@ export default function ReceiveRegistrationPage() {
                                                 <td className="px-4 py-4">
                                                     <input
                                                         type="text"
-                                                        defaultValue={item.name}
+                                                        defaultValue={item.name.value ?? ""}
                                                         placeholder="품목명 입력"
                                                         className={`w-full bg-transparent border-b border-transparent focus:border-black outline-none font-bold text-gray-800 ${
-                                                            item.nameStatus === "YELLOW" ? "bg-amber-50" : ""
+                                                            item.name.status === "YELLOW" ? "bg-amber-50" : ""
                                                         }`}
                                                     />
-                                                    {item.nameMessage && (
+                                                    {item.name.message && (
                                                         <p className="text-[9px] text-amber-600 mt-0.5">
-                                                            {item.nameMessage}
+                                                            {item.name.message}
                                                         </p>
                                                     )}
                                                 </td>
                                                 <td className="px-4 py-4 text-center">
                                                     <input
                                                         type="number"
-                                                        defaultValue={item.quantity}
+                                                        defaultValue={item.quantity.value ?? ""}
                                                         placeholder="0"
                                                         className="w-12 text-center border-b border-transparent focus:border-black outline-none font-bold"
                                                     />
@@ -310,7 +318,7 @@ export default function ReceiveRegistrationPage() {
                                                 <td className="px-4 py-4">
                                                     <input
                                                         type="text"
-                                                        defaultValue={item.unit}
+                                                        defaultValue={item.rawCapacity.value ?? ""}
                                                         placeholder="단위"
                                                         className="w-full bg-transparent border-b border-transparent focus:border-black outline-none text-gray-500"
                                                     />
@@ -318,18 +326,18 @@ export default function ReceiveRegistrationPage() {
                                                 <td className="px-4 py-4 text-right">
                                                     <input
                                                         type="text"
-                                                        defaultValue={item.costPrice}
+                                                        defaultValue={item.costPrice.value ?? ""}
                                                         placeholder="0"
                                                         className="w-full bg-transparent border-b border-transparent focus:border-black outline-none text-right text-gray-600"
                                                     />
                                                 </td>
                                                 <td className="px-4 py-4 text-right font-bold text-gray-900">
-                                                    {item.totalPrice}
+                                                    {item.totalPrice.value}
                                                 </td>
                                                 <td className="px-4 py-4 text-center">
                                                     <input
                                                         type="date"
-                                                        defaultValue={item.expirationDate}
+                                                        defaultValue={item.expirationDate.value ?? ""}
                                                         className="bg-gray-100 text-[10px] rounded px-1 py-0.5 border-none outline-none"
                                                     />
                                                 </td>
