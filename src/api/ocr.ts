@@ -13,8 +13,6 @@ export const analyzeReceipt = async (
         formData,
         {
             headers: {
-                // multipart일 때는 Content-Type을 직접 지정하지 않는 게 안전
-                // axios가 boundary 자동 설정
                 "Content-Type": "multipart/form-data",
             },
             signal,
