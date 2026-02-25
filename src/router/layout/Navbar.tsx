@@ -32,29 +32,6 @@ function IconBell({ className }: { className?: string }) {
   );
 }
 
-function IconSearch({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M16.5 16.5 21 21"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 function IconChevronDown({ className }: { className?: string }) {
   return (
     <svg
@@ -74,7 +51,7 @@ function IconChevronDown({ className }: { className?: string }) {
   );
 }
 
-type MenuKey = "sales" | "stock" | "orders" | "customer_orders" | "analytics" | "standards" | "profile" | null;
+type MenuKey = "sales" | "inventory" | "orders" | "purchases" | "analytics" | "standards" | "profile" | null;
 
 type MenuItem = {
   label: string;
@@ -90,16 +67,17 @@ function ProfileDropdown({
   name,
   email,
   onMyPage,
+  onStoreManage,
   onLogout,
 }: {
   name: string;
   email: string;
   onMyPage: () => void;
+  onStoreManage: () => void;
   onLogout: () => void;
 }) {
   return (
-    <div
-      className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white shadow-lg p-3 z-50">
+    <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white shadow-lg p-3 z-50">
       <div className="px-2 pb-3 border-b border-slate-100">
         <div className="text-sm font-bold text-slate-900">{name}</div>
         <div className="text-xs text-slate-500 mt-0.5">{email}</div>
@@ -112,6 +90,15 @@ function ProfileDropdown({
         >
           마이페이지
         </button>
+        <button
+          type="button"
+          onClick={onStoreManage}
+          className="w-full text-left rounded-xl px-2 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+        >
+          매장 관리
+        </button>
+      </div>
+      <div className="pt-2 mt-2 border-t border-slate-100 space-y-1">
         <button
           type="button"
           onClick={onLogout}
@@ -132,18 +119,24 @@ function MegaMenu({
   onNavigate: (path: string) => void;
 }) {
   return (
+    // nav 높이를 72px로 올렸으니 MegaMenu top도 동일하게 맞춤
     <div
       data-mega-menu
       className="fixed left-0 right-0 top-[72px] z-40 border-b border-slate-200 bg-white/95 backdrop-blur"
     >
+      {/* 너무 가득 차 보이지 않게 컨텐츠는 중앙/적당한 폭으로 제한 */}
       <div className="mx-auto max-w-5xl px-6 py-6">
         <div className="flex justify-center">
+          {/* 한 줄 유지: grid-flow-col + auto-cols-max */}
           <div className="grid grid-flow-col auto-cols-max gap-x-16">
             {sections.map((sec) => (
               <div key={sec.title} className="min-w-[120px]">
+                {/* 큰 카테고리(굵게/조금 크게) */}
                 <div className="text-[14px] font-extrabold text-slate-400">
                   {sec.title}
                 </div>
+
+                {/* 하위 메뉴(작게) */}
                 <ul className="mt-3 space-y-2">
                   {sec.items.map((it) => (
                     <li key={it.label}>
@@ -227,7 +220,10 @@ export default function Navbar() {
 
   const handleProtectedNav = (path: string) => {
     const currentAuthed = !!getAccessToken();
+    console.log("Navigating to:", path, "currentAuthed:", currentAuthed);
+
     if (!currentAuthed) {
+      console.warn("User not authenticated, redirecting to login");
       if (location.pathname !== "/login") {
         navigate(`/login?redirect=${encodeURIComponent(path)}`);
       }
@@ -237,6 +233,7 @@ export default function Navbar() {
   };
 
   const handleMenuNav = (path: string) => {
+    console.log("Menu item clicked:", path);
     setOpenMenu(null);
     handleProtectedNav(path);
   };
@@ -255,18 +252,11 @@ export default function Navbar() {
           { label: "차감 기준", path: "/sales/deduction-rules" },
         ],
       },
-    ],
-    [],
-  );
-
-  const customerOrdersSections: MenuSection[] = useMemo(
-    () => [
       {
-        title: "주문",
+        title: "직원·초대관리",
         items: [
-          { label: "주문 현황", path: "/orders/status" },
-          { label: "테이블 관리", path: "/orders/tables" },
-          { label: "QR 관리", path: "/orders/qr" },
+          { label: "직원 관리", path: "/stores/members" },
+          { label: "초대 코드", path: "/stores/invitations" },
         ],
       },
     ],
@@ -287,7 +277,7 @@ export default function Navbar() {
     [],
   );
 
-  const stockSections: MenuSection[] = useMemo(
+  const inventorySections: MenuSection[] = useMemo(
     () => [
       {
         title: "재고",
@@ -312,6 +302,20 @@ export default function Navbar() {
   const ordersSections: MenuSection[] = useMemo(
     () => [
       {
+        title: "주문",
+        items: [
+          { label: "주문 현황", path: "/orders" },
+          { label: "테이블 관리", path: "/orders/tables" },
+          { label: "QR 관리", path: "/orders/qrs" },
+        ],
+      },
+    ],
+    [],
+  );
+
+  const purchasesSections: MenuSection[] = useMemo(
+    () => [
+      {
         title: "발주",
         items: [
           { label: "발주 목록", path: "/orders" },
@@ -321,7 +325,7 @@ export default function Navbar() {
       {
         title: "거래처",
         items: [
-          { label: "거래처 목록", path: "/vendors" },
+          { label: "거래처 관리", path: "/vendors" },
         ],
       },
     ],
@@ -348,13 +352,21 @@ export default function Navbar() {
     [],
   );
 
+  // 바깥 클릭 / ESC로 닫기
   useEffect(() => {
     const onMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
+
+      // 프로필 드롭다운 내부 클릭은 무시
       if (profileWrapRef.current?.contains(target)) return;
+
+      // 메가메뉴 내부 클릭은 무시
       const megaMenu = document.querySelector("[data-mega-menu]");
       if (megaMenu?.contains(target)) return;
+
+      // 토글 버튼 클릭은 무시 (버튼이 자체 처리)
       if (target.closest("[data-menu-toggle]")) return;
+
       setOpenMenu(null);
     };
 
@@ -370,6 +382,7 @@ export default function Navbar() {
     };
   }, []);
 
+  // 라우트가 바뀌면 메뉴 닫기
   useEffect(() => {
     setOpenMenu(null);
   }, [location.pathname]);
@@ -379,22 +392,33 @@ export default function Navbar() {
       ref={(el) => {
         rootRef.current = el;
       }}
+      // h-16 -> h-[72px] 로 세로 높이만 약간 확장
       className="fixed top-0 left-0 right-0 z-50 h-[72px] border-b border-slate-200 bg-white/98 backdrop-blur"
     >
       <div className="mx-auto max-w-7xl h-full px-6 flex items-center justify-between gap-4">
+        {/* Left: Brand */}
         <button
           type="button"
-          onClick={() => handleProtectedNav("/")}
+          onClick={() => {
+            // 온보딩 상태에서는 로고 클릭 시 로그인/대시보드로 이동하지 않고 그대로 유지
+            if (location.pathname.startsWith("/onboarding")) {
+              return;
+            }
+            handleProtectedNav("/");
+          }}
           className="flex items-center shrink-0"
         >
           <img
             src="/images/logo.png"
             alt="Don't Worry"
+            // nav 높이 확장에 맞춰 로고도 살짝 키움
             className="h-16 w-auto object-contain block"
           />
         </button>
 
+        {/* Center: Nav */}
         <div className="flex items-center gap-1">
+          {/* 매장 */}
           <button
             type="button"
             data-menu-toggle
@@ -404,11 +428,12 @@ export default function Navbar() {
             aria-haspopup="menu"
           >
             <span className="inline-flex items-center gap-1">
-              기준정보
+              매장
               <IconChevronDown className="h-4 w-4" />
             </span>
           </button>
 
+          {/* 주문 */}
           <button
             type="button"
             data-menu-toggle
@@ -418,31 +443,33 @@ export default function Navbar() {
             aria-haspopup="menu"
           >
             <span className="inline-flex items-center gap-1">
-              발주
-              <IconChevronDown className="h-4 w-4" />
-            </span>
-          </button>
-
-          <button
-            type="button"
-            data-menu-toggle
-            onClick={() => toggleMenu("customer_orders")}
-            className={cn(topItemBase, openMenu === "customer_orders" && topItemOpen)}
-            aria-expanded={openMenu === "customer_orders"}
-            aria-haspopup="menu"
-          >
-            <span className="inline-flex items-center gap-1">
               주문
               <IconChevronDown className="h-4 w-4" />
             </span>
           </button>
 
+          {/* 발주 */}
           <button
             type="button"
             data-menu-toggle
-            onClick={() => toggleMenu("stock")}
-            className={cn(topItemBase, openMenu === "stock" && topItemOpen)}
-            aria-expanded={openMenu === "stock"}
+            onClick={() => toggleMenu("purchases")}
+            className={cn(topItemBase, openMenu === "purchases" && topItemOpen)}
+            aria-expanded={openMenu === "purchases"}
+            aria-haspopup="menu"
+          >
+            <span className="inline-flex items-center gap-1">
+              발주
+              <IconChevronDown className="h-4 w-4" />
+            </span>
+          </button>
+
+          {/* 재고 */}
+          <button
+            type="button"
+            data-menu-toggle
+            onClick={() => toggleMenu("inventory")}
+            className={cn(topItemBase, openMenu === "inventory" && topItemOpen)}
+            aria-expanded={openMenu === "inventory"}
             aria-haspopup="menu"
           >
             <span className="inline-flex items-center gap-1">
@@ -451,6 +478,7 @@ export default function Navbar() {
             </span>
           </button>
 
+          {/* 매출 */}
           <button
             type="button"
             data-menu-toggle
@@ -465,6 +493,7 @@ export default function Navbar() {
             </span>
           </button>
 
+          {/* 분석 */}
           <button
             type="button"
             data-menu-toggle
@@ -492,23 +521,10 @@ export default function Navbar() {
           </button>
         </div>
 
+        {/* Right: Utilities */}
         <div className="flex items-center gap-3">
-          <div
-            className="hidden md:flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 h-10 w-[320px]">
-            <IconSearch className="h-4 w-4 text-slate-400" />
-            <input
-              className="w-full outline-none text-sm text-slate-700 placeholder:text-slate-400"
-              placeholder="검색"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !isAuthed) {
-                  navigate(
-                    `/login?redirect=${encodeURIComponent(location.pathname)}`,
-                  );
-                }
-              }}
-            />
-          </div>
-
+          {/* Search: 현재 미사용이므로 숨김 */}
+          {/* Bell */}
           <button
             type="button"
             className="relative h-10 w-10 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 grid place-items-center transition-colors"
@@ -523,6 +539,7 @@ export default function Navbar() {
             <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-rose-500 ring-2 ring-white" />
           </button>
 
+          {/* Profile */}
           {isAuthed ? (
             <div ref={profileWrapRef} className="relative">
               <button
@@ -552,6 +569,10 @@ export default function Navbar() {
                     closeAll();
                     handleProtectedNav("/me");
                   }}
+                  onStoreManage={() => {
+                    closeAll();
+                    handleProtectedNav("/stores/manage");
+                  }}
                   onLogout={handleLogout}
                 />
               )}
@@ -560,7 +581,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => navigate("/login")}
-              className="px-4 py-2 text-sm font-bold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-colors shrink-0"
+              className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800 transition-all active:scale-95"
             >
               로그인
             </button>
@@ -568,20 +589,21 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Mega Menus */}
       {openMenu === "standards" && (
         <MegaMenu sections={standardsSections} onNavigate={handleMenuNav} />
+      )}
+
+      {openMenu === "purchases" && (
+        <MegaMenu sections={purchasesSections} onNavigate={handleMenuNav} />
       )}
 
       {openMenu === "orders" && (
         <MegaMenu sections={ordersSections} onNavigate={handleMenuNav} />
       )}
 
-      {openMenu === "stock" && (
-        <MegaMenu sections={stockSections} onNavigate={handleMenuNav} />
-      )}
-
-      {openMenu === "customer_orders" && (
-        <MegaMenu sections={customerOrdersSections} onNavigate={handleMenuNav} />
+      {openMenu === "inventory" && (
+        <MegaMenu sections={inventorySections} onNavigate={handleMenuNav} />
       )}
 
       {openMenu === "sales" && (

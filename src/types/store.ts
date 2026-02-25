@@ -1,11 +1,11 @@
 // --- Store Enums ---
-export type StoreMemberRole = 'OWNER' | 'EMPLOYEE';
+export type StoreMemberRole = 'OWNER' | 'MEMBER';
 export type StoreMemberStatus = 'ACTIVE' | 'INACTIVE';
 
 // --- Store Response Types ---
 export interface MyStoreResponse {
-  storeId: number;
-  storePublicId: string;
+  storeId: number; // 내부 ID (백엔드 응답에 포함되지만 프론트엔드는 storePublicId 사용 권장)
+  storePublicId: string; // UUID - API 호출 시 사용
   storeName: string;
   businessRegistrationNumber: string;
   myRole: StoreMemberRole;
@@ -14,8 +14,8 @@ export interface MyStoreResponse {
 }
 
 export interface StoreCreateResponse {
-  storeId: number;
-  storePublicId: string;
+  storeId: number; // 내부 ID
+  storePublicId: string; // UUID - API 호출 시 사용
   name: string;
   businessRegistrationNumber: string;
 }
@@ -33,6 +33,20 @@ export interface StoreNameUpdateRequest {
 // --- Store Aliases (for convenience) ---
 export type StoreSummary = MyStoreResponse;
 export type StoreListResponse = MyStoreResponse[];
+
+// --- Store Member Types ---
+export interface StoreMemberResponse {
+  storeMemberId: number;
+  userId: number;
+  userName: string;
+  userEmail: string;
+  role: StoreMemberRole;
+  status: StoreMemberStatus;
+}
+
+export interface MemberStatusUpdateRequest {
+  status: StoreMemberStatus;
+}
 
 // --- Store Management UI Types ---
 export type StoreManageTabType = 'list' | 'create' | 'join';

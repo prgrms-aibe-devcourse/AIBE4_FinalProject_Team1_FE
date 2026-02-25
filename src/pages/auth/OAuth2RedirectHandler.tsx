@@ -18,7 +18,15 @@ const OAuth2RedirectHandler = () => {
 
           if (accessToken) {
             setAccessToken(accessToken);
-            navigate("/dashboard", { replace: true });
+
+            // 로그인 전에 저장해 둔 리다이렉트 경로가 있으면 우선 사용
+            const redirectPath = localStorage.getItem("post_login_redirect");
+            if (redirectPath) {
+              localStorage.removeItem("post_login_redirect");
+              navigate(redirectPath, { replace: true });
+            } else {
+              navigate("/dashboard", { replace: true });
+            }
           }
         })
         .catch((err) => {

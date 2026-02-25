@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createStore } from '@/api/store';
+import { createStore, setDefaultStore } from '@/api/store';
 import { acceptInvitation } from '@/api/invitation';
-import { setDefaultStore } from '@/api/store';
+import { setStorePublicId } from '@/utils/store';
 import { Store, Ticket, ArrowRight, Loader2 } from 'lucide-react';
 
 type ViewMode = 'select' | 'create' | 'join';
@@ -18,7 +18,6 @@ const OnboardingPage = () => {
   const [createError, setCreateError] = useState('');
 
   // 초대 코드 가입
-  const [storeIdForCode, setStoreIdForCode] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinError, setJoinError] = useState('');
@@ -45,7 +44,8 @@ const OnboardingPage = () => {
       });
 
       // 생성한 매장을 기본 매장으로 설정
-      await setDefaultStore(response.storeId);
+      await setDefaultStore(response.storePublicId);
+      setStorePublicId(response.storePublicId);
 
       // 대시보드로 이동
       navigate('/dashboard', { replace: true });
@@ -60,20 +60,22 @@ const OnboardingPage = () => {
     e.preventDefault();
     setJoinError('');
 
-    if (!storeIdForCode.trim() || !inviteCode.trim()) {
-      setJoinError('매장 ID와 초대 코드를 모두 입력해주세요.');
+    if (!inviteCode.trim()) {
+      setJoinError('초대 코드를 입력해주세요.');
       return;
     }
 
     setJoinLoading(true);
     try {
-      await acceptInvitation({
-        storeId: parseInt(storeIdForCode),
+      const response = await acceptInvitation({
         code: inviteCode
       });
 
-      // 가입한 매장을 기본 매장으로 설정 (정책에 따라 조정 가능)
-      await setDefaultStore(parseInt(storeIdForCode));
+      // 가입한 매장을 기본 매장으로 설정
+      if (response.storePublicId) {
+        await setDefaultStore(response.storePublicId);
+        setStorePublicId(response.storePublicId);
+      }
 
       // 대시보드로 이동
       navigate('/dashboard', { replace: true });
@@ -241,21 +243,6 @@ const OnboardingPage = () => {
 
           <form onSubmit={handleJoinWithCode} className="space-y-6">
             <div>
-              <label htmlFor="storeId" className="block text-sm font-semibold text-gray-900 mb-2">
-                매장 ID <span className="text-red-600">*</span>
-              </label>
-              <input
-                id="storeId"
-                type="text"
-                value={storeIdForCode}
-                onChange={(e) => setStoreIdForCode(e.target.value.replace(/\D/g, ''))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-shadow font-mono"
-                placeholder="숫자만 입력"
-                required
-              />
-            </div>
-
-            <div>
               <label htmlFor="inviteCode" className="block text-sm font-semibold text-gray-900 mb-2">
                 초대 코드 <span className="text-red-600">*</span>
               </label>
@@ -265,7 +252,7 @@ const OnboardingPage = () => {
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-shadow font-mono tracking-wider"
-                placeholder="ABCD1234"
+                placeholder="12345678"
                 required
               />
             </div>

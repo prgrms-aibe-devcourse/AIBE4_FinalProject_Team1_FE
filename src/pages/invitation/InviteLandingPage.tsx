@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { acceptInvitation } from '@/api/invitation';
 import { setDefaultStore } from '@/api/store';
+import { getAccessToken } from '@/utils/auth';
+import { setStorePublicId } from '@/utils/store';
 import { CheckCircle, XCircle, Loader2, UserPlus } from 'lucide-react';
 import axios from 'axios';
 import type { ApiError } from '@/types/common';
@@ -10,6 +12,7 @@ type InviteStatus = 'loading' | 'success' | 'error';
 
 const InviteLandingPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<InviteStatus>('loading');
   const [storeName, setStoreName] = useState<string>('');
@@ -17,32 +20,41 @@ const InviteLandingPage = () => {
 
   useEffect(() => {
     const processInvitation = async () => {
+      const accessToken = getAccessToken();
+
+      // 로그인되지 않은 상태라면 로그인 페이지로 유도 후, 로그인 완료 시 다시 현재 초대 URL로 복귀
+      if (!accessToken) {
+        const currentPathWithQuery = `${location.pathname}${location.search}`;
+        localStorage.setItem('post_login_redirect', currentPathWithQuery);
+        navigate(`/login`, { replace: true });
+        return;
+      }
+
       try {
         // URL에서 파라미터 추출
         const token = searchParams.get('token');
         const code = searchParams.get('code');
-        const storeIdParam = searchParams.get('storeId');
 
         // 유효성 검사
-        if (!token && (!code || !storeIdParam)) {
+        if (!token && !code) {
           setStatus('error');
           setErrorMessage('초대 정보가 올바르지 않습니다. 초대 링크를 다시 확인해주세요.');
           return;
         }
 
-        // 초대 수락 요청
+        // 초대 수락 요청 (storeId 는 서버에서 판별)
         const response = await acceptInvitation({
           token: token || undefined,
           code: code || undefined,
-          storeId: storeIdParam ? parseInt(storeIdParam, 10) : undefined,
         });
 
         setStatus('success');
         setStoreName(response.storeName);
 
         // 가입한 매장을 기본 매장으로 설정
-        if (response.storeId) {
-          await setDefaultStore(response.storeId);
+        if (response.storePublicId) {
+          await setDefaultStore(response.storePublicId);
+          setStorePublicId(response.storePublicId);
         }
 
         // 3초 후 대시보드로 이동
@@ -66,7 +78,7 @@ const InviteLandingPage = () => {
     };
 
     processInvitation();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, location]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
