@@ -1,4 +1,4 @@
-import apiClient from './client';
+import apiClient from './client.ts';
 
 // 로그인
 export const login = (credentials: { email: string; password: string }) =>

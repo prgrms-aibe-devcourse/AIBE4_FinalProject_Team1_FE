@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { socialLogin } from "@/services/api/auth";
+import { socialLogin } from "@/api/auth.ts";
 import { setAccessToken } from "@/utils/auth";
 
 const OAuth2RedirectHandler = () => {

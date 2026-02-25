@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { logout } from "../../services/api/auth";
-import { getUserProfile } from "../../services/api/user";
-import { getAccessToken, removeAccessToken } from "../../utils/auth";
+import { logout } from "@/api/auth";
+import { getUserProfile } from "@/api/user";
+import { getAccessToken, removeAccessToken } from "@/utils/auth.ts";
+import type { UserProfileResponse } from "@/types";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -73,7 +74,7 @@ function IconChevronDown({ className }: { className?: string }) {
   );
 }
 
-type MenuKey = "sales" | "inventory" | "orders" | "documents" | "analytics" | "profile" | null;
+type MenuKey = "sales" | "inventory" | "orders" | "analytics" | "profile" | null;
 
 type MenuItem = {
   label: string;
@@ -181,32 +182,27 @@ export default function Navbar() {
   const profileWrapRef = useRef<HTMLDivElement | null>(null);
 
   const isAuthed = !!getAccessToken();
-
-  const [user, setUser] = useState<{
-    name: string;
-    email: string;
-    avatarUrl?: string;
-  } | null>(null);
-
-  useEffect(() => {
-    if (isAuthed) {
-      getUserProfile()
-        .then((data) => {
-          setUser({
-            name: data.name || "사용자",
-            email: data.email || "",
-            avatarUrl: data.avatarUrl,
-          });
-        })
-        .catch((err) => {
-          console.error("Failed to fetch user profile:", err);
-        });
-    } else {
-      setUser(null);
-    }
-  }, [isAuthed]);
+  const [user, setUser] = useState<UserProfileResponse | null>(null);
 
   const [openMenu, setOpenMenu] = useState<MenuKey>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = getAccessToken();
+      if (!token) {
+        setUser(null);
+        return;
+      }
+      try {
+        const userData = await getUserProfile();
+        setUser(userData);
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error);
+        setUser(null);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const profileOpen = openMenu === "profile";
 
@@ -226,7 +222,6 @@ export default function Navbar() {
       console.error("Logout API failed:", error);
     } finally {
       removeAccessToken();
-      setUser(null);
       navigate("/login");
     }
   };
@@ -306,29 +301,9 @@ export default function Navbar() {
         ],
       },
       {
-        title: "추천",
-        items: [
-          { label: "발주 추천", path: "/orders/recommendations" },
-          { label: "추천 히스토리", path: "/orders/history" },
-        ],
-      },
-      {
         title: "거래처",
         items: [
-          { label: "거래처", path: "/orders/vendors" },
-        ],
-      },
-    ],
-    [],
-  );
-
-  const documentSections: MenuSection[] = useMemo(
-    () => [
-      {
-        title: "문서",
-        items: [
-          { label: "영수증/명세서 업로드", path: "/documents/upload" },
-          { label: "업로드 내역", path: "/documents/history" },
+          { label: "거래처 목록", path: "/vendors" },
         ],
       },
     ],
@@ -460,20 +435,6 @@ export default function Navbar() {
           <button
             type="button"
             data-menu-toggle
-            onClick={() => toggleMenu("documents")}
-            className={cn(topItemBase, openMenu === "documents" && topItemOpen)}
-            aria-expanded={openMenu === "documents"}
-            aria-haspopup="menu"
-          >
-            <span className="inline-flex items-center gap-1">
-              문서
-              <IconChevronDown className="h-4 w-4" />
-            </span>
-          </button>
-
-          <button
-            type="button"
-            data-menu-toggle
             onClick={() => toggleMenu("analytics")}
             className={cn(topItemBase, openMenu === "analytics" && topItemOpen)}
             aria-expanded={openMenu === "analytics"}
@@ -578,10 +539,6 @@ export default function Navbar() {
       </div>
 
       {/* Mega Menus */}
-      {openMenu === "sales" && (
-        <MegaMenu sections={salesSections} onNavigate={handleMenuNav} />
-      )}
-
       {openMenu === "inventory" && (
         <MegaMenu sections={inventorySections} onNavigate={handleMenuNav} />
       )}
@@ -590,8 +547,8 @@ export default function Navbar() {
         <MegaMenu sections={ordersSections} onNavigate={handleMenuNav} />
       )}
 
-      {openMenu === "documents" && (
-        <MegaMenu sections={documentSections} onNavigate={handleMenuNav} />
+      {openMenu === "sales" && (
+        <MegaMenu sections={salesSections} onNavigate={handleMenuNav} />
       )}
 
       {openMenu === "analytics" && (
