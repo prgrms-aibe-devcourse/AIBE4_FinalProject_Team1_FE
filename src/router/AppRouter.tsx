@@ -1,84 +1,91 @@
-import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
-import {getAccessToken} from "../utils/auth";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { getAccessToken } from "../utils/auth";
 import MainLayout from "./layout/MainLayout";
-import HomePage from "../pages/home/HomePage";
-import MyPage from "../pages/me/MyPage";
+import StoreGuard from "./layout/StoreGuard";
+
+// Auth
 import LoginPage from "../pages/auth/LoginPage";
 import OAuth2RedirectHandler from "../pages/auth/OAuth2RedirectHandler";
-import StocktakePage from "../pages/inventory/StocktakePage";
-import StocktakeListPage from "../pages/inventory/StocktakeListPage";
+
+// Dashboard
+import DashboardPage from "../pages/dashboard/DashboardPage";
+
+// User
+import MyPage from "../pages/user/MyPage";
+
+// Store
+import StoreManagePage from "../pages/store/StoreManagePage";
+import OnboardingPage from "../pages/store/OnboardingPage";
+
+// Invitation
+import InviteLandingPage from "../pages/invitation/InviteLandingPage";
+
+// Inventory (Stock)
+import StocktakePage from "../pages/stock/StocktakePage";
+import StocktakeListPage from "../pages/stock/StocktakeListPage";
 import IngredientPage from "../pages/ingredient/IngredientPage";
 import MenuPage from "../pages/menu/MenuPage";
 import VendorPage from "../pages/vendor/VendorPage";
-import StockPage from "@/pages/stock/StockPage.tsx";
-import ReceiveRegistrationPage from "@/pages/stock/ReceiveRegistrationPage.tsx";
-import ReceivingPage from "@/pages/stock/ReceivingPage.tsx";
-import StockDocumentsPage from "@/pages/stock/StockDocumentsPage.tsx";
-import DisposalPage from "@/pages/stock/DisposalPage.tsx";
+
+// Common
+import NotFoundPage from "../pages/common/NotFoundPage";
 
 export default function AppRouter() {
-    const isAuthed = !!getAccessToken();
+  const isAuthed = !!getAccessToken();
 
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route element={<MainLayout/>}>
-                    {/* 기본 진입: 홈 */}
-                    <Route
-                        index
-                        element={
-                            isAuthed ? (
-                                <Navigate to="/home" replace/>
-                            ) : (
-                                <Navigate to="/login" replace/>
-                            )
-                        }
-                    />
-                    {/* 로그인 */}
-                    <Route path="/login" element={<LoginPage/>}/>
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<MainLayout />}>
+          {/* 기본 진입 */}
+          <Route
+            index
+            element={
+              isAuthed ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
 
-                    <Route path="/oauth/redirect" element={<OAuth2RedirectHandler/>}/>
+          {/* 인증 */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/oauth/redirect" element={<OAuth2RedirectHandler />} />
 
-                    {/* 홈 */}
-                    <Route path="/home" element={<HomePage/>}/>
+          {/* 온보딩 */}
+          <Route path="/onboarding" element={<OnboardingPage />} />
 
-                    {/* 재고 관리 */}
-                    <Route path="/inventory/stocktakes" element={<StocktakeListPage/>}/>
-                    <Route path="/inventory/stocktakes/new" element={<StocktakePage/>}/>
-                    <Route path="/inventory/ingredients" element={<IngredientPage/>}/>
-                    <Route path="/stock" element={<StockPage/>}/>
-                    <Route path="/stock/receiving" element={<ReceivingPage/>}/>
-                    <Route path="/stock/receiveRegister" element={<ReceiveRegistrationPage/>}/>
-                    <Route path="/stock/documents" element={<StockDocumentsPage/>}/>
-                    <Route path="/stock/disposal" element={<DisposalPage/>}/>
+          {/* 초대 */}
+          <Route path="/invite" element={<InviteLandingPage />} />
 
-                    {/* TODO: 매출 관리 */}
-                    <Route path="/sales/menu" element={<MenuPage/>}/>
-                    {/* <Route path="/sales/upload" element={<SalesUploadPage />} /> */}
-                    {/* <Route path="/sales/list" element={<SalesListPage />} /> */}
-                    {/* <Route path="/analytics/sales" element={<SalesAnalyticsPage />} /> */}
+          {/* 매장 선택이 완료된 후 접근 */}
+          <Route element={<StoreGuard />}>
+            {/* 대시보드 */}
+            <Route path="/dashboard" element={<DashboardPage />} />
 
-                    {/* TODO: 문서 OCR */}
-                    {/* <Route path="/documents/upload" element={<DocumentUploadPage />} /> */}
-                    {/* <Route path="/documents/history" element={<DocumentHistoryPage />} /> */}
+            {/* 매장 관리 */}
+            <Route path="/stores/manage" element={<StoreManagePage />} />
 
-                    {/* 거래처 관리 */}
-                    <Route path="/vendors" element={<VendorPage/>}/>
+            {/* 재고 관리 */}
+            <Route path="/inventory/stocktakes" element={<StocktakeListPage />} />
+            <Route path="/inventory/stocktakes/new" element={<StocktakePage />} />
+            <Route path="/inventory/ingredients" element={<IngredientPage />} />
 
-                    {/* TODO: 발주 */}
-                    {/* <Route path="/orders" element={<OrdersPage />} /> */}
-                    {/* <Route path="/orders/recommendations" element={<RecommendationsPage />} /> */}
+            {/* 매출 관리 */}
+            <Route path="/sales/menu" element={<MenuPage />} />
 
-                    {/* TODO: 대시보드 */}
-                    {/* <Route path="/analytics" element={<AnalyticsPage />} /> */}
+            {/* 거래처 관리 */}
+            <Route path="/vendors" element={<VendorPage />} />
 
-                    {/* 마이페이지 */}
-                    <Route path="/me" element={<MyPage/>}/>
+            {/* 마이페이지 */}
+            <Route path="/me" element={<MyPage />} />
+          </Route>
 
-                    {/* 404 처리 */}
-                    <Route path="*" element={<Navigate to="/" replace/>}/>
-                </Route>
-            </Routes>
-        </BrowserRouter>
-    );
+          {/* 404 처리 */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }

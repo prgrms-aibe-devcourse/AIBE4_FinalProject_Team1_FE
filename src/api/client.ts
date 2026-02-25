@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getAccessToken, setAccessToken, removeAccessToken, extractToken } from '../../utils/auth';
+import { getAccessToken, setAccessToken, removeAccessToken, extractToken } from '../utils/auth.ts';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -71,7 +71,7 @@ apiClient.interceptors.response.use(
         // 여기서는 일단 직접 임포트 대신 axios 정의를 그대로 두거나 
         // 유저 요청대로 auth.ts의 것을 쓰되 루프 방지 처리
 
-        const { reissue } = await import('./auth');
+        const { reissue } = await import('./auth.ts');
         const response = await reissue();
 
         // 응답 헤더나 바디에서 access token 추출 (유틸리티 사용)

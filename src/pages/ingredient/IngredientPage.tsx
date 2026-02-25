@@ -14,29 +14,30 @@ import {
     getIngredients,
     createIngredient,
     updateIngredient,
-    deleteIngredient,
-    type IngredientResponse,
-    type IngredientUnit,
-    type IngredientStatus
-} from '../../services/api/ingredient';
+    deleteIngredient
+} from '@/api/ingredient';
+import type {
+    IngredientResponse,
+    IngredientUnit,
+    IngredientStatus
+} from '@/types';
+import { requireStorePublicId } from '@/utils/store';
 
-import { getStorePublicId } from '../../utils/store';
-
-const INGREDIENT_UNITS: IngredientUnit[] = ["EA", "G", "ML"];
+const INGREDIENT_UNITS: IngredientUnit[] = ["EA", "KG", "L"];
 const INGREDIENT_STATUS: IngredientStatus[] = ["ACTIVE", "INACTIVE"];
 
 const UNIT_LABELS: Record<IngredientUnit, string> = {
     EA: "개(EA)",
-    G: "g",
-    ML: "ml"
+    KG: "kg",
+    L: "L"
 };
 
 const StatusBadge = ({ status }: { status: IngredientStatus }) => {
-    const styles = {
+    const styles: Record<IngredientStatus, string> = {
         ACTIVE: "bg-emerald-100 text-emerald-700 border border-emerald-200",
         INACTIVE: "bg-slate-100 text-slate-500 border border-slate-200"
     };
-    const labels = {
+    const labels: Record<IngredientStatus, string> = {
         ACTIVE: "활성",
         INACTIVE: "비활성"
     };
@@ -44,7 +45,7 @@ const StatusBadge = ({ status }: { status: IngredientStatus }) => {
 };
 
 export default function IngredientPage() {
-    const storePublicId = getStorePublicId();
+    const storePublicId = requireStorePublicId();
 
     // --- State ---
     const [view, setView] = useState<'LIST' | 'CREATE' | 'EDIT'>('LIST');
@@ -57,8 +58,8 @@ export default function IngredientPage() {
     const loadIngredients = async () => {
         setIsLoading(true);
         try {
-            const response = await getIngredients(storePublicId);
-            setIngredients(response.data);
+            const data = await getIngredients(storePublicId);
+            setIngredients(data);
         } catch (error) {
             console.error("Failed to load ingredients:", error);
             alert("데이터를 불러오는 중 오류가 발생했습니다.");
@@ -72,7 +73,7 @@ export default function IngredientPage() {
     }, []);
 
     // --- Handlers ---
-    const handleCreate = async (newData: { name: string; unit: IngredientUnit; lowStockThreshold: number }) => {
+    const handleCreate = async (newData: { name: string; unit: IngredientUnit; lowStockThreshold: number | null }) => {
         try {
             await createIngredient(storePublicId, newData);
             alert("새 식재료가 등록되었습니다.");
@@ -258,7 +259,7 @@ interface FormViewInnerProps {
     currentIngredient: IngredientResponse | null;
     setView: (view: 'LIST' | 'CREATE' | 'EDIT') => void;
     handleUpdate: (data: IngredientResponse) => Promise<void>;
-    handleCreate: (data: { name: string; unit: IngredientUnit; lowStockThreshold: number }) => Promise<void>;
+    handleCreate: (data: { name: string; unit: IngredientUnit; lowStockThreshold: number | null }) => Promise<void>;
 }
 
 const FormViewInner: React.FC<FormViewInnerProps> = ({ mode, currentIngredient, setView, handleUpdate, handleCreate }) => {

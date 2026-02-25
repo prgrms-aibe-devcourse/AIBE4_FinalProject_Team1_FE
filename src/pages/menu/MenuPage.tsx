@@ -20,13 +20,23 @@ import {
     type MenuResponse,
     type MenuStatus,
     type Ingredient
-} from '../../services/api/menu';
+} from '@/api';
 import {
     getIngredients,
     type IngredientResponse
-} from '../../services/api/ingredient';
+} from '@/api';
 
-import { getStorePublicId } from '../../utils/store';
+import { requireStorePublicId } from '@/utils/store.ts';
+
+/**
+ * 메뉴 폼 데이터 인터페이스
+ */
+interface MenuFormData {
+    name: string;
+    basePrice: string | number;
+    status: MenuStatus;
+    ingredients: Ingredient[];
+}
 
 /**
  * 메뉴 관리 시스템 메인 컴포넌트
@@ -35,7 +45,7 @@ const MenuPage: React.FC = () => {
     console.log("MenuPage mounting...");
     // --- 화면 상태 관리 ---
     const [viewMode, setViewMode] = useState<"LIST" | "CREATE" | "EDIT">("LIST");
-    const storePublicId = getStorePublicId();
+    const storePublicId = requireStorePublicId();
 
     // 단위 목록 정의 (Enum 대응)
     // const UNIT_OPTIONS = ["EA", "KG", "L"];
@@ -64,7 +74,7 @@ const MenuPage: React.FC = () => {
                 getIngredients(storePublicId)
             ]);
             setMenus(menuData);
-            setAvailableIngredients(ingredientData.data);
+            setAvailableIngredients(ingredientData);
         } catch (error) {
             console.error("Failed to fetch data:", error);
             alert("데이터를 불러오는 중 오류가 발생했습니다.");
@@ -118,7 +128,7 @@ const MenuPage: React.FC = () => {
 
     // 식재료 행 추가
     const addIngredientRow = () => {
-        setFormData((prev: any) => ({
+        setFormData((prev: MenuFormData) => ({
             ...prev,
             ingredients: [...prev.ingredients, { name: "", amount: "", unit: "EA" }]
         }));
@@ -126,14 +136,14 @@ const MenuPage: React.FC = () => {
 
     // 식재료 행 삭제
     const removeIngredientRow = (index: number) => {
-        const updated = formData.ingredients.filter((_: any, i: number) => i !== index);
-        setFormData((prev: any) => ({ ...prev, ingredients: updated }));
+        const updated = formData.ingredients.filter((_: Ingredient, i: number) => i !== index);
+        setFormData((prev: MenuFormData) => ({ ...prev, ingredients: updated }));
     };
 
     // 식재료 선택 핸들러
     const handleSelectIngredient = (index: number, ingredientName: string) => {
         const targetIngredient = availableIngredients.find(ing => ing.name === ingredientName);
-        const updated = formData.ingredients.map((ing: any, i: number) => {
+        const updated = formData.ingredients.map((ing: Ingredient, i: number) => {
             if (i === index) {
                 return {
                     ...ing,
@@ -143,15 +153,15 @@ const MenuPage: React.FC = () => {
             }
             return ing;
         });
-        setFormData((prev: any) => ({ ...prev, ingredients: updated }));
+        setFormData((prev: MenuFormData) => ({ ...prev, ingredients: updated }));
     };
 
     // 식재료 수량 변경 핸들러
     const handleIngredientAmountChange = (index: number, value: string) => {
-        const updated = formData.ingredients.map((ing: any, i: number) =>
+        const updated = formData.ingredients.map((ing: Ingredient, i: number) =>
             i === index ? { ...ing, amount: value } : ing
         );
-        setFormData((prev: any) => ({ ...prev, ingredients: updated }));
+        setFormData((prev: MenuFormData) => ({ ...prev, ingredients: updated }));
     };
 
     // [POST/PUT] 저장 핸들러
@@ -197,7 +207,7 @@ const MenuPage: React.FC = () => {
 
     // 상태 배지 렌더러
     const StatusBadge = ({ status }: { status: MenuStatus }) => {
-        const styles = {
+        const styles: Record<MenuStatus, string> = {
             ACTIVE: "bg-emerald-100 text-emerald-700 border-emerald-200",
             INACTIVE: "bg-amber-100 text-amber-700 border-amber-200",
             DELETED: "bg-red-100 text-red-700 border-red-200"
