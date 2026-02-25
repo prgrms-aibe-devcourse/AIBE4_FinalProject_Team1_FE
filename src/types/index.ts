@@ -8,3 +8,5 @@ export * from './common';
 export * from './product';
 export * from './vendor';
 export * from './menu';
+
+export * from "./ocr"
