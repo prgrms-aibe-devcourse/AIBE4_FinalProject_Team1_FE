@@ -5,6 +5,9 @@ import type {
   IngredientUpdateRequest,
 } from '../types';
 
+// Re-export types for convenience
+export type { IngredientResponse, IngredientUnit, IngredientStatus } from '../types';
+
 /**
  * 식재료 생성
  * POST /api/ingredients/{storePublicId}

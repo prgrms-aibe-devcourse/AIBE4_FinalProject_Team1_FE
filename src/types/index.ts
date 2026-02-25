@@ -6,3 +6,5 @@ export * from './ingredient';
 export * from './stock';
 export * from './common';
 export * from './product';
+export * from './vendor';
+export * from './menu';

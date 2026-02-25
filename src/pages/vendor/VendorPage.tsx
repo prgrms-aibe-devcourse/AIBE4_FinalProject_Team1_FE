@@ -13,8 +13,8 @@ import {
     createVendor,
     updateVendor,
     deleteVendor
-} from '@/services/api/vendor';
-import type { VendorResponse, VendorStatus } from '@/types/vendor';
+} from '@/api/vendor';
+import type { VendorResponse, VendorStatus } from '@/types';
 import { getStorePublicId } from '@/utils/store';
 
 const StatusBadge = ({ status }: { status: VendorStatus }) => {

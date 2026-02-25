@@ -5,4 +5,6 @@ export * from './stock.ts';
 export * from './user.ts';
 export * from './store.ts';
 export * from './invitation.ts';
+export * from './vendor.ts';
+export * from './menu.ts';
 export { default as apiClient } from './client.ts';
