@@ -6,8 +6,7 @@ import MainLayout from "./layout/MainLayout";
 import LoginPage from "../pages/auth/LoginPage";
 import OAuth2RedirectHandler from "../pages/auth/OAuth2RedirectHandler";
 
-// Home & Dashboard
-import HomePage from "../pages/home/HomePage";
+// Dashboard
 import DashboardPage from "../pages/dashboard/DashboardPage";
 
 // User
@@ -42,7 +41,7 @@ export default function AppRouter() {
             index
             element={
               isAuthed ? (
-                <Navigate to="/home" replace />
+                <Navigate to="/dashboard" replace />
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -59,8 +58,7 @@ export default function AppRouter() {
           {/* 초대 */}
           <Route path="/invite" element={<InviteLandingPage />} />
 
-          {/* 홈 & 대시보드 */}
-          <Route path="/home" element={<HomePage />} />
+          {/* 대시보드 */}
           <Route path="/dashboard" element={<DashboardPage />} />
 
           {/* 매장 관리 */}
