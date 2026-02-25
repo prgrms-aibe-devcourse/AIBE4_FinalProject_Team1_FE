@@ -1,26 +1,24 @@
 const STORE_ID_KEY = 'store_public_id';
-// const DEFAULT_STORE_ID = '8fa9f91d-f95c-412d-855c-06ae9f7e643b';
-const DEFAULT_STORE_ID = '29e4ab96-8f56-4eb7-8e88-06c2f8e89124';
 
 /**
  * 현재 선택된 매장의 Public ID를 반환합니다.
- * 우선순위: localStorage > DEFAULT_STORE_ID
+ * localStorage에 값이 없으면 null을 반환합니다.
  */
-export const getStorePublicId = (): string => {
-    const savedId = localStorage.getItem(STORE_ID_KEY);
-    return savedId || DEFAULT_STORE_ID;
+export const getStorePublicId = (): string | null => {
+  return localStorage.getItem(STORE_ID_KEY);
 };
 
 /**
  * 매장 Public ID를 설정합니다.
  */
 export const setStorePublicId = (id: string): void => {
-    localStorage.setItem(STORE_ID_KEY, id);
+  localStorage.setItem(STORE_ID_KEY, id);
 };
 
-/**
- * 등록된 매장 ID를 제거합니다.
- */
-export const removeStorePublicId = (): void => {
-    localStorage.removeItem(STORE_ID_KEY);
+export const requireStorePublicId = (): string => {
+  const id = getStorePublicId();
+  if (!id) {
+    throw new Error('store_public_id is missing in localStorage. Ensure StoreGuard is applied or redirect to onboarding.');
+  }
+  return id;
 };

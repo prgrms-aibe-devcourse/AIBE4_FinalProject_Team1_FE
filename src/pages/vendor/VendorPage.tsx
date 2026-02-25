@@ -15,7 +15,7 @@ import {
     deleteVendor
 } from '@/api/vendor';
 import type { VendorResponse, VendorStatus } from '@/types';
-import { getStorePublicId } from '@/utils/store';
+import { requireStorePublicId } from '@/utils/store';
 
 const StatusBadge = ({ status }: { status: VendorStatus }) => {
     const styles = {
@@ -34,7 +34,7 @@ const StatusBadge = ({ status }: { status: VendorStatus }) => {
 };
 
 export default function VendorPage() {
-    const storePublicId = getStorePublicId();
+    const storePublicId = requireStorePublicId();
 
     // --- State ---
     const [view, setView] = useState<'LIST' | 'CREATE' | 'EDIT'>('LIST');
@@ -134,7 +134,7 @@ export default function VendorPage() {
                 <div className="flex gap-2 w-full md:w-auto">
                     <button
                         onClick={() => setView('CREATE')}
-                        className="flex-1 md:flex-none bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition flex items-center justify-center gap-2 shadow-md"
+                        className="flex-1 md:flex-none bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition flex items-center justify-center gap-2 shadow-md"
                     >
                         <Plus className="w-4 h-4" /> 거래처 추가
                     </button>
@@ -354,7 +354,7 @@ export default function VendorPage() {
                             </button>
                             <button
                                 type="submit"
-                                className="flex-1 py-3 bg-amber-600 text-white rounded-lg font-bold hover:bg-amber-700 shadow-lg transition active:scale-[0.98]"
+                                className="flex-1 py-3 bg-black text-white rounded-lg font-bold hover:bg-gray-900 shadow-lg transition active:scale-[0.98]"
                             >
                                 {mode === 'EDIT' ? '정보 업데이트' : '거래처 등록'}
                             </button>
