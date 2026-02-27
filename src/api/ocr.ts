@@ -6,10 +6,18 @@ export const analyzeReceipt = async (
     signal?: AbortSignal
 ): Promise<ReceiptResponse> => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("files", file);
 
+    // localStorage에서 store_public_id를 가져옵니다.
+    const storePublicId = localStorage.getItem("store_public_id");
+
+    if (!storePublicId) {
+        throw new Error("store_public_id not found in localStorage.");
+    }
+
+    // URL에 storePublicId를 포함하여 요청합니다.
     const response = await apiClient.post<ReceiptResponse>(
-        "/api/documents/ocr",
+        `/api/documents/${storePublicId}/ocr`,
         formData,
         {
             headers: {

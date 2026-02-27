@@ -1,10 +1,10 @@
 import {analyzeReceipt} from "@/api/ocr";
-import type {ReceiptItem, ReceiptResponse, FieldStatus, Field} from "@/types";
+import type {Item, ReceiptResponse, FieldStatus, Field} from "@/types";
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 
 // 화면 표시용으로 id를 추가한 타입
-interface DisplayReceiptItem extends ReceiptItem {
+interface DisplayReceiptItem extends Item {
     id: number;
 }
 
@@ -32,13 +32,22 @@ export default function ReceiveRegistrationPage() {
         message: null,
     });
 
+    const emptyNumberField = (value: number | null = null): Field<number> => ({
+        value,
+        status: "GREEN" as FieldStatus,
+        message: null,
+    });
+
 
     const addNewRow = () => {
         setItems((prev) => [
             ...prev,
             {
                 id: Date.now() + Math.random(),
-                name: emptyField(""),
+                ingredient: {
+                    id: emptyNumberField(null),
+                    name: emptyField(""),
+                },
                 quantity: emptyField("0"),
                 rawCapacity: emptyField(""),
                 costPrice: emptyField("0"),
@@ -58,20 +67,49 @@ export default function ReceiveRegistrationPage() {
 
         setSelectedFile(file);
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const img = document.getElementById("ocrPreviewImg") as HTMLImageElement;
-            if (img && e.target?.result) {
-                img.src = e.target.result as string;
-                document.getElementById("ocrPreviewContainer")?.classList.remove("hidden");
-                const scanLine = document.getElementById("scanLine");
-                if (scanLine) {
-                    scanLine.classList.remove("hidden");
-                    scanLine.style.animation = "scan 2s linear infinite";
-                }
+        const img = document.getElementById("ocrPreviewImg") as HTMLImageElement;
+        const ocrPreviewContainer = document.getElementById("ocrPreviewContainer");
+        const scanLine = document.getElementById("scanLine");
+
+        if (ocrPreviewContainer) {
+            ocrPreviewContainer.classList.remove("hidden");
+        }
+
+        if (scanLine) {
+            scanLine.classList.add("hidden"); // 기본적으로 숨김
+            scanLine.style.animation = "none"; // 애니메이션 중지
+        }
+
+        if (img) {
+            if (file.type.startsWith("image/")) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    if (e.target?.result) {
+                        img.src = e.target.result as string;
+                        if (scanLine) {
+                            scanLine.classList.remove("hidden");
+                            scanLine.style.animation = "scan 2s linear infinite";
+                        }
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type === "application/pdf") {
+                // PDF 아이콘 이미지로 대체 (실제 아이콘 경로로 변경 필요)
+                img.src = "https://via.placeholder.com/150x150?text=PDF+Document";
+                img.alt = "PDF Document";
+            } else if (
+                file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+                file.type === "application/vnd.ms-excel"
+            ) {
+                // Excel 아이콘 이미지로 대체 (실제 아이콘 경로로 변경 필요)
+                img.src = "https://via.placeholder.com/150x150?text=Excel+Document";
+                img.alt = "Excel Document";
+            } else {
+                // 기타 문서 파일 아이콘 이미지로 대체 (실제 아이콘 경로로 변경 필요)
+                img.src = "https://via.placeholder.com/150x150?text=Document";
+                img.alt = "Generic Document";
             }
-        };
-        reader.readAsDataURL(file);
+        }
     };
 
     const processOCR = async () => {
@@ -83,7 +121,7 @@ export default function ReceiveRegistrationPage() {
             const data: ReceiptResponse = await analyzeReceipt(selectedFile);
 
             (document.getElementById("vendorName") as HTMLInputElement).value =
-                data.vendorName.value ?? "";
+                data.vendor.name.value ?? "";
 
             (document.getElementById("receiptDate") as HTMLInputElement).value =
                 data.date.value ?? "";
@@ -94,13 +132,8 @@ export default function ReceiveRegistrationPage() {
             document.getElementById("aiStatus")?.classList.remove("hidden");
 
             const newItems: DisplayReceiptItem[] = data.items.map((item) => ({
+                ...item,
                 id: Date.now() + Math.random(),
-                name: item.name,
-                quantity: item.quantity,
-                rawCapacity: item.rawCapacity,
-                costPrice: item.costPrice,
-                totalPrice: item.totalPrice,
-                expirationDate: item.expirationDate,
             }));
 
             setItems(newItems);
@@ -286,7 +319,7 @@ export default function ReceiveRegistrationPage() {
                                                 <td className="px-4 py-4 text-center">
                                                     <i
                                                         className={`ph-fill ph-circle ${
-                                                            item.name.status === "GREEN" || !item.name.status
+                                                            item.ingredient.name.status === "GREEN" || !item.ingredient.name.status
                                                                 ? "text-emerald-500"
                                                                 : "text-amber-500"
                                                         }`}
@@ -295,15 +328,15 @@ export default function ReceiveRegistrationPage() {
                                                 <td className="px-4 py-4">
                                                     <input
                                                         type="text"
-                                                        defaultValue={item.name.value ?? ""}
+                                                        defaultValue={item.ingredient.name.value ?? ""}
                                                         placeholder="품목명 입력"
                                                         className={`w-full bg-transparent border-b border-transparent focus:border-black outline-none font-bold text-gray-800 ${
-                                                            item.name.status === "YELLOW" ? "bg-amber-50" : ""
+                                                            item.ingredient.name.status === "YELLOW" ? "bg-amber-50" : ""
                                                         }`}
                                                     />
-                                                    {item.name.message && (
+                                                    {item.ingredient.name.message && (
                                                         <p className="text-[9px] text-amber-600 mt-0.5">
-                                                            {item.name.message}
+                                                            {item.ingredient.name.message}
                                                         </p>
                                                     )}
                                                 </td>
@@ -420,6 +453,7 @@ export default function ReceiveRegistrationPage() {
                             id="ocrInput"
                             className="hidden"
                             onChange={handleFileUpload}
+                            // accept 속성을 제거하여 모든 파일 유형을 선택할 수 있도록 함
                         />
                         <label htmlFor="ocrInput" className="cursor-pointer block">
                             <div
