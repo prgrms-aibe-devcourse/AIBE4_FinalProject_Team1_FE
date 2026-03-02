@@ -9,5 +9,6 @@ export * from './product';
 export * from './vendor';
 export * from './menu';
 export * from './diningTable';
+export * from './sales';
 
 export * from "./ocr"
