@@ -10,5 +10,6 @@ export * from './vendor';
 export * from './menu';
 export * from './diningTable';
 export * from './sales';
+export * from './tableQr';
 
 export * from "./ocr"
