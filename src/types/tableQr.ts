@@ -1,14 +1,14 @@
 export interface TableQrIssueResponse {
     tablePublicId: string;
-    qrUrl: string;
-    issuedAt: string;
+    qrImageUrl: string;
+    createdAt: string;
 }
 
 export interface TableQrResponse {
     tablePublicId: string;
     tableCode: string;
-    qrUrl: string;
-    issuedAt: string;
+    qrImageUrl: string;
+    createdAt: string;
     status: 'ACTIVE' | 'INACTIVE';
 }
 
