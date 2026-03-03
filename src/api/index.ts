@@ -10,4 +10,5 @@ export * from './vendor.ts';
 export * from './menu.ts';
 export * from './diningTable.ts';
 export * from './sales.ts';
+export * from './tableQr.ts';
 export { default as apiClient } from './client.ts';
