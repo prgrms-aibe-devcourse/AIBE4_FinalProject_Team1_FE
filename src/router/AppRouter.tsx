@@ -40,6 +40,10 @@ import DiningTablePage from "../pages/dining/diningTablePage";
 // Sales
 import SalesOrderListPage from "../pages/sales/SalesOrderListPage";
 
+// Purchases
+import PurchaseOrderListPage from "../pages/purchase/PurchaseOrderListPage";
+import PurchaseOrderCreatePage from "../pages/purchase/PurchaseOrderCreatePage";
+
 // Common
 import NotFoundPage from "../pages/common/NotFoundPage";
 
@@ -98,6 +102,10 @@ export default function AppRouter() {
             {/* 주문 관리 */}
             <Route path="/orders" element={<SalesOrderListPage />} />
             <Route path="/orders/tables" element={<DiningTablePage />} />
+
+            {/* 발주 관리 */}
+            <Route path="/purchase-orders" element={<PurchaseOrderListPage />} />
+            <Route path="/purchase-orders/new" element={<PurchaseOrderCreatePage />} />
 
             {/* 거래처 관리 */}
             <Route path="/vendors" element={<VendorPage />} />
