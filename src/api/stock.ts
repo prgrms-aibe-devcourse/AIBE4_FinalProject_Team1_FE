@@ -11,6 +11,7 @@ import type {
     DisposalSearchCondition,
     DisposalPageResponse,
 } from '@/types';
+import type {StockLogResponse, StockLogSearchCondition} from "@/types/stockLog.ts";
 
 /**
  * 주문 재고 차감
@@ -110,6 +111,25 @@ export async function getWasteRecords(storePublicId: string, condition: Disposal
             page,
             size,
             sort: 'wasteAt,desc'
+        },
+    });
+    return response.data;
+}
+
+/** * --- 이력(Log) 관련 API 추가 ---
+ */
+
+/**
+ * 재고 이력 조회
+ * GET /api/stockLogs/{storePublicId}
+ */
+export async function getStockLogs(storePublicId: string, condition: StockLogSearchCondition, page: number = 0, size: number = 20): Promise<DisposalPageResponse<StockLogResponse>> {
+    const response = await apiClient.get<DisposalPageResponse<StockLogResponse>>(`/api/stockLogs/${storePublicId}`, {
+        params: {
+            ...condition,
+            page,
+            size,
+            sort: 'createdAt,desc'
         },
     });
     return response.data;
