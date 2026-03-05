@@ -14,4 +14,6 @@ export * from './sales';
 export * from './tableQr';
 export * from './purchase';
 
-export * from "./ocr"
+export * from "./ocr";
+export * from "./document";
+export * from "./disposal";
