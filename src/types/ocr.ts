@@ -6,8 +6,18 @@ export interface Field<T> {
     message: string | null;
 }
 
-export interface ReceiptItem {
+export interface VendorField {
+    id: Field<number>;
     name: Field<string>;
+}
+
+export interface IngredientField {
+    id: Field<number>;
+    name: Field<string>;
+}
+
+export interface Item {
+    ingredient: IngredientField;
     quantity: Field<string>;
     rawCapacity: Field<string>;
     costPrice: Field<string>;
@@ -16,8 +26,9 @@ export interface ReceiptItem {
 }
 
 export interface ReceiptResponse {
-    vendorName: Field<string>;
+    documentPath: string;
+    vendor: VendorField;
     date: Field<string>;
     amount: Field<string>;
-    items: ReceiptItem[];
+    items: Item[];
 }
