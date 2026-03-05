@@ -1,5 +1,5 @@
-import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
-import {getAccessToken} from "../utils/auth";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { getAccessToken } from "../utils/auth";
 import MainLayout from "./layout/MainLayout";
 import StoreGuard from "./layout/StoreGuard";
 
@@ -40,6 +40,9 @@ import DiningTablePage from "../pages/dining/diningTablePage";
 
 // Sales
 import SalesOrderListPage from "../pages/sales/SalesOrderListPage";
+
+// SalesLedger
+import SalesLedgerPage from "../pages/sales/SalesLedgerPage";
 
 // Purchases
 import PurchaseOrderListPage from "../pages/purchase/PurchaseOrderListPage";
@@ -98,8 +101,9 @@ export default function AppRouter() {
                         <Route path="/stock/disposal" element={<DisposalPage/>}/>
                         <Route path="/stock/log" element={<StockLogPage/>}/>
 
-                        {/* 매출 관리 */}
-                        <Route path="/sales/menu" element={<MenuPage/>}/>
+            {/* 매출 관리 */}
+            <Route path="/sales/menu" element={<MenuPage />} />
+            <Route path="/sales/list" element={<SalesLedgerPage />} />
 
                         {/* 주문 관리 */}
                         <Route path="/orders" element={<SalesOrderListPage/>}/>
