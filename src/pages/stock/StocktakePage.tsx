@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
     ClipboardCheck,
     Save,
@@ -11,68 +11,86 @@ import {
 } from 'lucide-react';
 import { requireStorePublicId } from '@/utils/store.ts';
 import { getIngredients } from '@/api/ingredient.ts';
-import { createStockTakeSheet, confirmStockTakeSheet } from '@/api/stockTake.ts';
-import type { StockTakeItemRequest } from '@/types/stockTake.ts';
+import {
+    createStockTakeSheet,
+    confirmStockTakeSheet,
+    getStockTakeSheetDetail,
+    updateStockTakeDraftItems
+} from '@/api/stockTake.ts';
+import type {
+    StockTakeItemRequest,
+    StockTakeItemsDraftUpdateRequest,
+    StockTakeItemResponse
+} from '@/types/stockTake.ts';
 
 /**
  * 실사 재고 관리 메인 컴포넌트
  */
 const StocktakePage: React.FC = () => {
     const navigate = useNavigate();
+    const { sheetId: urlSheetId } = useParams<{ sheetId: string }>();
     // --- 상태 관리 ---
     const storePublicId = requireStorePublicId();
     const [title, setTitle] = useState(`${new Date().toLocaleDateString()} 정기 재고 실사`);
-    const [items, setItems] = useState<any[]>([]);
+    const [items, setItems] = useState<StockTakeItemResponse[] | any[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false);
-    const [sheetPublicId, setSheetPublicId] = useState<string | null>(null);
-    const [status, setStatus] = useState("DRAFT"); // DRAFT, SAVED, CONFIRMED
+    const [sheetPublicId] = useState<string | null>(urlSheetId || null);
+    const [status, setStatus] = useState<string>("DRAFT"); // DRAFT, SAVED, CONFIRMED
 
     // --- 데이터 로드 ---
     useEffect(() => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                // 식재료 목록 조회
-                const ingredients = await getIngredients(storePublicId);
+                if (sheetPublicId) {
+                    // 기존 전표 상세 조회
+                    const detail = await getStockTakeSheetDetail(storePublicId, sheetPublicId);
+                    setTitle(detail.title);
+                    setItems(detail.items);
+                    setStatus(detail.status);
+                } else {
+                    // 신규 작성을 위해 식재료 목록 조회
+                    const ingredients = await getIngredients(storePublicId);
 
-                // 로컬 저장소 확인
-                const savedData = localStorage.getItem(`stocktake_draft_${storePublicId}`);
-                let savedItemsMap = new Map();
+                    // 로컬 저장소 확인 (신규 작성 시에만 로컬 데이터 참조 고려)
+                    const savedData = localStorage.getItem(`stocktake_draft_${storePublicId}`);
+                    let savedItemsMap = new Map();
 
-                if (savedData) {
-                    const parsed = JSON.parse(savedData);
-                    setTitle(parsed.title);
-                    if (parsed.sheetPublicId) setSheetPublicId(parsed.sheetPublicId);
-                    if (parsed.items) {
-                        parsed.items.forEach((item: any) => {
-                            savedItemsMap.set(item.ingredientPublicId, item.stocktakeQty);
-                        });
+                    if (savedData) {
+                        const parsed = JSON.parse(savedData);
+                        setTitle(parsed.title);
+                        if (parsed.items) {
+                            parsed.items.forEach((item: any) => {
+                                savedItemsMap.set(item.ingredientPublicId, item.stockTakeQty);
+                            });
+                        }
                     }
+
+                    // 초기 데이터 구성
+                    const initialItems = ingredients.map(ing => ({
+                        ingredientPublicId: ing.ingredientPublicId,
+                        name: ing.name,
+                        unit: ing.unit,
+                        theoreticalQty: 0, // 백엔드에서 초기 생성 시 결정되므로 프론트에선 0으로 시작
+                        stockTakeQty: savedItemsMap.get(ing.ingredientPublicId) || 0,
+                        varianceQty: 0
+                    }));
+
+                    setItems(initialItems);
                 }
-
-                // API 데이터와 로컬 데이터 병합
-                const mergedItems = ingredients.map(ing => ({
-                    ingredientPublicId: ing.ingredientPublicId,
-                    name: ing.name,
-                    unit: ing.unit,
-                    theoreticalQty: 0, // 현재 API에서 제공되지 않음 (추후 보완)
-                    stocktakeQty: savedItemsMap.get(ing.ingredientPublicId) || ""
-                }));
-
-                setItems(mergedItems);
             } catch (error) {
                 console.error("데이터 로드 실패:", error);
-                alert("재료 정보를 불러오는 데 실패했습니다.");
+                alert("정보를 불러오는 데 실패했습니다.");
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchData();
-    }, [storePublicId]);
+    }, [storePublicId, sheetPublicId]);
 
     // --- 데이터 변경 시 로컬 자동 저장 ---
     useEffect(() => {
@@ -95,36 +113,51 @@ const StocktakePage: React.FC = () => {
     const handleQtyChange = (ingredientPublicId: string, value: string) => {
         if (status === "CONFIRMED") return;
         setItems(prev => prev.map(item =>
-            item.ingredientPublicId === ingredientPublicId ? { ...item, stocktakeQty: value } : item
+            item.ingredientPublicId === ingredientPublicId ? { ...item, stockTakeQty: value } : item
         ));
         setStatus("DRAFT");
     };
 
-    // [POST] 임시 저장 (createStockTakeSheet 연동)
+    // [POST/PATCH] 임시 저장
     const saveDraft = async () => {
-        if (items.filter(i => i.stocktakeQty !== "").length === 0) {
+        const validItems = items.filter(i => (i.stockTakeQty !== "" && i.stockTakeQty !== undefined));
+        if (validItems.length === 0) {
             alert("실사 수량을 하나 이상 입력해주세요.");
             return;
         }
 
         setIsSaving(true);
         try {
-            const requestItems: StockTakeItemRequest[] = items
-                .filter(i => i.stocktakeQty !== "")
-                .map(i => ({
+            if (!sheetPublicId) {
+                // 최초 생성
+                const requestItems: StockTakeItemRequest[] = items.map(i => ({
                     ingredientPublicId: i.ingredientPublicId,
-                    stockTakeQty: parseFloat(i.stocktakeQty as string)
+                    stockTakeQty: parseFloat(i.stockTakeQty as string || "0")
                 }));
 
-            const requestBody = {
-                title: title,
-                items: requestItems
-            };
+                const requestBody = {
+                    title: title,
+                    items: requestItems
+                };
 
-            const newSheetId = await createStockTakeSheet(storePublicId, requestBody);
-            setSheetPublicId(newSheetId);
-            setStatus("SAVED");
-            alert("임시 저장이 완료되었습니다.");
+                await createStockTakeSheet(storePublicId, requestBody);
+                // 백엔드에서 Long(id)을 반환하므로, UUID 기반 조회를 위해 목록으로 이동하거나 알림
+                setStatus("SAVED");
+                alert("전표가 최초 생성되었습니다. 계속해서 작성하려면 목록에서 다시 선택해 주세요.");
+                navigate("/inventory/stocktakes");
+            } else {
+                // 기존 전표 업데이트
+                const requestItems: StockTakeItemsDraftUpdateRequest = {
+                    items: items.map(i => ({
+                        ingredientPublicId: i.ingredientPublicId,
+                        stockTakeQty: parseFloat(i.stockTakeQty as string || "0")
+                    }))
+                };
+
+                await updateStockTakeDraftItems(storePublicId, sheetPublicId, requestItems);
+                setStatus("SAVED");
+                alert("임시 저장이 완료되었습니다.");
+            }
         } catch (error) {
             console.error("저장 실패:", error);
             alert("저장에 실패했습니다.");
@@ -168,10 +201,11 @@ const StocktakePage: React.FC = () => {
 
     // 요약 정보 계산
     const summary = useMemo(() => {
-        const entered = items.filter(i => i.stocktakeQty !== "").length;
+        const entered = items.filter(i => (i.stockTakeQty !== "" && i.stockTakeQty !== undefined && i.stockTakeQty !== 0)).length;
         const totalVariance = items.reduce((acc, curr) => {
-            if (curr.stocktakeQty === "") return acc;
-            return acc + (parseFloat(curr.stocktakeQty as string) - curr.theoreticalQty);
+            const qty = parseFloat(curr.stockTakeQty as string || "0");
+            if (qty === 0 && (curr.stockTakeQty === "" || curr.stockTakeQty === undefined)) return acc;
+            return acc + (qty - curr.theoreticalQty);
         }, 0);
         return { entered, total: items.length, variance: totalVariance };
     }, [items]);
@@ -296,8 +330,9 @@ const StocktakePage: React.FC = () => {
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {filteredItems.length > 0 ? filteredItems.map((item) => {
-                                        const variance = item.stocktakeQty !== "" ? (parseFloat(item.stocktakeQty as string) - item.theoreticalQty) : 0;
-                                        const isDirty = item.stocktakeQty !== "";
+                                        const stockQty = parseFloat(item.stockTakeQty as string || "0");
+                                        const variance = (item.stockTakeQty !== "" && item.stockTakeQty !== undefined) ? (stockQty - item.theoreticalQty) : 0;
+                                        const isDirty = item.stockTakeQty !== "" && item.stockTakeQty !== undefined && item.stockTakeQty !== 0;
 
                                         return (
                                             <tr key={item.ingredientPublicId} className={`hover:bg-slate-50 transition-colors ${status === "CONFIRMED" ? "opacity-75" : ""}`}>
@@ -314,7 +349,7 @@ const StocktakePage: React.FC = () => {
                                                             type="number"
                                                             step="0.01"
                                                             disabled={status === "CONFIRMED"}
-                                                            value={item.stocktakeQty}
+                                                            value={item.stockTakeQty}
                                                             onChange={(e) => handleQtyChange(item.ingredientPublicId, e.target.value)}
                                                             className={`w-full p-2.5 text-center font-black rounded-lg border-2 transition-all outline-none ${isDirty
                                                                 ? "border-emerald-200 bg-emerald-50 text-emerald-900 focus:border-emerald-500"
@@ -326,7 +361,7 @@ const StocktakePage: React.FC = () => {
                                                 </td>
                                                 <td className={`px-6 py-4 text-right font-bold text-sm ${!isDirty ? "text-slate-300" : variance > 0 ? "text-blue-600" : variance < 0 ? "text-red-600" : "text-slate-400"
                                                     }`}>
-                                                    {isDirty ? (variance > 0 ? `+${variance.toFixed(2)}` : variance.toFixed(2)) : "0.00"}
+                                                    {isDirty || item.stockTakeQty === 0 ? (variance > 0 ? `+${variance.toFixed(2)}` : variance.toFixed(2)) : "0.00"}
                                                 </td>
                                                 <td className="px-6 py-4 text-center text-xs text-slate-400 font-bold">
                                                     {item.unit}
