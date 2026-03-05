@@ -1,7 +1,13 @@
 import apiClient from './client.ts';
 import type {
-  StockOrderDeductionRequest,
-  StockDeductionResponse,
+    Pagination,
+    StockOrderDeductionRequest,
+    StockDeductionResponse,
+    StockInboundResponse,
+    DisposalRequest,
+    DisposalResponse,
+    DisposalSearchCondition,
+    DisposalPageResponse,
 } from '@/types';
 
 /**
