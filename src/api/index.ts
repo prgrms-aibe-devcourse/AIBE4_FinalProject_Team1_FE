@@ -2,6 +2,7 @@ export * from './products.ts';
 export * from './auth.ts';
 export * from './ingredient.ts';
 export * from './stock.ts';
+export * from './stockTake.ts';
 export * from './user.ts';
 export * from './store.ts';
 export * from './storeMember.ts';

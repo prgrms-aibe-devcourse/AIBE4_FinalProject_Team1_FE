@@ -9,21 +9,3 @@ export interface StockDeductionResponse {
   message: string;
 }
 
-// --- Stocktake Types ---
-export type StocktakeStatus = 'DRAFT' | 'CONFIRMED';
-
-export interface StocktakeItemRequest {
-  ingredientId: number;
-  stocktakeQty: number;
-}
-
-export interface StocktakeCreateRequest {
-  title: string;
-  items: StocktakeItemRequest[];
-}
-
-export interface StocktakeSheetResponse {
-  sheetId: number;
-  title: string;
-  status: StocktakeStatus;
-}

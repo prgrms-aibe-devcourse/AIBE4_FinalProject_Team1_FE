@@ -4,6 +4,7 @@ export * from './store';
 export * from './invitation';
 export * from './ingredient';
 export * from './stock';
+export * from './stockTake';
 export * from './common';
 export * from './product';
 export * from './vendor';
