@@ -23,13 +23,13 @@ import type {
 } from '@/types';
 import { requireStorePublicId } from '@/utils/store';
 
-const INGREDIENT_UNITS: IngredientUnit[] = ["EA", "KG", "L"];
+const INGREDIENT_UNITS: IngredientUnit[] = ["EA", "G", "ML"];
 const INGREDIENT_STATUS: IngredientStatus[] = ["ACTIVE", "INACTIVE"];
 
 const UNIT_LABELS: Record<IngredientUnit, string> = {
     EA: "개(EA)",
-    KG: "kg",
-    L: "L"
+    G: "g",
+    ML: "ml"
 };
 
 const StatusBadge = ({ status }: { status: IngredientStatus }) => {

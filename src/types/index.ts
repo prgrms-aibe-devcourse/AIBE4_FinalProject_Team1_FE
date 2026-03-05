@@ -8,6 +8,10 @@ export * from './common';
 export * from './product';
 export * from './vendor';
 export * from './menu';
+export * from './diningTable';
+export * from './sales';
+export * from './tableQr';
+export * from './purchase';
 
 export * from "./ocr";
 export * from "./document";

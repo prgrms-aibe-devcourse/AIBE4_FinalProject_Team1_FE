@@ -6,7 +6,7 @@ import type {
 } from '../types';
 
 // Re-export types for convenience
-export type { MenuResponse, MenuStatus, Ingredient } from '../types';
+export type { MenuResponse, MenuStatus } from '../types';
 
 /**
  * 메뉴 목록 조회
