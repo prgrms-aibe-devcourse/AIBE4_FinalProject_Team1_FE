@@ -26,6 +26,7 @@ export interface Item {
 }
 
 export interface ReceiptResponse {
+    documentPath: string;
     vendor: VendorField;
     date: Field<string>;
     amount: Field<string>;

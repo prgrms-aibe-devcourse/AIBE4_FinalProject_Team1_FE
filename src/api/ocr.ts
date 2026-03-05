@@ -1,5 +1,6 @@
 import apiClient from "./client";
 import type {ReceiptResponse} from "@/types";
+import {requireStorePublicId} from "@/utils/store.ts";
 
 export const analyzeReceipt = async (
     file: File,
@@ -8,8 +9,7 @@ export const analyzeReceipt = async (
     const formData = new FormData();
     formData.append("files", file);
 
-    // localStorage에서 store_public_id를 가져옵니다.
-    const storePublicId = localStorage.getItem("store_public_id");
+    const storePublicId = requireStorePublicId();
 
     if (!storePublicId) {
         throw new Error("store_public_id not found in localStorage.");
