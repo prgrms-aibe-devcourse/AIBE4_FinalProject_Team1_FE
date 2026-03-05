@@ -268,7 +268,6 @@ export default function Navbar() {
       {
         title: "매출",
         items: [
-          { label: "매출 업로드", path: "/sales/upload" },
           { label: "매출 내역", path: "/sales/list" },
           { label: "매출 분석", path: "/analytics/sales" },
         ],
