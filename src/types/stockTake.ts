@@ -1,7 +1,7 @@
 export type StockTakeStatus = 'DRAFT' | 'CONFIRMED';
 
 export interface StockTakeItemRequest {
-    ingredientId: number;
+    ingredientPublicId: string;
     stockTakeQty: number;
 }
 
@@ -11,7 +11,7 @@ export interface StockTakeCreateRequest {
 }
 
 export interface StockTakeSheetResponse {
-    sheetId: number;
+    sheetPublicId: string;
     title: string;
     status: StockTakeStatus;
     createdAt: string;

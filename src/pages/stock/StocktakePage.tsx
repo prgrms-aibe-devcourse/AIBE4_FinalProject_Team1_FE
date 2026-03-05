@@ -10,6 +10,9 @@ import {
     ArrowLeftRight,
 } from 'lucide-react';
 import { requireStorePublicId } from '@/utils/store.ts';
+import { getIngredients } from '@/api/ingredient.ts';
+import { createStockTakeSheet, confirmStockTakeSheet } from '@/api/stockTake.ts';
+import type { StockTakeItemRequest } from '@/types/stockTake.ts';
 
 /**
  * 실사 재고 관리 메인 컴포넌트
@@ -19,37 +22,65 @@ const StocktakePage: React.FC = () => {
     // --- 상태 관리 ---
     const storePublicId = requireStorePublicId();
     const [title, setTitle] = useState(`${new Date().toLocaleDateString()} 정기 재고 실사`);
-    const [items, setItems] = useState([
-        { ingredientId: 101, name: "에스프레소 원두(A)", unit: "kg", theoreticalQty: 12.50, stocktakeQty: "" },
-        { ingredientId: 102, name: "멸균우유 (1L)", unit: "개", theoreticalQty: 48.00, stocktakeQty: "" },
-        { ingredientId: 103, name: "바닐라 시럽", unit: "병", theoreticalQty: 6.00, stocktakeQty: "" },
-        { ingredientId: 104, name: "초코 파우더", unit: "kg", theoreticalQty: 3.25, stocktakeQty: "" },
-        { ingredientId: 105, name: "종이컵 (12oz)", unit: "박스", theoreticalQty: 2.00, stocktakeQty: "" },
-    ]);
+    const [items, setItems] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false);
-    const [sheetId, setSheetId] = useState<number | null>(null);
+    const [sheetPublicId, setSheetPublicId] = useState<string | null>(null);
     const [status, setStatus] = useState("DRAFT"); // DRAFT, SAVED, CONFIRMED
 
-    // --- 로컬 저장소 자동 로드 ---
+    // --- 데이터 로드 ---
     useEffect(() => {
-        const savedData = localStorage.getItem(`stocktake_draft_${storePublicId}`);
-        if (savedData) {
-            const parsed = JSON.parse(savedData);
-            setTitle(parsed.title);
-            setItems(parsed.items);
-            if (parsed.sheetId) setSheetId(parsed.sheetId);
-        }
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                // 식재료 목록 조회
+                const ingredients = await getIngredients(storePublicId);
+
+                // 로컬 저장소 확인
+                const savedData = localStorage.getItem(`stocktake_draft_${storePublicId}`);
+                let savedItemsMap = new Map();
+
+                if (savedData) {
+                    const parsed = JSON.parse(savedData);
+                    setTitle(parsed.title);
+                    if (parsed.sheetPublicId) setSheetPublicId(parsed.sheetPublicId);
+                    if (parsed.items) {
+                        parsed.items.forEach((item: any) => {
+                            savedItemsMap.set(item.ingredientPublicId, item.stocktakeQty);
+                        });
+                    }
+                }
+
+                // API 데이터와 로컬 데이터 병합
+                const mergedItems = ingredients.map(ing => ({
+                    ingredientPublicId: ing.ingredientPublicId,
+                    name: ing.name,
+                    unit: ing.unit,
+                    theoreticalQty: 0, // 현재 API에서 제공되지 않음 (추후 보완)
+                    stocktakeQty: savedItemsMap.get(ing.ingredientPublicId) || ""
+                }));
+
+                setItems(mergedItems);
+            } catch (error) {
+                console.error("데이터 로드 실패:", error);
+                alert("재료 정보를 불러오는 데 실패했습니다.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
     }, [storePublicId]);
 
     // --- 데이터 변경 시 로컬 자동 저장 ---
     useEffect(() => {
-        if (status !== "CONFIRMED") {
-            const dataToSave = { title, items, sheetId };
+        if (status !== "CONFIRMED" && items.length > 0) {
+            const dataToSave = { title, items, sheetPublicId };
             localStorage.setItem(`stocktake_draft_${storePublicId}`, JSON.stringify(dataToSave));
         }
-    }, [title, items, sheetId, status, storePublicId]);
+    }, [title, items, sheetPublicId, status, storePublicId]);
 
     // --- 비즈니스 로직 ---
 
@@ -61,74 +92,79 @@ const StocktakePage: React.FC = () => {
     }, [items, searchTerm]);
 
     // 수량 입력 핸들러
-    const handleQtyChange = (ingredientId: number, value: string) => {
+    const handleQtyChange = (ingredientPublicId: string, value: string) => {
         if (status === "CONFIRMED") return;
         setItems(prev => prev.map(item =>
-            item.ingredientId === ingredientId ? { ...item, stocktakeQty: value } : item
+            item.ingredientPublicId === ingredientPublicId ? { ...item, stocktakeQty: value } : item
         ));
         setStatus("DRAFT");
     };
 
-    // [POST] 임시 저장 (createStocktakeSheet 연동)
+    // [POST] 임시 저장 (createStockTakeSheet 연동)
     const saveDraft = async () => {
+        if (items.filter(i => i.stocktakeQty !== "").length === 0) {
+            alert("실사 수량을 하나 이상 입력해주세요.");
+            return;
+        }
+
         setIsSaving(true);
         try {
-            // 백엔드 StocktakeDto.CreateRequest 구조와 매핑
+            const requestItems: StockTakeItemRequest[] = items
+                .filter(i => i.stocktakeQty !== "")
+                .map(i => ({
+                    ingredientPublicId: i.ingredientPublicId,
+                    stockTakeQty: parseFloat(i.stocktakeQty as string)
+                }));
+
             const requestBody = {
                 title: title,
-                items: items
-                    .filter(i => i.stocktakeQty !== "")
-                    .map(i => ({
-                        ingredientId: i.ingredientId,
-                        stocktakeQty: parseFloat(i.stocktakeQty as string)
-                    }))
+                items: requestItems
             };
 
-            console.log("Saving to API:", requestBody);
-
-            // 실제 API 호출 시뮬레이션
-            // const response = await fetch(`/api/stocktakes/${storePublicId}`, { ... });
-            // const newSheetId = await response.json();
-
-            setTimeout(() => {
-                const mockNewSheetId = sheetId || Math.floor(Math.random() * 10000);
-                setSheetId(mockNewSheetId);
-                setStatus("SAVED");
-                setIsSaving(false);
-            }, 800);
+            const newSheetId = await createStockTakeSheet(storePublicId, requestBody);
+            setSheetPublicId(newSheetId);
+            setStatus("SAVED");
+            alert("임시 저장이 완료되었습니다.");
         } catch (error) {
             console.error("저장 실패:", error);
+            alert("저장에 실패했습니다.");
+        } finally {
             setIsSaving(false);
         }
     };
 
-    // [POST] 전표 확정 (confirmSheet 연동)
+    // [POST] 전표 확정 (confirmStockTakeSheet 연동)
     const confirmStocktake = async () => {
-        if (!sheetId) {
-            alert("먼저 임시저장을 진행해 주세요.");
-            return;
+        let currentSheetId = sheetPublicId;
+
+        // 시트 ID가 없으면 먼저 저장 시도
+        if (!currentSheetId) {
+            if (window.confirm("확정 전 임시 저장이 필요합니다. 저장하시겠습니까?")) {
+                await saveDraft();
+                // saveDraft가 성공하면 state가 업데이트되지만, 클로저 문제로 인해 직접 가져오거나 로직 개선 필요
+                // 여기선 단순화를 위해 재확인 프로세스 사용
+                return;
+            } else {
+                return;
+            }
         }
 
         if (!window.confirm("재고 실사를 확정하시겠습니까? 확정 후에는 실제 재고량이 조정되며 수정할 수 없습니다.")) return;
 
         setIsConfirming(true);
         try {
-            console.log(`Confirming Sheet ID: ${sheetId} for Store: ${storePublicId}`);
-
-            // 실제 API 호출 시뮬레이션
-            // await fetch(`/api/stocktakes/${storePublicId}/${sheetId}/confirm`, { method: 'POST' });
-
-            setTimeout(() => {
-                setStatus("CONFIRMED");
-                setIsConfirming(false);
-                localStorage.removeItem(`stocktake_draft_${storePublicId}`);
-                alert("재고 실사가 성공적으로 확정되어 장부가 업데이트되었습니다.");
-            }, 1000);
+            await confirmStockTakeSheet(storePublicId, currentSheetId);
+            setStatus("CONFIRMED");
+            localStorage.removeItem(`stocktake_draft_${storePublicId}`);
+            alert("재고 실사가 성공적으로 확정되어 장부가 업데이트되었습니다.");
         } catch (error) {
             console.error("확정 실패:", error);
+            alert("확정 처리에 실패했습니다.");
+        } finally {
             setIsConfirming(false);
         }
     };
+
 
     // 요약 정보 계산
     const summary = useMemo(() => {
@@ -197,121 +233,130 @@ const StocktakePage: React.FC = () => {
             </header>
 
             <main className="max-w-6xl mx-auto mt-6 px-6">
-                {/* 요약 대시보드 */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <p className="text-xs text-slate-400 font-bold uppercase">진행률</p>
-                            <h3 className="text-2xl font-black text-slate-700">{summary.entered} / {summary.total}</h3>
-                        </div>
-                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
-                            <History size={20} />
-                        </div>
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-32 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
+                        <p className="text-slate-500 font-medium">재료 정보를 불러오는 중입니다...</p>
                     </div>
-                    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <p className="text-xs text-slate-400 font-bold uppercase">전체 차이 수량</p>
-                            <h3 className={`text-2xl font-black ${summary.variance >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                                {summary.variance > 0 ? `+${summary.variance.toFixed(2)}` : summary.variance.toFixed(2)}
-                            </h3>
+                ) : (
+                    <>
+                        {/* 요약 대시보드 */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-slate-400 font-bold uppercase">진행률</p>
+                                    <h3 className="text-2xl font-black text-slate-700">{summary.entered} / {summary.total}</h3>
+                                </div>
+                                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
+                                    <History size={20} />
+                                </div>
+                            </div>
+                            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs text-slate-400 font-bold uppercase">전체 차이 수량</p>
+                                    <h3 className={`text-2xl font-black ${summary.variance >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                                        {summary.variance > 0 ? `+${summary.variance.toFixed(2)}` : summary.variance.toFixed(2)}
+                                    </h3>
+                                </div>
+                                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
+                                    <ArrowLeftRight size={20} />
+                                </div>
+                            </div>
+                            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Search size={16} className="text-slate-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="식재료 검색..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full bg-transparent focus:outline-none text-sm text-slate-600"
+                                    />
+                                </div>
+                                <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-emerald-500 transition-all duration-500"
+                                        style={{ width: `${(summary.entered / summary.total) * 100}%` }}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
-                            <ArrowLeftRight size={20} />
-                        </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Search size={16} className="text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="식재료 검색..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-transparent focus:outline-none text-sm text-slate-600"
-                            />
-                        </div>
-                        <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-emerald-500 transition-all duration-500"
-                                style={{ width: `${(summary.entered / summary.total) * 100}%` }}
-                            />
-                        </div>
-                    </div>
-                </div>
 
-                {/* 메인 리스트 테이블 */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                                <th className="px-6 py-4">식재료 정보</th>
-                                <th className="px-6 py-4 text-right">전산 재고 (A)</th>
-                                <th className="px-6 py-4 text-center w-48">실사 수량 (B)</th>
-                                <th className="px-6 py-4 text-right">차이 (B-A)</th>
-                                <th className="px-6 py-4 text-center">단위</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {filteredItems.length > 0 ? filteredItems.map((item) => {
-                                const variance = item.stocktakeQty !== "" ? (parseFloat(item.stocktakeQty as string) - item.theoreticalQty) : 0;
-                                const isDirty = item.stocktakeQty !== "";
-
-                                return (
-                                    <tr key={item.ingredientId} className={`hover:bg-slate-50 transition-colors ${status === "CONFIRMED" ? "opacity-75" : ""}`}>
-                                        <td className="px-6 py-4">
-                                            <div className="font-bold text-slate-800">{item.name}</div>
-                                            <div className="text-xs text-slate-400">코드: {item.ingredientId}</div>
-                                        </td>
-                                        <td className="px-6 py-4 text-right font-medium text-slate-500">
-                                            {item.theoreticalQty.toFixed(2)}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="relative">
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    disabled={status === "CONFIRMED"}
-                                                    value={item.stocktakeQty}
-                                                    onChange={(e) => handleQtyChange(item.ingredientId, e.target.value)}
-                                                    className={`w-full p-2.5 text-center font-black rounded-lg border-2 transition-all outline-none ${isDirty
-                                                        ? "border-emerald-200 bg-emerald-50 text-emerald-900 focus:border-emerald-500"
-                                                        : "border-slate-200 bg-white focus:border-slate-400"
-                                                        } ${status === "CONFIRMED" ? "bg-slate-100 border-slate-100" : ""}`}
-                                                    placeholder="0.00"
-                                                />
-                                            </div>
-                                        </td>
-                                        <td className={`px-6 py-4 text-right font-bold text-sm ${!isDirty ? "text-slate-300" : variance > 0 ? "text-blue-600" : variance < 0 ? "text-red-600" : "text-slate-400"
-                                            }`}>
-                                            {isDirty ? (variance > 0 ? `+${variance.toFixed(2)}` : variance.toFixed(2)) : "0.00"}
-                                        </td>
-                                        <td className="px-6 py-4 text-center text-xs text-slate-400 font-bold">
-                                            {item.unit}
-                                        </td>
+                        {/* 메인 리스트 테이블 */}
+                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                                        <th className="px-6 py-4">식재료 정보</th>
+                                        <th className="px-6 py-4 text-right">전산 재고 (A)</th>
+                                        <th className="px-6 py-4 text-center w-48">실사 수량 (B)</th>
+                                        <th className="px-6 py-4 text-right">차이 (B-A)</th>
+                                        <th className="px-6 py-4 text-center">단위</th>
                                     </tr>
-                                );
-                            }) : (
-                                <tr>
-                                    <td colSpan={5} className="px-6 py-20 text-center text-slate-400 italic">
-                                        검색 결과와 일치하는 식재료가 없습니다.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {filteredItems.length > 0 ? filteredItems.map((item) => {
+                                        const variance = item.stocktakeQty !== "" ? (parseFloat(item.stocktakeQty as string) - item.theoreticalQty) : 0;
+                                        const isDirty = item.stocktakeQty !== "";
 
-                {/* 하단 안내사항 */}
-                <div className="mt-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between text-xs text-slate-400 font-medium">
-                    <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500"></span> 재고 부족 (손실)</span>
-                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500"></span> 재고 과잉 (조정)</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <AlertCircle size={14} />
-                        최종 확정 시 장부 재고가 실사 수량으로 강제 업데이트됩니다.
-                    </div>
-                </div>
+                                        return (
+                                            <tr key={item.ingredientPublicId} className={`hover:bg-slate-50 transition-colors ${status === "CONFIRMED" ? "opacity-75" : ""}`}>
+                                                <td className="px-6 py-4">
+                                                    <div className="font-bold text-slate-800">{item.name}</div>
+                                                    <div className="text-xs text-slate-400">코드: {item.ingredientPublicId}</div>
+                                                </td>
+                                                <td className="px-6 py-4 text-right font-medium text-slate-500">
+                                                    {item.theoreticalQty.toFixed(2)}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="relative">
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            disabled={status === "CONFIRMED"}
+                                                            value={item.stocktakeQty}
+                                                            onChange={(e) => handleQtyChange(item.ingredientPublicId, e.target.value)}
+                                                            className={`w-full p-2.5 text-center font-black rounded-lg border-2 transition-all outline-none ${isDirty
+                                                                ? "border-emerald-200 bg-emerald-50 text-emerald-900 focus:border-emerald-500"
+                                                                : "border-slate-200 bg-white focus:border-slate-400"
+                                                                } ${status === "CONFIRMED" ? "bg-slate-100 border-slate-100" : ""}`}
+                                                            placeholder="0.00"
+                                                        />
+                                                    </div>
+                                                </td>
+                                                <td className={`px-6 py-4 text-right font-bold text-sm ${!isDirty ? "text-slate-300" : variance > 0 ? "text-blue-600" : variance < 0 ? "text-red-600" : "text-slate-400"
+                                                    }`}>
+                                                    {isDirty ? (variance > 0 ? `+${variance.toFixed(2)}` : variance.toFixed(2)) : "0.00"}
+                                                </td>
+                                                <td className="px-6 py-4 text-center text-xs text-slate-400 font-bold">
+                                                    {item.unit}
+                                                </td>
+                                            </tr>
+                                        );
+                                    }) : (
+                                        <tr>
+                                            <td colSpan={5} className="px-6 py-20 text-center text-slate-400 italic">
+                                                검색 결과와 일치하는 식재료가 없습니다.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* 하단 안내사항 */}
+                        <div className="mt-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between text-xs text-slate-400 font-medium">
+                            <div className="flex items-center gap-4">
+                                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500"></span> 재고 부족 (손실)</span>
+                                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500"></span> 재고 과잉 (조정)</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <AlertCircle size={14} />
+                                최종 확정 시 장부 재고가 실사 수량으로 강제 업데이트됩니다.
+                            </div>
+                        </div>
+                    </>
+                )}
             </main>
 
             {/* 모바일 하단 플로팅 정보 바 */}
