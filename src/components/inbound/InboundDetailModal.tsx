@@ -133,10 +133,10 @@ export default function InboundDetailModal({
                                                         {item.quantity}
                                                     </td>
                                                     <td className="px-4 py-4 text-right text-gray-400">
-                                                        ₩{item.unitPrice?.toLocaleString() || 0}
+                                                        ₩{item.unitCost?.toLocaleString() || 0}
                                                     </td>
                                                     <td className="px-4 py-4 text-right font-bold text-gray-900">
-                                                        ₩{(item.quantity * item.unitPrice).toLocaleString()}
+                                                        ₩{(item.quantity * item.unitCost).toLocaleString()}
                                                     </td>
                                                     <td className="px-5 py-4 text-center">
                                                         {item.expirationDate ? (
@@ -162,7 +162,7 @@ export default function InboundDetailModal({
                                             </td>
                                             <td colSpan={2}
                                                 className="px-5 py-4 text-right font-black text-emerald-600 text-sm">
-                                                ₩{inbound.items.reduce((acc, curr) => acc + (curr.quantity * curr.unitPrice), 0).toLocaleString()}
+                                                ₩{inbound.items.reduce((acc, curr) => acc + (curr.quantity * curr.unitCost), 0).toLocaleString()}
                                             </td>
                                         </tr>
                                         </tfoot>
