@@ -11,5 +11,6 @@ export * from './menu';
 export * from './diningTable';
 export * from './sales';
 export * from './tableQr';
+export * from './purchase';
 
 export * from "./ocr"

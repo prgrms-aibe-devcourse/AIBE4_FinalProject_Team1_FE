@@ -318,8 +318,8 @@ export default function Navbar() {
       {
         title: "발주",
         items: [
-          { label: "발주 목록", path: "/orders" },
-          { label: "발주 등록", path: "/orders/create" },
+          { label: "발주 목록", path: "/purchase-orders" },
+          { label: "발주 등록", path: "/purchase-orders/new" },
         ],
       },
       {
