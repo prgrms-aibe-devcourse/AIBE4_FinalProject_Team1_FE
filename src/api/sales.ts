@@ -3,7 +3,7 @@
  */
 
 import apiClient from './client';
-import type { SalesOrderListResponse, SalesOrderResponse } from '@/types/sales';
+import type { SalesOrderListResponse, SalesOrderResponse } from '@/types/sales/sales.ts';
 
 /**
  * 매장 주문 목록 조회

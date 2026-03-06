@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { VendorResponse, VendorCreateRequest, VendorUpdateRequest, VendorStatus } from '@/types/vendor';
+import type { VendorResponse, VendorCreateRequest, VendorUpdateRequest, VendorStatus } from '@/types/reference/vendor.ts';
 
 /**
  * 거래처 목록 조회

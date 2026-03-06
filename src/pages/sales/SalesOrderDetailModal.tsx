@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { getSalesOrderDetail, refundSalesOrder } from '@/api/sales';
-import type { SalesOrderResponse, SalesOrderStatus } from '@/types/sales';
+import type { SalesOrderResponse, SalesOrderStatus } from '@/types/sales/sales.ts';
 
 interface SalesOrderDetailModalProps {
     storePublicId: string;

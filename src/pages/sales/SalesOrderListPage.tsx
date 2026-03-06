@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { getSalesOrders } from '@/api/sales';
 import { requireStorePublicId } from '@/utils/store';
-import type { SalesOrderResponse, SalesOrderStatus } from '@/types/sales';
+import type { SalesOrderResponse, SalesOrderStatus } from '@/types/sales/sales.ts';
 import SalesOrderDetailModal from './SalesOrderDetailModal';
 
 type VIEW = 'LIST' | 'DETAIL';

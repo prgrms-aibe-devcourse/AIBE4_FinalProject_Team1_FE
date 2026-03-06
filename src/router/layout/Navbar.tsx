@@ -249,7 +249,7 @@ export default function Navbar() {
         items: [
           { label: "재료 관리", path: "/stock/ingredients" },
           { label: "메뉴 관리", path: "/sales/menu" },
-          { label: "차감 기준", path: "/sales/deduction-rules" },
+          { label: "거래처 관리", path: "/vendors" },
         ],
       },
       {
@@ -326,13 +326,7 @@ export default function Navbar() {
           { label: "발주 목록", path: "/purchase-orders" },
           { label: "발주 등록", path: "/purchase-orders/new" },
         ],
-      },
-      {
-        title: "거래처",
-        items: [
-          { label: "거래처 관리", path: "/vendors" },
-        ],
-      },
+      }
     ],
     [],
   );
