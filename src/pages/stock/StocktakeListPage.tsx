@@ -49,8 +49,7 @@ const StockTakeListPage = () => {
     };
 
     const handleViewDetail = (sheetPublicId: string) => {
-        console.log("View detail for sheet:", sheetPublicId);
-        // navigate(`/stock/stocktakes/${sheetPublicId}`);
+        navigate(`/stock/stocktakes/${sheetPublicId}`);
     };
 
     const getStatusBadge = (status: string) => {

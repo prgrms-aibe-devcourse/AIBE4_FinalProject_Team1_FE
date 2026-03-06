@@ -95,6 +95,7 @@ export default function AppRouter() {
                         <Route path="/stock/" element={<StockPage />} />
                         <Route path="/stock/stocktakes" element={<StockTakeListPage />} />
                         <Route path="/stock/stocktakes/new" element={<StockTakePage />} />
+                        <Route path="/stock/stocktakes/:sheetPublicId" element={<StockTakePage />} />
                         <Route path="/stock/ingredients" element={<IngredientPage />} />
                         <Route path="/stock/inbound" element={<StockInboundPage />} />
                         <Route path="/stock/inbound/new" element={<StockInboundRegistrationPage />} />
