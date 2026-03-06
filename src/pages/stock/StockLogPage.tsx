@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import type { StockLogResponse, TransactionType, StockLogSearchCondition } from '@/types/stock/stockLog';
-import { getStockLogs } from '@/api/stock/stock.ts';
-import { requireStorePublicId } from "@/utils/store.ts";
+import React, {useState, useEffect, useCallback} from 'react';
+import type {StockLogResponse, TransactionType, StockLogSearchCondition} from '@/types/stock/stockLog';
+import {getStockLogs} from '@/api/stock/stock.ts';
+import {requireStorePublicId} from "@/utils/store.ts";
 
 const StockLogPage: React.FC = () => {
     const storePublicId = requireStorePublicId();
@@ -25,13 +25,13 @@ const StockLogPage: React.FC = () => {
     // --- [유형별 색상 및 아이콘 설정] ---
     const getTypeConfig = (type: TransactionType | undefined) => {
         // type이 없는 경우에 대한 기본값 처리
-        if (!type) return { label: '기타', icon: 'ph-question', bg: 'bg-gray-50', text: 'text-gray-600' };
+        if (!type) return {label: '기타', icon: 'ph-question', bg: 'bg-gray-50', text: 'text-gray-600'};
 
         const configs: Record<TransactionType, { label: string; icon: string; bg: string; text: string }> = {
-            INBOUND: { label: '입고', icon: 'ph-arrow-down-left', bg: 'bg-blue-50', text: 'text-blue-600' },
-            DEDUCTION: { label: '판매', icon: 'ph-shopping-cart', bg: 'bg-red-50', text: 'text-red-600' },
-            WASTE: { label: '폐기', icon: 'ph-trash', bg: 'bg-red-50', text: 'text-red-600' },
-            ADJUST: { label: '조정', icon: 'ph-scales', bg: 'bg-amber-50', text: 'text-amber-600' }
+            INBOUND: {label: '입고', icon: 'ph-arrow-down-left', bg: 'bg-blue-50', text: 'text-blue-600'},
+            DEDUCTION: {label: '판매', icon: 'ph-shopping-cart', bg: 'bg-red-50', text: 'text-red-600'},
+            WASTE: {label: '폐기', icon: 'ph-trash', bg: 'bg-red-50', text: 'text-red-600'},
+            ADJUST: {label: '조정', icon: 'ph-scales', bg: 'bg-amber-50', text: 'text-amber-600'}
         };
         return configs[type];
     };
@@ -116,10 +116,10 @@ const StockLogPage: React.FC = () => {
                             <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3">
                                 <i className="ph ph-calendar text-gray-400"></i>
                                 <input type="date" className="bg-transparent text-xs font-bold py-3 outline-none"
-                                    value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                                       value={startDate} onChange={(e) => setStartDate(e.target.value)}/>
                                 <span className="text-gray-300">~</span>
                                 <input type="date" className="bg-transparent text-xs font-bold py-3 outline-none"
-                                    value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                                       value={endDate} onChange={(e) => setEndDate(e.target.value)}/>
                             </div>
                             <select
                                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-bold outline-none cursor-pointer"
@@ -142,68 +142,68 @@ const StockLogPage: React.FC = () => {
                             <table className="w-full text-left text-xs border-collapse">
                                 <thead
                                     className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10 font-bold text-gray-500">
-                                    <tr>
-                                        <th className="px-6 py-4 w-44">날짜/시간</th>
-                                        <th className="px-6 py-4 w-32">유형</th>
-                                        <th className="px-6 py-4">품목 정보</th>
-                                        <th className="px-6 py-4 text-right">변동 수량</th>
-                                        <th className="px-6 py-4 text-right">최종 재고</th>
-                                        <th className="px-6 py-4">처리자</th>
-                                    </tr>
+                                <tr>
+                                    <th className="px-6 py-4 w-44">날짜/시간</th>
+                                    <th className="px-6 py-4 w-32">유형</th>
+                                    <th className="px-6 py-4">품목 정보</th>
+                                    <th className="px-6 py-4 text-right">변동 수량</th>
+                                    <th className="px-6 py-4 text-right">최종 재고</th>
+                                    <th className="px-6 py-4">처리자</th>
+                                </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {loading && currentPage === 0 ? (
-                                        <tr>
-                                            <td colSpan={6} className="text-center py-20 text-gray-400">데이터를 불러오는 중...</td>
-                                        </tr>
-                                    ) : stockHistory.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={6} className="text-center py-20 text-gray-400">조회된 내역이 없습니다.</td>
-                                        </tr>
-                                    ) : (
-                                        stockHistory.map((log, index) => {
-                                            const config = getTypeConfig(log.type);
-                                            const qtyColor = getQtyColorClass(log.type, log.changeQuantity);
-                                            return (
-                                                <tr key={index} className="hover:bg-gray-50 transition-colors">
-                                                    <td className="px-6 py-4 text-gray-400 font-medium">
-                                                        {log.createAt ? new Date(log.createAt).toLocaleString('ko-KR', {
-                                                            month: '2-digit',
-                                                            day: '2-digit',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        }) : '-'}
-                                                    </td>
-                                                    <td className="px-6 py-4">
+                                {loading && currentPage === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} className="text-center py-20 text-gray-400">데이터를 불러오는 중...</td>
+                                    </tr>
+                                ) : stockHistory.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} className="text-center py-20 text-gray-400">조회된 내역이 없습니다.</td>
+                                    </tr>
+                                ) : (
+                                    stockHistory.map((log, index) => {
+                                        const config = getTypeConfig(log.type);
+                                        const qtyColor = getQtyColorClass(log.type, log.changeQuantity);
+                                        return (
+                                            <tr key={index} className="hover:bg-gray-50 transition-colors">
+                                                <td className="px-6 py-4 text-gray-400 font-medium">
+                                                    {log.createAt ? new Date(log.createAt).toLocaleString('ko-KR', {
+                                                        month: '2-digit',
+                                                        day: '2-digit',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    }) : '-'}
+                                                </td>
+                                                <td className="px-6 py-4">
                                                         <span
                                                             className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black w-fit ${config.bg} ${config.text}`}>
                                                             <i className={`ph-bold ${config.icon}`}></i> {config.label}
                                                         </span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex flex-col">
-                                                            <span
-                                                                className="font-bold text-gray-800">{log.ingredientName}</span>
-                                                            <span
-                                                                className="text-[10px] text-gray-400">ID: {log.batchId || '-'}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className={`px-6 py-4 text-right font-black text-sm ${qtyColor}`}>
-                                                        {log.changeQuantity && log.changeQuantity > 0 ? `+${log.changeQuantity}` : log.changeQuantity} EA
-                                                    </td>
-                                                    <td className="px-6 py-4 text-right font-bold text-gray-800">{log.balanceAfter ?? 0} EA</td>
-                                                    <td className="px-6 py-4 flex items-center gap-2">
-                                                        <div
-                                                            className="w-6 h-6 bg-indigo-50 rounded-full flex items-center justify-center text-[10px] font-bold text-indigo-600 uppercase">
-                                                            {log.workerName?.substring(0, 1) || 'S'}
-                                                        </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-col">
                                                         <span
-                                                            className="font-medium text-gray-700">{log.workerName || '시스템'}</span>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })
-                                    )}
+                                                            className="font-bold text-gray-800">{log.ingredientName}</span>
+                                                        <span
+                                                            className="text-[10px] text-gray-400">ID: {log.batchId || '-'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className={`px-6 py-4 text-right font-black text-sm ${qtyColor}`}>
+                                                    {log.changeQuantity && log.changeQuantity > 0 ? `+${log.changeQuantity}` : log.changeQuantity} EA
+                                                </td>
+                                                <td className="px-6 py-4 text-right font-bold text-gray-800">{log.balanceAfter ?? 0} EA</td>
+                                                <td className="px-6 py-4 flex items-center gap-2">
+                                                    <div
+                                                        className="w-6 h-6 bg-indigo-50 rounded-full flex items-center justify-center text-[10px] font-bold text-indigo-600 uppercase">
+                                                        {log.workerName?.substring(0, 1) || 'S'}
+                                                    </div>
+                                                    <span
+                                                        className="font-medium text-gray-700">{log.workerName || '시스템'}</span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
                                 </tbody>
                             </table>
                         </div>
