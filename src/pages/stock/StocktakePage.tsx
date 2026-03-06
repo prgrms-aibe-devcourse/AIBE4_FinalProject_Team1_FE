@@ -29,8 +29,8 @@ type ViewStockTakeItem = {
     name: string;
     unit: string;
     stockTakeQty: number;
-    theoreticalQty: number;
-    varianceQty: number;
+    theoreticalQty: number | null;
+    varianceQty: number | null;
 };
 
 const StockTakePage: React.FC = () => {
@@ -45,6 +45,35 @@ const StockTakePage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
+    const [isDirty, setIsDirty] = useState<boolean>(false);
+
+    const mapDetailItemsToViewItems = (detailItems: any[] = []): ViewStockTakeItem[] => {
+        return detailItems.map((item: any) => ({
+            ingredientPublicId: item.ingredientPublicId,
+            name: item.ingredientName ?? '',
+            unit: item.unit ?? '',
+            stockTakeQty: Number(item.stockTakeQty ?? 0),
+            theoreticalQty:
+                item.theoreticalQty === null || item.theoreticalQty === undefined
+                    ? null
+                    : Number(item.theoreticalQty),
+            varianceQty:
+                item.varianceQty === null || item.varianceQty === undefined
+                    ? null
+                    : Number(item.varianceQty)
+        }));
+    };
+
+    const loadSheetDetail = async (targetSheetPublicId: string) => {
+        const detail = await getStockTakeSheetDetail(storePublicId, targetSheetPublicId);
+
+        setTitle(detail.title ?? `${new Date().toLocaleDateString()} 정기 재고 실사`);
+        setStatus(detail.status ?? 'DRAFT');
+        setItems(mapDetailItemsToViewItems(detail.items ?? []));
+        setIsDirty(false);
+
+        return detail;
+    };
 
     useEffect(() => {
         const initData = async () => {
@@ -52,21 +81,7 @@ const StockTakePage: React.FC = () => {
 
             try {
                 if (sheetPublicId) {
-                    const detail = await getStockTakeSheetDetail(storePublicId, sheetPublicId);
-
-                    setTitle(detail.title ?? `${new Date().toLocaleDateString()} 정기 재고 실사`);
-                    setStatus(detail.status ?? 'DRAFT');
-
-                    const mappedItems: ViewStockTakeItem[] = (detail.items ?? []).map((item: any) => ({
-                        ingredientPublicId: item.ingredientPublicId,
-                        name: item.ingredientName ?? '',
-                        unit: item.unit ?? '',
-                        stockTakeQty: item.stockTakeQty ?? 0,
-                        theoreticalQty: item.theoreticalQty ?? 0,
-                        varianceQty: item.varianceQty ?? 0
-                    }));
-
-                    setItems(mappedItems);
+                    await loadSheetDetail(sheetPublicId);
                 } else {
                     setStatus('DRAFT');
                     setTitle(`${new Date().toLocaleDateString()} 정기 재고 실사`);
@@ -77,12 +92,13 @@ const StockTakePage: React.FC = () => {
                         ingredientPublicId: ing.ingredientPublicId,
                         name: ing.name ?? '',
                         unit: ing.unit ?? '',
-                        theoreticalQty: 0,
                         stockTakeQty: 0,
-                        varianceQty: 0
+                        theoreticalQty: null,
+                        varianceQty: null
                     }));
 
                     setItems(initialItems);
+                    setIsDirty(false);
                 }
             } catch (error) {
                 console.error('데이터 로드 실패:', error);
@@ -98,16 +114,25 @@ const StockTakePage: React.FC = () => {
     const summary = useMemo(() => {
         const total = items.length;
         const entered = items.filter((i) => (i.stockTakeQty ?? 0) > 0).length;
+
         const variance = items.reduce((acc, curr) => {
+            if (curr.theoreticalQty === null || curr.theoreticalQty === undefined) {
+                return acc;
+            }
+
             const stockTakeQty = curr.stockTakeQty ?? 0;
-            const theoreticalQty = curr.theoreticalQty ?? 0;
-            return acc + (stockTakeQty - theoreticalQty);
+            return acc + (stockTakeQty - curr.theoreticalQty);
         }, 0);
+
+        const comparableCount = items.filter(
+            (i) => i.theoreticalQty !== null && i.theoreticalQty !== undefined
+        ).length;
 
         return {
             total,
             entered,
             variance,
+            comparableCount,
             progress: total > 0 ? (entered / total) * 100 : 0
         };
     }, [items]);
@@ -120,54 +145,84 @@ const StockTakePage: React.FC = () => {
     const handleQtyChange = (ingredientPublicId: string, value: string) => {
         if (status === 'CONFIRMED') return;
 
-        const numVal = value === '' ? 0 : parseFloat(value);
+        const parsed = value === '' ? 0 : parseFloat(value);
+        const safeQty = Number.isNaN(parsed) ? 0 : parsed;
 
         setItems((prev) =>
-            prev.map((item) =>
-                item.ingredientPublicId === ingredientPublicId
-                    ? {
-                        ...item,
-                        stockTakeQty: Number.isNaN(numVal) ? 0 : numVal,
-                        varianceQty: (Number.isNaN(numVal) ? 0 : numVal) - (item.theoreticalQty ?? 0)
-                    }
-                    : item
-            )
+            prev.map((item) => {
+                if (item.ingredientPublicId !== ingredientPublicId) {
+                    return item;
+                }
+
+                const nextVariance =
+                    item.theoreticalQty === null || item.theoreticalQty === undefined
+                        ? null
+                        : safeQty - item.theoreticalQty;
+
+                return {
+                    ...item,
+                    stockTakeQty: safeQty,
+                    varianceQty: nextVariance
+                };
+            })
         );
+
+        setIsDirty(true);
+        setStatus('DRAFT');
+    };
+
+    const saveDraft = async (): Promise<string> => {
+        if (!sheetPublicId) {
+            const requestItems: StockTakeItemRequest[] = items.map((i) => ({
+                ingredientPublicId: i.ingredientPublicId,
+                stockTakeQty: i.stockTakeQty
+            }));
+
+            const newSheetPublicId = await createStockTakeSheet(storePublicId, {
+                title,
+                items: requestItems
+            });
+
+            if (!newSheetPublicId) {
+                throw new Error('생성 응답에 sheetPublicId가 없습니다.');
+            }
+
+            await loadSheetDetail(newSheetPublicId);
+            setStatus('SAVED');
+            setIsDirty(false);
+
+            return newSheetPublicId;
+        }
+
+        const request: StockTakeItemsDraftUpdateRequest = {
+            items: items.map((i) => ({
+                ingredientPublicId: i.ingredientPublicId,
+                stockTakeQty: i.stockTakeQty
+            }))
+        };
+
+        await updateStockTakeDraftItems(storePublicId, sheetPublicId, request);
+        await loadSheetDetail(sheetPublicId);
+
+        setStatus('SAVED');
+        setIsDirty(false);
+
+        return sheetPublicId;
     };
 
     const handleSave = async () => {
         setIsProcessing(true);
 
         try {
+            const savedSheetPublicId = await saveDraft();
+
             if (!sheetPublicId) {
-                const requestItems: StockTakeItemRequest[] = items.map((i) => ({
-                    ingredientPublicId: i.ingredientPublicId,
-                    stockTakeQty: i.stockTakeQty
-                }));
-
-                const newSheetPublicId = await createStockTakeSheet(storePublicId, {
-                    title,
-                    items: requestItems
-                });
-
-                if (!newSheetPublicId) {
-                    throw new Error('생성 응답에 sheetPublicId가 없습니다.');
-                }
-
                 alert('전표가 성공적으로 생성되었습니다.');
-                navigate(`/stock/stocktakes/${newSheetPublicId}`, { replace: true });
-            } else {
-                const request: StockTakeItemsDraftUpdateRequest = {
-                    items: items.map((i) => ({
-                        ingredientPublicId: i.ingredientPublicId,
-                        stockTakeQty: i.stockTakeQty
-                    }))
-                };
-
-                await updateStockTakeDraftItems(storePublicId, sheetPublicId, request);
-                setStatus('SAVED');
-                alert('임시 저장이 완료되었습니다.');
+                navigate(`/stock/stocktakes/${savedSheetPublicId}`, { replace: true });
+                return;
             }
+
+            alert('임시 저장이 완료되었습니다.');
         } catch (e) {
             console.error('저장 오류:', e);
             alert('저장에 실패했습니다.');
@@ -177,11 +232,6 @@ const StockTakePage: React.FC = () => {
     };
 
     const handleConfirm = async () => {
-        if (!sheetPublicId) {
-            alert('확정 전 임시 저장이 필요합니다.');
-            return;
-        }
-
         if (
             !window.confirm(
                 '실사를 확정하시겠습니까? 확정 후에는 재고가 즉시 조정되며 수정할 수 없습니다.'
@@ -193,8 +243,17 @@ const StockTakePage: React.FC = () => {
         setIsProcessing(true);
 
         try {
-            await confirmStockTakeSheet(storePublicId, sheetPublicId);
+            let targetSheetPublicId = sheetPublicId;
+
+            if (!targetSheetPublicId || isDirty) {
+                targetSheetPublicId = await saveDraft();
+            }
+
+            await confirmStockTakeSheet(storePublicId, targetSheetPublicId as string);
+
             setStatus('CONFIRMED');
+            setIsDirty(false);
+
             alert('재고 실사가 성공적으로 확정되었습니다.');
             navigate('/stock/stocktakes');
         } catch (e) {
@@ -203,6 +262,42 @@ const StockTakePage: React.FC = () => {
         } finally {
             setIsProcessing(false);
         }
+    };
+
+    const renderTheoreticalQty = (item: ViewStockTakeItem) => {
+        if (item.theoreticalQty === null || item.theoreticalQty === undefined) {
+            return <span className="text-slate-300">생성 후 계산</span>;
+        }
+
+        return item.theoreticalQty.toFixed(2);
+    };
+
+    const renderVariance = (item: ViewStockTakeItem) => {
+        if (item.varianceQty === null || item.varianceQty === undefined) {
+            return <span className="text-slate-300">-</span>;
+        }
+
+        if (item.varianceQty > 0) {
+            return `+${item.varianceQty.toFixed(2)}`;
+        }
+
+        return item.varianceQty.toFixed(2);
+    };
+
+    const getVarianceTextColor = (item: ViewStockTakeItem) => {
+        if (item.varianceQty === null || item.varianceQty === undefined) {
+            return 'text-slate-300';
+        }
+
+        if (item.varianceQty > 0) {
+            return 'text-blue-500';
+        }
+
+        if (item.varianceQty < 0) {
+            return 'text-rose-500';
+        }
+
+        return 'text-slate-400';
     };
 
     return (
@@ -224,7 +319,13 @@ const StockTakePage: React.FC = () => {
                                 <input
                                     type="text"
                                     value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
+                                    onChange={(e) => {
+                                        setTitle(e.target.value);
+                                        if (status !== 'CONFIRMED') {
+                                            setIsDirty(true);
+                                            setStatus('DRAFT');
+                                        }
+                                    }}
                                     disabled={status === 'CONFIRMED'}
                                     className="text-lg font-bold text-slate-800 bg-transparent border-none outline-none focus:ring-2 focus:ring-emerald-200 rounded px-1 transition-all"
                                 />
@@ -317,10 +418,11 @@ const StockTakePage: React.FC = () => {
                                         1. 각 품목의 실제 수량을 입력하세요. 단위가 다른 품목은 개별 차이
                                         수량을 확인 바랍니다.
                                         <br />
-                                        2. 입력 즉시 해당 품목의 장부 재고와의 차이가 실시간으로 계산됩니다.
+                                        2. 저장 후 실사 시트에 장부 재고 기준값이 반영되며, 이후 차이 수량이
+                                        계산됩니다.
                                         <br />
-                                        3. 모든 품목 입력 후 상단의 &apos;최종확정&apos;을 눌러 조사를 완료해
-                                        주세요.
+                                        3. 최종확정 시 저장되지 않은 변경사항이 있으면 먼저 자동 저장한 뒤
+                                        확정됩니다.
                                     </p>
                                 </div>
 
@@ -380,9 +482,7 @@ const StockTakePage: React.FC = () => {
                                         {filteredItems.length > 0 ? (
                                             filteredItems.map((item) => {
                                                 const stockTakeQty = item.stockTakeQty ?? 0;
-                                                const theoreticalQty = item.theoreticalQty ?? 0;
-                                                const variance = stockTakeQty - theoreticalQty;
-                                                const isDirty = stockTakeQty > 0;
+                                                const isDirtyRow = stockTakeQty > 0;
 
                                                 return (
                                                     <tr
@@ -400,7 +500,7 @@ const StockTakePage: React.FC = () => {
                                                         </td>
 
                                                         <td className="px-6 py-4 text-right font-mono text-sm text-slate-500">
-                                                            {theoreticalQty.toFixed(2)}
+                                                            {renderTheoreticalQty(item)}
                                                         </td>
 
                                                         <td className="px-6 py-4">
@@ -415,7 +515,7 @@ const StockTakePage: React.FC = () => {
                                                                         e.target.value
                                                                     )
                                                                 }
-                                                                className={`w-full py-2 px-3 text-center font-black text-lg rounded-xl border-2 transition-all outline-none ${isDirty
+                                                                className={`w-full py-2 px-3 text-center font-black text-lg rounded-xl border-2 transition-all outline-none ${isDirtyRow
                                                                         ? 'border-blue-100 bg-blue-50 text-blue-700 focus:border-blue-400'
                                                                         : 'border-slate-100 bg-white focus:border-slate-300'
                                                                     } disabled:bg-slate-50 disabled:border-transparent`}
@@ -424,20 +524,11 @@ const StockTakePage: React.FC = () => {
                                                         </td>
 
                                                         <td
-                                                            className={`px-6 py-4 text-right font-mono font-bold text-sm ${!isDirty
-                                                                    ? 'text-slate-200'
-                                                                    : variance > 0
-                                                                        ? 'text-blue-500'
-                                                                        : variance < 0
-                                                                            ? 'text-rose-500'
-                                                                            : 'text-slate-400'
-                                                                }`}
+                                                            className={`px-6 py-4 text-right font-mono font-bold text-sm ${getVarianceTextColor(
+                                                                item
+                                                            )}`}
                                                         >
-                                                            {isDirty
-                                                                ? variance > 0
-                                                                    ? `+${variance.toFixed(2)}`
-                                                                    : variance.toFixed(2)
-                                                                : '0.00'}
+                                                            {renderVariance(item)}
                                                         </td>
 
                                                         <td className="px-6 py-4 text-center">
@@ -481,19 +572,26 @@ const StockTakePage: React.FC = () => {
                                         총 재고 차이
                                     </p>
                                     <p
-                                        className={`font-bold ${summary.variance >= 0 ? 'text-blue-500' : 'text-rose-500'
+                                        className={`font-bold ${summary.comparableCount === 0
+                                                ? 'text-slate-400'
+                                                : summary.variance >= 0
+                                                    ? 'text-blue-500'
+                                                    : 'text-rose-500'
                                             }`}
                                     >
-                                        {summary.variance > 0
-                                            ? `+${summary.variance.toFixed(2)}`
-                                            : summary.variance.toFixed(2)}
+                                        {summary.comparableCount === 0
+                                            ? '생성 후 계산'
+                                            : summary.variance > 0
+                                                ? `+${summary.variance.toFixed(2)}`
+                                                : summary.variance.toFixed(2)}
                                     </p>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
                                 <AlertCircle size={14} className="text-amber-500" />
-                                최종 확정 시 실제 장부 재고가 업데이트됩니다. 이 작업은 되돌릴 수 없습니다.
+                                최종 확정 시 저장되지 않은 변경사항은 먼저 반영되며, 이후 장부 재고가
+                                업데이트됩니다.
                             </div>
                         </div>
                     </>
