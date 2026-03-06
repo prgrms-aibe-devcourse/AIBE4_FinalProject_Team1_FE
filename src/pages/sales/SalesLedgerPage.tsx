@@ -3,13 +3,13 @@ import { requireStorePublicId } from '@/utils/store';
 import {
     getSalesLedgerOrderDetail,
     getSalesLedgerOrders,
-} from '@/api/salesLedger';
+} from '@/api';
 import type {
     SalesLedgerOrderDetailResponse,
     SalesLedgerOrderStatus,
     SalesLedgerOrderSummaryResponse,
     SalesLedgerOrderType,
-} from '@/types/salesLedger';
+} from '@/types/sales/salesLedger.ts';
 
 const KST_OFFSET = '+09:00';
 
@@ -70,8 +70,8 @@ function StatusBadge({ status }: { status: SalesLedgerOrderStatus }) {
 
     return (
         <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${color}`}>
-      {label}
-    </span>
+            {label}
+        </span>
     );
 }
 
@@ -180,11 +180,10 @@ export default function SalesLedgerPage() {
                                                     setSelectedDate(date);
                                                     setPage(0);
                                                 }}
-                                                className={`w-full rounded-xl px-3 py-2 text-left text-sm font-semibold transition-colors ${
-                                                    active
+                                                className={`w-full rounded-xl px-3 py-2 text-left text-sm font-semibold transition-colors ${active
                                                         ? 'bg-indigo-50 text-indigo-700'
                                                         : 'text-slate-700 hover:bg-slate-100'
-                                                }`}
+                                                    }`}
                                             >
                                                 {date.getDate()}일
                                             </button>
@@ -244,34 +243,34 @@ export default function SalesLedgerPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full border-collapse text-left">
                                 <thead>
-                                <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
-                                    <th className="px-3 py-3">주문번호</th>
-                                    <th className="px-3 py-3">상태</th>
-                                    <th className="px-3 py-3">유형</th>
-                                    <th className="px-3 py-3">주문시각</th>
-                                    <th className="px-3 py-3 text-right">순매출</th>
-                                </tr>
+                                    <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
+                                        <th className="px-3 py-3">주문번호</th>
+                                        <th className="px-3 py-3">상태</th>
+                                        <th className="px-3 py-3">유형</th>
+                                        <th className="px-3 py-3">주문시각</th>
+                                        <th className="px-3 py-3 text-right">순매출</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {isLoading ? (
-                                    <tr><td className="px-3 py-8 text-center text-sm text-slate-400" colSpan={5}>불러오는 중...</td></tr>
-                                ) : orders.length === 0 ? (
-                                    <tr><td className="px-3 py-8 text-center text-sm text-slate-400" colSpan={5}>조회 결과가 없습니다.</td></tr>
-                                ) : (
-                                    orders.map((order) => (
-                                        <tr
-                                            key={order.orderPublicId}
-                                            className="cursor-pointer border-b border-slate-100 hover:bg-slate-50"
-                                            onClick={() => handleOpenDetail(order.orderPublicId)}
-                                        >
-                                            <td className="px-3 py-3 text-sm font-semibold">#{order.orderPublicId.slice(0, 8)}</td>
-                                            <td className="px-3 py-3"><StatusBadge status={order.status} /></td>
-                                            <td className="px-3 py-3 text-sm">{order.type === 'DINE_IN' ? '매장 식사' : '포장'}</td>
-                                            <td className="px-3 py-3 text-sm">{formatDateTime(order.orderedAt)}</td>
-                                            <td className="px-3 py-3 text-right text-sm font-bold">{formatAmount(order.netAmount)}원</td>
-                                        </tr>
-                                    ))
-                                )}
+                                    {isLoading ? (
+                                        <tr><td className="px-3 py-8 text-center text-sm text-slate-400" colSpan={5}>불러오는 중...</td></tr>
+                                    ) : orders.length === 0 ? (
+                                        <tr><td className="px-3 py-8 text-center text-sm text-slate-400" colSpan={5}>조회 결과가 없습니다.</td></tr>
+                                    ) : (
+                                        orders.map((order) => (
+                                            <tr
+                                                key={order.orderPublicId}
+                                                className="cursor-pointer border-b border-slate-100 hover:bg-slate-50"
+                                                onClick={() => handleOpenDetail(order.orderPublicId)}
+                                            >
+                                                <td className="px-3 py-3 text-sm font-semibold">#{order.orderPublicId.slice(0, 8)}</td>
+                                                <td className="px-3 py-3"><StatusBadge status={order.status} /></td>
+                                                <td className="px-3 py-3 text-sm">{order.type === 'DINE_IN' ? '매장 식사' : '포장'}</td>
+                                                <td className="px-3 py-3 text-sm">{formatDateTime(order.orderedAt)}</td>
+                                                <td className="px-3 py-3 text-right text-sm font-bold">{formatAmount(order.netAmount)}원</td>
+                                            </tr>
+                                        ))
+                                    )}
                                 </tbody>
                             </table>
                         </div>

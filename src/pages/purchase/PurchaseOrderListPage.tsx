@@ -5,13 +5,13 @@ import {
     getPurchaseOrder,
     cancelPurchaseOrder,
     downloadPurchaseOrderPdf
-} from '@/api/purchase';
+} from '@/api/purchase/purchase.ts';
 import { requireStorePublicId } from '@/utils/store';
 import type {
     PurchaseOrderSummary,
     PurchaseOrderDetail,
     PurchaseOrderStatus
-} from '@/types/purchase';
+} from '@/types/purchase/purchase.ts';
 import { Plus, FileText, FileDown, XCircle, Edit, X } from 'lucide-react';
 
 function StatusBadge({ status }: { status: PurchaseOrderStatus }) {

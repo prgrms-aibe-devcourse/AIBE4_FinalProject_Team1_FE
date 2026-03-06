@@ -7,8 +7,8 @@ import {
     LayoutList
 } from 'lucide-react';
 import { requireStorePublicId } from '@/utils/store.ts';
-import { getStockTakeSheets } from '@/api/stockTake.ts';
-import type { StockTakeSheetResponse } from '@/types/stockTake.ts';
+import { getStockTakeSheets } from '@/api/stock/stockTake';
+import type { StockTakeSheetResponse } from '@/types/stock/stockTake';
 
 /**
  * 실사 재고 관리 시스템 리스트 컴포넌트

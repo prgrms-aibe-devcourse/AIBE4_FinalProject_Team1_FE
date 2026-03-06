@@ -10,18 +10,18 @@ import {
     ArrowLeftRight,
 } from 'lucide-react';
 import { requireStorePublicId } from '@/utils/store.ts';
-import { getIngredients } from '@/api/ingredient.ts';
+import { getIngredients } from '@/api/reference/ingredient.ts';
 import {
     createStockTakeSheet,
     confirmStockTakeSheet,
     getStockTakeSheetDetail,
     updateStockTakeDraftItems
-} from '@/api/stockTake.ts';
+} from '@/api/stock/stockTake';
 import type {
     StockTakeItemRequest,
     StockTakeItemsDraftUpdateRequest,
     StockTakeItemResponse
-} from '@/types/stockTake.ts';
+} from '@/types/stock/stockTake';
 
 /**
  * 실사 재고 관리 메인 컴포넌트

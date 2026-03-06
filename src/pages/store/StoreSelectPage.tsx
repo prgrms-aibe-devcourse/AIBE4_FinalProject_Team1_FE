@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMyStores, setDefaultStore } from '@/api/store';
+import { getMyStores, setDefaultStore } from '@/api/store/store.ts';
 import { setStorePublicId } from '@/utils/store';
 import type { MyStoreResponse } from '@/types';
 import { Store as StoreIcon, CheckCircle, Loader2 } from 'lucide-react';

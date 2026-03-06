@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createStore, setDefaultStore } from '@/api/store';
-import { acceptInvitation } from '@/api/invitation';
+import { createStore, setDefaultStore } from '@/api/store/store.ts';
+import { acceptInvitation } from '@/api/store/invitation.ts';
 import { setStorePublicId } from '@/utils/store';
 import { Store, Ticket, ArrowRight, Loader2 } from 'lucide-react';
 

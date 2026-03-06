@@ -4,11 +4,11 @@ import MainLayout from "./layout/MainLayout";
 import StoreGuard from "./layout/StoreGuard";
 
 // Auth
-import LoginPage from "../pages/auth/LoginPage";
-import OAuth2RedirectHandler from "../pages/auth/OAuth2RedirectHandler";
+import LoginPage from "../pages/user/LoginPage.tsx";
+import OAuth2RedirectHandler from "../pages/user/OAuth2RedirectHandler.tsx";
 
 // Dashboard
-import DashboardPage from "../pages/dashboard/DashboardPage";
+import DashboardPage from "../pages/sales/DashboardPage.tsx";
 
 // User
 import MyPage from "../pages/user/MyPage";
@@ -19,17 +19,17 @@ import OnboardingPage from "../pages/store/OnboardingPage";
 import StoreMemberPage from "../pages/store/StoreMemberPage";
 
 // Invitation
-import InviteLandingPage from "../pages/invitation/InviteLandingPage";
-import InvitationManagePage from "../pages/invitation/InvitationManagePage";
+import InviteLandingPage from "../pages/store/InviteLandingPage.tsx";
+import InvitationManagePage from "../pages/store/InvitationManagePage.tsx";
 
 // Inventory (Stock)
 import StocktakePage from "../pages/stock/StocktakePage";
 import StocktakeListPage from "../pages/stock/StocktakeListPage";
-import IngredientPage from "../pages/ingredient/IngredientPage";
-import MenuPage from "../pages/menu/MenuPage";
-import VendorPage from "../pages/vendor/VendorPage";
-import ReceivingPage from "../pages/stock/ReceivingPage";
-import ReceiveRegistrationPage from "../pages/stock/ReceiveRegistrationPage";
+import IngredientPage from "../pages/reference/IngredientPage.tsx";
+import MenuPage from "../pages/reference/MenuPage.tsx";
+import VendorPage from "../pages/reference/VendorPage.tsx";
+import StockInboundPage from "../pages/stock/StockInboundPage";
+import StockInboundRegistrationPage from "../pages/stock/StockInboundRegistrationPage";
 import StockDocumentsPage from "../pages/stock/StockDocumentsPage";
 import DisposalPage from "../pages/stock/DisposalPage";
 import StockPage from "../pages/stock/StockPage";
@@ -37,7 +37,7 @@ import StockLogPage from "../pages/stock/StockLogPage.tsx";
 import InboundDetailPage from "../pages/stock/InboundDetailPage.tsx";
 
 // Dining
-import DiningTablePage from "../pages/dining/diningTablePage";
+import DiningTablePage from "../pages/sales/diningTablePage";
 
 // Sales
 import SalesOrderListPage from "../pages/sales/SalesOrderListPage";
@@ -96,10 +96,10 @@ export default function AppRouter() {
                         <Route path="/stock/stocktakes" element={<StocktakeListPage />} />
                         <Route path="/stock/stocktakes/new" element={<StocktakePage />} />
                         <Route path="/stock/ingredients" element={<IngredientPage />} />
-                        <Route path="/stock/receiving" element={<ReceivingPage />} />
-                        <Route path="/stock/receiving/new" element={<ReceiveRegistrationPage />} />
-                        <Route path="/stock/receiving/documents" element={<StockDocumentsPage />} />
-                        <Route path="/stock/receiving/:inboundPublicId" element={<InboundDetailPage />} />
+                        <Route path="/stock/inbound" element={<StockInboundPage />} />
+                        <Route path="/stock/inbound/new" element={<StockInboundRegistrationPage />} />
+                        <Route path="/stock/inbound/documents" element={<StockDocumentsPage />} />
+                        <Route path="/stock/inbound/:inboundPublicId" element={<InboundDetailPage />} />
                         <Route path="/stock/disposal" element={<DisposalPage />} />
                         <Route path="/stock/log" element={<StockLogPage />} />
 
