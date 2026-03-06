@@ -8,7 +8,7 @@ export * from './store/storeMember.ts';
 export * from './store/invitation.ts';
 export * from './reference/vendor.ts';
 export * from './reference/menu.ts';
-export * from './sales/sales.ts';
+export * from './sales/salesOrder.ts';
 export * from './sales/salesLedger.ts';
 export * from './ocr/document.ts';
 export * from './ocr/ocr.ts';

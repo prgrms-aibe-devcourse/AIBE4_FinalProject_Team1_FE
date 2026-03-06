@@ -11,7 +11,7 @@ import type {
     DisposalSearchCondition,
     DisposalPageResponse,
 } from '@/types';
-import type {StockLogResponse, StockLogSearchCondition} from "@/types/stock/stockLog.ts";
+import type {StockLogResponse, StockLogSearchCondition} from "@/types/stock/stockLog";
 
 /**
  * 주문 재고 차감

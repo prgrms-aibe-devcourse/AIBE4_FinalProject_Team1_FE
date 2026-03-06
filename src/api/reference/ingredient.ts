@@ -3,10 +3,10 @@ import type {
   IngredientResponse,
   IngredientCreateRequest,
   IngredientUpdateRequest,
-} from '../../types';
+} from '@/types';
 
 // Re-export types for convenience
-export type { IngredientResponse, IngredientUnit, IngredientStatus } from '../../types';
+export type { IngredientResponse, IngredientUnit, IngredientStatus } from '@/types';
 
 /**
  * 식재료 생성

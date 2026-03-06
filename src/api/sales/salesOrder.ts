@@ -1,9 +1,5 @@
-/**
- * 주문(Sales Order) API
- */
-
 import apiClient from '../user/client.ts';
-import type { SalesOrderListResponse, SalesOrderResponse } from '@/types/sales';
+import type { SalesOrderListResponse, SalesOrderResponse } from '@/types/sales/salesOrder.ts';
 
 /**
  * 매장 주문 목록 조회
