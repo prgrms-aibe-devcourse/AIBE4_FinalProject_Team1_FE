@@ -9,7 +9,7 @@ import type {
     SalesLedgerOrderStatus,
     SalesLedgerOrderSummaryResponse,
     SalesLedgerOrderType,
-} from '@/types/salesLedger';
+} from '@/types/sales/salesLedger.ts';
 
 const KST_OFFSET = '+09:00';
 

@@ -6,7 +6,7 @@ import { getAccessToken } from '@/utils/auth';
 import { setStorePublicId } from '@/utils/store';
 import { CheckCircle, XCircle, Loader2, UserPlus } from 'lucide-react';
 import axios from 'axios';
-import type { ApiError } from '@/types/common';
+import type { ApiError } from '@/types/common/common.ts';
 
 type InviteStatus = 'loading' | 'success' | 'error';
 

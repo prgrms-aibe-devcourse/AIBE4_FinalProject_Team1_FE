@@ -1,5 +1,5 @@
 import client from './client';
-import type { TableQrIssueResponse, TableQrResponse } from '@/types/tableQr';
+import type { TableQrIssueResponse, TableQrResponse } from '@/types/sales/tableQr.ts';
 
 /**
  * 테이블 QR 발급

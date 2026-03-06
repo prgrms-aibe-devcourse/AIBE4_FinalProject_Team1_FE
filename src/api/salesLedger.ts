@@ -3,7 +3,7 @@ import type {
     SalesLedgerOrderDetailResponse,
     SalesLedgerOrderListResponse,
     SalesLedgerSearchParams,
-} from '@/types/salesLedger';
+} from '@/types/sales/salesLedger.ts';
 
 export const getSalesLedgerOrders = async (
     storePublicId: string,

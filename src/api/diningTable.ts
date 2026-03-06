@@ -1,10 +1,10 @@
 import client from './client';
-export * from '@/types/diningTable';
+export * from '@/types/sales/diningTable.ts';
 import type {
     DiningTableResponse,
     DiningTableCreateRequest,
     DiningTableUpdateRequest
-} from '@/types/diningTable';
+} from '@/types/sales/diningTable.ts';
 
 export const createTable = async (storePublicId: string, request: DiningTableCreateRequest): Promise<string> => {
     const response = await client.post<string>(`/api/tables/${storePublicId}`, request);

@@ -1,4 +1,4 @@
-import type { Pagination } from './common';
+import type { Pagination } from '@/types';
 
 export type SalesLedgerOrderStatus = 'COMPLETED' | 'REFUNDED';
 export type SalesLedgerOrderType = 'DINE_IN' | 'TAKEOUT';
