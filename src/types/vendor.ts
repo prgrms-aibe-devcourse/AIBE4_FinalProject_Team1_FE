@@ -11,6 +11,7 @@ export type VendorStatus = 'ACTIVE' | 'INACTIVE';
  * PATCH /api/vendors/{storePublicId}/{vendorPublicId}
  */
 export interface VendorResponse {
+    vendorId?: number;
     vendorPublicId: string;
     name: string;
     contactPerson: string | null;

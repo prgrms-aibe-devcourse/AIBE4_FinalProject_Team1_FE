@@ -11,6 +11,7 @@ export * from './vendor.ts';
 export * from './menu.ts';
 export * from './diningTable.ts';
 export * from './sales.ts';
+export * from './salesLedger.ts';
 export * from './tableQr.ts';
 export * from './purchase.ts';
 

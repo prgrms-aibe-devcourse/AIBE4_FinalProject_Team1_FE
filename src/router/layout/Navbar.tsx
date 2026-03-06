@@ -268,7 +268,6 @@ export default function Navbar() {
       {
         title: "매출",
         items: [
-          { label: "매출 업로드", path: "/sales/upload" },
           { label: "매출 내역", path: "/sales/list" },
           { label: "매출 분석", path: "/analytics/sales" },
         ],
@@ -277,27 +276,33 @@ export default function Navbar() {
     [],
   );
 
-  const inventorySections: MenuSection[] = useMemo(
-    () => [
-      {
-        title: "재고",
-        items: [
-          { label: "재고 현황", path: "/stock" },
-          { label: "실사 재고 관리", path: "/stock/stocktakes" },
-          { label: "폐기 관리", path: "/stock/disposal" },
+    const inventorySections: MenuSection[] = useMemo(
+        () => [
+            {
+                title: "재고",
+                items: [
+                    {label: "재고 현황", path: "/stock"},
+                    {label: "실사 재고 관리", path: "/stock/stocktakes"},
+                    {label: "폐기 관리", path: "/stock/disposal"},
+                ],
+            },
+            {
+                title: "입고",
+                items: [
+                    {label: "입고 목록", path: "/stock/receiving"},
+                    {label: "입고 등록", path: "/stock/receiving/new"},
+                    {label: "증빙 보관함", path: "/stock/receiving/documents"},
+                ],
+            },
+            {
+                title: "이력",
+                items: [
+                    {label: "이력 현황", path: "/stock/log"},
+                ],
+            },
         ],
-      },
-      {
-        title: "입고",
-        items: [
-          { label: "입고 목록", path: "/stock/receiving" },
-          { label: "입고 등록", path: "/stock/receiving/new" },
-          { label: "증빙 보관함", path: "/stock/receiving/documents" },
-        ],
-      },
-    ],
-    [],
-  );
+        [],
+    );
 
   const ordersSections: MenuSection[] = useMemo(
     () => [
