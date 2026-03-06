@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { createPurchaseOrder } from '@/api/purchase/purchase.ts';
 import { getVendors } from '@/api/reference/vendor.ts';
 import { requireStorePublicId } from '@/utils/store';
-import type { PurchaseOrderItemRequest } from '@/types/purchase';
-import type { VendorResponse } from '@/types/vendor';
+import type { PurchaseOrderItemRequest } from '@/types/purchase/purchase.ts';
+import type { VendorResponse } from '@/types/reference/vendor.ts';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 
 export default function PurchaseOrderCreatePage() {
