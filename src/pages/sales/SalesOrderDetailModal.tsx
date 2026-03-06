@@ -3,8 +3,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { getSalesOrderDetail, refundSalesOrder } from '@/api/sales';
-import type { SalesOrderResponse, SalesOrderStatus } from '@/types/sales/sales.ts';
+import { getSalesOrderDetail, refundSalesOrder } from '@/api';
+import type { SalesOrderResponse, SalesOrderStatus } from '@/types/sales';
 
 interface SalesOrderDetailModalProps {
     storePublicId: string;
@@ -31,8 +31,8 @@ function StatusBadge({ status }: { status: SalesOrderStatus }) {
         <span
             className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status]}`}
         >
-      {labels[status]}
-    </span>
+            {labels[status]}
+        </span>
     );
 }
 
@@ -57,11 +57,11 @@ function formatAmount(amount: number): string {
 }
 
 export default function SalesOrderDetailModal({
-                                                  storePublicId,
-                                                  orderPublicId,
-                                                  onClose,
-                                                  onRefunded,
-                                              }: SalesOrderDetailModalProps) {
+    storePublicId,
+    orderPublicId,
+    onClose,
+    onRefunded,
+}: SalesOrderDetailModalProps) {
     const [order, setOrder] = useState<SalesOrderResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isRefunding, setIsRefunding] = useState(false);
@@ -226,46 +226,46 @@ export default function SalesOrderDetailModal({
                                 <div className="rounded-2xl border border-slate-200 overflow-hidden">
                                     <table className="w-full text-left border-collapse">
                                         <thead className="bg-slate-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-sm font-bold text-slate-500 uppercase">
-                                                메뉴
-                                            </th>
-                                            <th className="px-6 py-3 text-sm font-bold text-slate-500 uppercase text-right">
-                                                단가
-                                            </th>
-                                            <th className="px-6 py-3 text-sm font-bold text-slate-500 uppercase text-center">
-                                                수량
-                                            </th>
-                                            <th className="px-6 py-3 text-sm font-bold text-slate-500 uppercase text-right">
-                                                합계
-                                            </th>
-                                        </tr>
+                                            <tr>
+                                                <th className="px-6 py-3 text-sm font-bold text-slate-500 uppercase">
+                                                    메뉴
+                                                </th>
+                                                <th className="px-6 py-3 text-sm font-bold text-slate-500 uppercase text-right">
+                                                    단가
+                                                </th>
+                                                <th className="px-6 py-3 text-sm font-bold text-slate-500 uppercase text-center">
+                                                    수량
+                                                </th>
+                                                <th className="px-6 py-3 text-sm font-bold text-slate-500 uppercase text-right">
+                                                    합계
+                                                </th>
+                                            </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
-                                        {order.items.map((item, index) => (
-                                            <tr key={index} className="hover:bg-slate-50">
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm font-semibold text-slate-900">
-                                                        {item.menuName}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="text-sm text-slate-600">
-                                                        {formatAmount(item.price)}원
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <div className="text-sm font-medium text-slate-900">
-                                                        {item.quantity}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="text-sm font-bold text-slate-900">
-                                                        {formatAmount(item.subtotal)}원
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                            {order.items.map((item, index) => (
+                                                <tr key={index} className="hover:bg-slate-50">
+                                                    <td className="px-6 py-4">
+                                                        <div className="text-sm font-semibold text-slate-900">
+                                                            {item.menuName}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="text-sm text-slate-600">
+                                                            {formatAmount(item.price)}원
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <div className="text-sm font-medium text-slate-900">
+                                                            {item.quantity}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="text-sm font-bold text-slate-900">
+                                                            {formatAmount(item.subtotal)}원
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
                                         </tbody>
                                     </table>
                                 </div>

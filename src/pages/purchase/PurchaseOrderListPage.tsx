@@ -5,7 +5,7 @@ import {
     getPurchaseOrder,
     cancelPurchaseOrder,
     downloadPurchaseOrderPdf
-} from '@/api/purchase';
+} from '@/api/purchase/purchase.ts';
 import { requireStorePublicId } from '@/utils/store';
 import type {
     PurchaseOrderSummary,

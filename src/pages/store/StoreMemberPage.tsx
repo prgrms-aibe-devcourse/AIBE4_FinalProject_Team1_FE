@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Search, Users, Trash2, Loader2 } from 'lucide-react';
-import { getStoreMembers, updateMemberStatus } from '@/api/storeMember';
+import { getStoreMembers, updateMemberStatus } from '@/api/store/storeMember.ts';
 import { requireStorePublicId } from '@/utils/store';
 import type { StoreMemberResponse, StoreMemberRole } from '@/types';
 

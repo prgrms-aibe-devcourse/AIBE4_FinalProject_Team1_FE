@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getUserProfile } from '@/api/user';
-import { getMyStores } from '@/api/store';
+import { getUserProfile } from '@/api/user/user.ts';
+import { getMyStores } from '@/api/store/store.ts';
 import type { UserProfileResponse, MyStoreResponse } from '@/types';
 import { User, Mail, Store as StoreIcon } from 'lucide-react';
 

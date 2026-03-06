@@ -8,14 +8,14 @@ import {
     bulkConfirmIngredients,
     normalizeAllProductNames,
     confirmInboundFinal,
-} from '@/api/inboundApi';
+} from '@/api/stock/inbound.ts';
 import type {
     StockInboundResponse,
     StockInboundItemResponse,
     BulkResolveResponse,
     Candidate,
 } from '@/types';
-import IngredientCandidatesModal from '@/components/inbound/IngredientCandidatesModal';
+import IngredientCandidatesModal from '@/components/stock/IngredientCandidatesModal';
 
 // ── Toast state type ────────────────────────────────────────────────────────
 type ToastType = 'success' | 'error' | 'info';
@@ -285,7 +285,7 @@ export default function InboundDetailPage() {
                     {/* Left: title & breadcrumb */}
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => navigate('/stock/receiving')}
+                            onClick={() => navigate('/stock/inbound')}
                             className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors text-sm"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">

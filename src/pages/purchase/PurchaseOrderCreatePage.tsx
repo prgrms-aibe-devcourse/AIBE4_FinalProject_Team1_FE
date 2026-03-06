@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createPurchaseOrder } from '@/api/purchase';
-import { getVendors } from '@/api/vendor';
+import { createPurchaseOrder } from '@/api/purchase/purchase.ts';
+import { getVendors } from '@/api/reference/vendor.ts';
 import { requireStorePublicId } from '@/utils/store';
 import type { PurchaseOrderItemRequest } from '@/types/purchase/purchase.ts';
 import type { VendorResponse } from '@/types/reference/vendor.ts';

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
-import { getMyStores } from '@/api/store';
+import { getMyStores } from '@/api/store/store.ts';
 import { getStorePublicId, setStorePublicId } from '@/utils/store';
 import { getAccessToken } from '@/utils/auth';
 import type { MyStoreResponse } from '@/types';
