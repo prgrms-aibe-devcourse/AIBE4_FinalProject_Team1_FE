@@ -34,8 +34,8 @@ export async function getStockTakeSheetDetail(
 export async function createStockTakeSheet(
     storePublicId: string,
     request: StockTakeCreateRequest
-): Promise<number> {
-    const response = await apiClient.post<number>(`/api/stocktakes/${storePublicId}`, request);
+): Promise<string> {
+    const response = await apiClient.post<string>(`/api/stocktakes/${storePublicId}`, request);
     return response.data;
 }
 
