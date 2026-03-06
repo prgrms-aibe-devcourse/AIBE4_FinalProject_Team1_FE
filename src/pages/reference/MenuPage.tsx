@@ -193,13 +193,9 @@ const MenuPage: React.FC = () => {
                 ingredientPublicId: r.ingredientPublicId,
                 qty: r.qty,
                 unit: r.unit,
-                // 표시/디버깅 편의로 name도 같이 저장(선택)
                 name: r.name,
             }));
 
-        // ⚠️ 백엔드 MenuCreateRequest에 status가 없다는 전제(네가 보여준 코드 기준)
-        // - CREATE/UPDATE 둘 다 status를 보내지 않음
-        // - 만약 update에서 status를 받고 싶으면 아래 payloadUpdate에 status 추가해주면 됨.
         const payloadCreate = {
             name: formData.name,
             basePrice: Number(formData.basePrice),
@@ -209,7 +205,7 @@ const MenuPage: React.FC = () => {
         const payloadUpdate = {
             name: formData.name,
             basePrice: Number(formData.basePrice),
-            // status: formData.status, // 백엔드가 받으면 주석 해제
+            status: formData.status,
             ingredientsJson,
         };
 
@@ -458,8 +454,8 @@ const MenuPage: React.FC = () => {
                                                     type="button"
                                                     onClick={() => setFormData({ ...formData, status: s })}
                                                     className={`flex-1 py-4 rounded-2xl font-black text-sm border-2 transition-all ${formData.status === s
-                                                            ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-lg shadow-emerald-50'
-                                                            : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                                                        ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-lg shadow-emerald-50'
+                                                        : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
                                                         }`}
                                                 >
                                                     {s === 'ACTIVE' ? '현재 판매 중' : '판매 일시 중지'}
