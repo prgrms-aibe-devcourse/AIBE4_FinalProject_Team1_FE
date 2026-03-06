@@ -13,7 +13,7 @@ import type { StockTakeSheetResponse } from '@/types/stock/stockTake';
 /**
  * 실사 재고 관리 시스템 리스트 컴포넌트
  */
-const StocktakeListPage = () => {
+const StockTakeListPage = () => {
     const navigate = useNavigate();
 
     // --- 데이터 상태 ---
@@ -187,4 +187,4 @@ const StocktakeListPage = () => {
     );
 };
 
-export default StocktakeListPage;
+export default StockTakeListPage;

@@ -26,7 +26,7 @@ import type {
 /**
  * 실사 재고 관리 메인 컴포넌트
  */
-const StocktakePage: React.FC = () => {
+const StockTakePage: React.FC = () => {
     const navigate = useNavigate();
     const { sheetId: urlSheetId } = useParams<{ sheetId: string }>();
     // --- 상태 관리 ---
@@ -412,4 +412,4 @@ const StocktakePage: React.FC = () => {
     );
 };
 
-export default StocktakePage;
+export default StockTakePage;
