@@ -311,7 +311,6 @@ export default function Navbar() {
         items: [
           { label: "주문 현황", path: "/orders" },
           { label: "테이블 관리", path: "/orders/tables" },
-          { label: "QR 관리", path: "/orders/qrs" },
         ],
       },
     ],

@@ -9,25 +9,6 @@ export interface StockDeductionResponse {
     message: string;
 }
 
-// ── Stocktake ────────────────────────────────────────────────────────────────
-export type StocktakeStatus = 'DRAFT' | 'CONFIRMED';
-
-export interface StocktakeItemRequest {
-    ingredientId: number;
-    stocktakeQty: number;
-}
-
-export interface StocktakeCreateRequest {
-    title: string;
-    items: StocktakeItemRequest[];
-}
-
-export interface StocktakeSheetResponse {
-    sheetId: number;
-    title: string;
-    status: StocktakeStatus;
-}
-
 // ── Inbound ──────────────────────────────────────────────────────────────────
 export type InboundStatus = 'DRAFT' | 'CONFIRMED' | 'CANCELLED';
 

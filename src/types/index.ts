@@ -4,6 +4,7 @@ export * from './store/store.ts';
 export * from './store/invitation.ts';
 export * from './reference/ingredient.ts';
 export * from './stock/stock.ts';
+export * from './stock/stockTake.ts';
 export * from './common/common.ts';
 export * from './stock/product.ts';
 export * from './reference/vendor.ts';
