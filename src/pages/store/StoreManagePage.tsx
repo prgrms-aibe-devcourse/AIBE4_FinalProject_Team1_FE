@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { createStore, getMyStores, setDefaultStore } from '@/api/store';
-import { acceptInvitation } from '@/api/invitation';
+import { createStore, getMyStores, setDefaultStore } from '@/api/store/store.ts';
+import { acceptInvitation } from '@/api/store/invitation.ts';
 import type { MyStoreResponse, StoreManageTabType } from '@/types';
 import { Store as StoreIcon, Star, Loader2 } from 'lucide-react';
 

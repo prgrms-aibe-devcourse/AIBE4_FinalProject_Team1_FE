@@ -6,7 +6,7 @@ import type {
     DisposalReason,
     DisposalRequest
 } from "@/types/disposal";
-import {getWasteRecords, recordWaste} from "@/api/stock";
+import {getWasteRecords, recordWaste} from "@/api/stock/stock.ts";
 import type {DisposalPageResponse} from "@/types";
 import {requireStorePublicId} from "@/utils/store.ts";
 
