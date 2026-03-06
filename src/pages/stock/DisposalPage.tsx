@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import type {
     DisposalItem,
     DisposalResponse,
@@ -6,16 +6,16 @@ import type {
     DisposalReason,
     DisposalRequest
 } from "@/types/stock/disposal";
-import { getWasteRecords, recordWaste } from "@/api/stock/stock.ts";
-import type { DisposalPageResponse } from "@/types";
-import { requireStorePublicId } from "@/utils/store.ts";
+import {getWasteRecords, recordWaste} from "@/api/stock/stock.ts";
+import type {DisposalPageResponse} from "@/types";
+import {requireStorePublicId} from "@/utils/store.ts";
 
 // UI 표시용 사유 매핑
 const REASON_MAP: Record<DisposalReason, { label: string; color: string }> = {
-    EXPIRED: { label: "유통기한 경과", color: "red" },
-    SPOILED: { label: "부패 및 변질", color: "orange" },
-    DAMAGED: { label: "포장 파손", color: "gray" },
-    OTHER: { label: "기타 사유", color: "gray" },
+    EXPIRED: {label: "유통기한 경과", color: "red"},
+    SPOILED: {label: "부패 및 변질", color: "orange"},
+    DAMAGED: {label: "포장 파손", color: "gray"},
+    OTHER: {label: "기타 사유", color: "gray"},
 };
 
 export default function DisposalPage() {
@@ -37,7 +37,7 @@ export default function DisposalPage() {
     // 다이나믹 폼 상태 (UI용 ingredientName 필드 추가)
     type FormItem = DisposalItem & { ingredientName?: string };
     const [items, setItems] = useState<FormItem[]>([
-        { stockBatchId: "", quantity: 0, reason: "EXPIRED", wasteDate: new Date().toISOString(), ingredientName: "" },
+        {stockBatchId: "", quantity: 0, reason: "EXPIRED", wasteDate: new Date().toISOString(), ingredientName: ""},
     ]);
 
     // --- [데이터 통신] ---
@@ -60,7 +60,7 @@ export default function DisposalPage() {
     // --- [핸들러 함수] ---
     const handleSearchChange = (field: keyof DisposalSearchCondition, value: any) => {
         setPage(0);
-        setCondition(prev => ({ ...prev, [field]: value }));
+        setCondition(prev => ({...prev, [field]: value}));
     };
 
     const addItem = () => {
@@ -80,7 +80,7 @@ export default function DisposalPage() {
 
     const updateItem = (index: number, field: keyof FormItem, value: any) => {
         const newItems = [...items];
-        newItems[index] = { ...newItems[index], [field]: value };
+        newItems[index] = {...newItems[index], [field]: value};
         setItems(newItems);
     };
 
@@ -103,7 +103,7 @@ export default function DisposalPage() {
 
         // 💡 DisposalRequest 타입에 맞춰 불필요한 필드 제거 후 전송
         const request: DisposalRequest = {
-            items: items.map(({ ingredientName, ...rest }) => rest)
+            items: items.map(({ingredientName, ...rest}) => rest)
         };
 
         try {
@@ -166,33 +166,33 @@ export default function DisposalPage() {
             <div className="bg-white border border-gray-200 rounded-3xl shadow-sm overflow-hidden">
                 <table className="w-full text-left text-xs">
                     <thead className="bg-gray-50 border-b border-gray-100 font-bold text-gray-400">
-                        <tr>
-                            <th className="px-6 py-4">처리일자</th>
-                            <th className="px-6 py-4">품목명</th>
-                            <th className="px-6 py-4 text-right">수량</th>
-                            <th className="px-6 py-4 text-right">손실액</th>
-                            <th className="px-6 py-4 text-center">사유</th>
-                        </tr>
+                    <tr>
+                        <th className="px-6 py-4">처리일자</th>
+                        <th className="px-6 py-4">품목명</th>
+                        <th className="px-6 py-4 text-right">수량</th>
+                        <th className="px-6 py-4 text-right">손실액</th>
+                        <th className="px-6 py-4 text-center">사유</th>
+                    </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                        {loading ? (
-                            <tr>
-                                <td colSpan={5} className="text-center py-20 text-gray-400 font-bold">로딩 중...</td>
-                            </tr>
-                        ) : data?.content.map((item) => (
-                            <tr key={item.wastePublicId} className="hover:bg-gray-50/50 transition-colors">
-                                <td className="px-6 py-5">{new Date(item.wasteAt).toLocaleDateString()}</td>
-                                <td className="px-6 py-5 font-black text-gray-800">{item.ingredientName}</td>
-                                <td className="px-6 py-5 text-right font-bold">{item.quantity} EA</td>
-                                <td className="px-6 py-5 text-right font-black text-red-500">₩{item.amount.toLocaleString()}</td>
-                                <td className="px-6 py-5 text-center">
-                                    <span
-                                        className={`px-2 py-1 rounded text-[10px] font-black ${item.reason === 'EXPIRED' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
-                                        {REASON_MAP[item.reason]?.label}
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
+                    {loading ? (
+                        <tr>
+                            <td colSpan={5} className="text-center py-20 text-gray-400 font-bold">로딩 중...</td>
+                        </tr>
+                    ) : data?.content.map((item) => (
+                        <tr key={item.wastePublicId} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-5">{new Date(item.wasteAt).toLocaleDateString()}</td>
+                            <td className="px-6 py-5 font-black text-gray-800">{item.ingredientName}</td>
+                            <td className="px-6 py-5 text-right font-bold">{item.quantity} EA</td>
+                            <td className="px-6 py-5 text-right font-black text-red-500">₩{item.amount.toLocaleString()}</td>
+                            <td className="px-6 py-5 text-center">
+                  <span
+                      className={`px-2 py-1 rounded text-[10px] font-black ${item.reason === 'EXPIRED' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
+                    {REASON_MAP[item.reason]?.label}
+                  </span>
+                            </td>
+                        </tr>
+                    ))}
                     </tbody>
                 </table>
                 {/* 페이지네이션 생략 (이전 코드와 동일) */}
@@ -201,7 +201,7 @@ export default function DisposalPage() {
             {/* 4. [메인 모달] 폐기 등록 슬라이드 */}
             {isMainModalOpen && (
                 <>
-                    <div className="fixed inset-0 bg-black/50 z-[100]" onClick={() => setIsMainModalOpen(false)} />
+                    <div className="fixed inset-0 bg-black/50 z-[100]" onClick={() => setIsMainModalOpen(false)}/>
                     <div
                         className="fixed top-0 right-0 h-full w-[500px] bg-white z-[110] shadow-2xl flex flex-col transition-transform">
                         <div className="p-6 border-b flex justify-between items-center bg-gray-50">
@@ -213,10 +213,10 @@ export default function DisposalPage() {
                         <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/30">
                             {items.map((item, index) => (
                                 <div key={index}
-                                    className="p-5 bg-white border border-gray-200 rounded-2xl shadow-sm relative space-y-4">
+                                     className="p-5 bg-white border border-gray-200 rounded-2xl shadow-sm relative space-y-4">
                                     <button onClick={() => removeItem(index)}
-                                        className="absolute top-4 right-4 text-gray-300 hover:text-red-500"><i
-                                            className="ph ph-trash text-lg"></i></button>
+                                            className="absolute top-4 right-4 text-gray-300 hover:text-red-500"><i
+                                        className="ph ph-trash text-lg"></i></button>
 
                                     {/* 품목 선택 버튼 */}
                                     <div className="space-y-2">
@@ -229,9 +229,9 @@ export default function DisposalPage() {
                                             }}
                                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm flex justify-between items-center cursor-pointer hover:border-red-500 transition-all"
                                         >
-                                            <span className={item.ingredientName ? "text-gray-800 font-bold" : "text-gray-400"}>
-                                                {item.ingredientName || "재고에서 품목을 선택하세요"}
-                                            </span>
+                      <span className={item.ingredientName ? "text-gray-800 font-bold" : "text-gray-400"}>
+                        {item.ingredientName || "재고에서 품목을 선택하세요"}
+                      </span>
                                             <i className="ph ph-magnifying-glass text-gray-400"></i>
                                         </div>
                                     </div>
@@ -263,17 +263,17 @@ export default function DisposalPage() {
                                 </div>
                             ))}
                             <button onClick={addItem}
-                                className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 font-bold hover:bg-white hover:border-red-200 hover:text-red-500 transition-all">+
+                                    className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 font-bold hover:bg-white hover:border-red-200 hover:text-red-500 transition-all">+
                                 폐기 항목 추가
                             </button>
                         </div>
 
                         <div className="p-6 border-t flex gap-3 bg-white">
                             <button onClick={() => setIsMainModalOpen(false)}
-                                className="flex-1 py-4 bg-gray-100 rounded-xl font-bold">취소
+                                    className="flex-1 py-4 bg-gray-100 rounded-xl font-bold">취소
                             </button>
                             <button onClick={handleRecordWaste}
-                                className="flex-[2] py-4 bg-red-600 text-white rounded-xl font-black shadow-lg shadow-red-100">
+                                    className="flex-[2] py-4 bg-red-600 text-white rounded-xl font-black shadow-lg shadow-red-100">
                                 {items.length}건 폐기 등록
                             </button>
                         </div>
@@ -285,7 +285,7 @@ export default function DisposalPage() {
             {isStockModalOpen && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                        onClick={() => setIsStockModalOpen(false)} />
+                         onClick={() => setIsStockModalOpen(false)}/>
                     <div
                         className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl flex flex-col max-h-[70vh] overflow-hidden">
                         <div className="p-6 border-b">

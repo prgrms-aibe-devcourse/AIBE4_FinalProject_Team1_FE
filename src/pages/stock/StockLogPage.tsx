@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import type {StockLogResponse, TransactionType, StockLogSearchCondition} from '@/types/stockLog';
+import type {StockLogResponse, TransactionType, StockLogSearchCondition} from '@/types/stock/stockLog';
 import {getStockLogs} from '@/api/stock/stock.ts';
 import {requireStorePublicId} from "@/utils/store.ts";
 

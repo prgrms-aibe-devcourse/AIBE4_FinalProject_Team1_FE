@@ -10,7 +10,7 @@ export * from './stock/product.ts';
 export * from './reference/vendor.ts';
 export * from './reference/menu.ts';
 export * from './sales/diningTable.ts';
-export * from './sales/sales.ts';
+export * from './sales/salesOrder.ts';
 export * from './sales/salesLedger.ts';
 export * from './sales/tableQr.ts';
 export * from './purchase/purchase.ts';

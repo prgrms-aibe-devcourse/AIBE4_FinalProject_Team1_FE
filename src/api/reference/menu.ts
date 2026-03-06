@@ -3,10 +3,10 @@ import type {
   MenuResponse,
   MenuCreateRequest,
   MenuUpdateRequest,
-} from '../../types';
+} from '@/types';
 
 // Re-export types for convenience
-export type { MenuResponse, MenuStatus } from '../../types';
+export type { MenuResponse, MenuStatus } from '@/types';
 
 /**
  * 메뉴 목록 조회

@@ -37,7 +37,7 @@ import StockLogPage from "../pages/stock/StockLogPage.tsx";
 import InboundDetailPage from "../pages/stock/InboundDetailPage.tsx";
 
 // Dining
-import DiningTablePage from "../pages/sales/diningTablePage";
+import DiningTablePage from "../pages/sales/DiningTablePage.tsx";
 
 // Sales
 import SalesOrderListPage from "../pages/sales/SalesOrderListPage";

@@ -4,7 +4,7 @@ import type {
     PurchaseOrderDetail,
     PurchaseOrderCreateRequest,
     PurchaseOrderUpdateRequest
-} from '@/types/purchase.ts';
+} from '@/types/purchase/purchase';
 
 /**
  * 발주서 목록 조회
