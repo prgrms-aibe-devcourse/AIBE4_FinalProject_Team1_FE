@@ -1,22 +1,23 @@
 export type StockTakeStatus = 'DRAFT' | 'CONFIRMED';
 
-export interface StockTakeItemRequest {
+export interface StockTakeItemQuantityRequest {
     ingredientPublicId: string;
     stockTakeQty: number;
 }
 
-export interface StockTakeCreateRequest {
+export interface StockTakeSheetCreateRequest {
     title: string;
-    items: StockTakeItemRequest[];
+    items: StockTakeItemQuantityRequest[];
 }
 
-export interface StockTakeItemDraftUpdateRequest {
-    ingredientPublicId: string;
-    stockTakeQty: number;
+export interface StockTakeDraftSaveRequest {
+    title: string;
+    items: StockTakeItemQuantityRequest[];
 }
 
-export interface StockTakeItemsDraftUpdateRequest {
-    items: StockTakeItemDraftUpdateRequest[];
+export interface StockTakeConfirmRequest {
+    title: string;
+    items: StockTakeItemQuantityRequest[];
 }
 
 export interface StockTakeSheetResponse {
@@ -42,4 +43,3 @@ export interface StockTakeDetailResponse {
     createdAt: string;
     items: StockTakeItemResponse[];
 }
-

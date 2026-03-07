@@ -298,6 +298,7 @@ export default function Navbar() {
         title: "이력",
         items: [
           { label: "이력 현황", path: "/stock/log" },
+          { label: "재고 부족 현황", path: "/stock/stocktake/shortages" },
         ],
       },
     ],

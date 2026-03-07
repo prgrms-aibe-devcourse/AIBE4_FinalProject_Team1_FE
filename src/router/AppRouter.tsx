@@ -25,6 +25,7 @@ import InvitationManagePage from "../pages/store/InvitationManagePage.tsx";
 // Inventory (Stock)
 import StockTakePage from "../pages/stock/StockTakePage.tsx";
 import StockTakeListPage from "../pages/stock/StockTakeListPage.tsx";
+import StockTakeShortagePage from "../pages/stock/StockTakeShortagePage.tsx";
 import IngredientPage from "../pages/reference/IngredientPage.tsx";
 import MenuPage from "../pages/reference/MenuPage.tsx";
 import VendorPage from "../pages/reference/VendorPage.tsx";
@@ -103,6 +104,7 @@ export default function AppRouter() {
                         <Route path="/stock/inbound/:inboundPublicId" element={<InboundDetailPage />} />
                         <Route path="/stock/disposal" element={<DisposalPage />} />
                         <Route path="/stock/log" element={<StockLogPage />} />
+                        <Route path="/stock/stocktake/shortages" element={<StockTakeShortagePage />} />
 
                         {/* 매출 관리 */}
                         <Route path="/sales/menu" element={<MenuPage />} />

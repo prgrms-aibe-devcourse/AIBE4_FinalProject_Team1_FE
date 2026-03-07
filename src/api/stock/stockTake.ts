@@ -1,9 +1,10 @@
 import apiClient from '../user/client.ts';
 import type {
     StockTakeSheetResponse,
-    StockTakeCreateRequest,
+    StockTakeSheetCreateRequest,
     StockTakeDetailResponse,
-    StockTakeItemsDraftUpdateRequest,
+    StockTakeDraftSaveRequest,
+    StockTakeConfirmRequest,
 } from '../../types/stock/stockTake.ts';
 
 /**
@@ -23,7 +24,9 @@ export async function getStockTakeSheetDetail(
     storePublicId: string,
     sheetPublicId: string
 ): Promise<StockTakeDetailResponse> {
-    const response = await apiClient.get<StockTakeDetailResponse>(`/api/stocktakes/${storePublicId}/${sheetPublicId}`);
+    const response = await apiClient.get<StockTakeDetailResponse>(
+        `/api/stocktakes/${storePublicId}/${sheetPublicId}`
+    );
     return response.data;
 }
 
@@ -33,32 +36,32 @@ export async function getStockTakeSheetDetail(
  */
 export async function createStockTakeSheet(
     storePublicId: string,
-    request: StockTakeCreateRequest
+    request: StockTakeSheetCreateRequest
 ): Promise<string> {
     const response = await apiClient.post<string>(`/api/stocktakes/${storePublicId}`, request);
     return response.data;
 }
 
 /**
- * 재고 실사 항목 임시저장(수정)
- * PATCH /api/stocktakes/{storePublicId}/{sheetPublicId}/items
+ * 재고 실사 초안 저장
+ * PUT /api/stocktakes/{storePublicId}/{sheetPublicId}/draft
  */
-export async function updateStockTakeDraftItems(
+export async function saveStockTakeDraft(
     storePublicId: string,
     sheetPublicId: string,
-    request: StockTakeItemsDraftUpdateRequest
+    request: StockTakeDraftSaveRequest
 ): Promise<void> {
-    await apiClient.patch<void>(`/api/stocktakes/${storePublicId}/${sheetPublicId}/items`, request);
+    await apiClient.put<void>(`/api/stocktakes/${storePublicId}/${sheetPublicId}/draft`, request);
 }
 
 /**
  * 재고 실사 확정
- * POST /api/stocktakes/{storePublicId}/{sheetId}/confirm
+ * POST /api/stocktakes/{storePublicId}/{sheetPublicId}/confirm
  */
 export async function confirmStockTakeSheet(
     storePublicId: string,
-    sheetPublicId: string
+    sheetPublicId: string,
+    request: StockTakeConfirmRequest
 ): Promise<void> {
-    await apiClient.post<void>(`/api/stocktakes/${storePublicId}/${sheetPublicId}/confirm`);
+    await apiClient.post<void>(`/api/stocktakes/${storePublicId}/${sheetPublicId}/confirm`, request);
 }
-
