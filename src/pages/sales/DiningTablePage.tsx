@@ -1,8 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-    Map, Printer, Settings2, Trash2, Edit3, X,
-    Plus, Loader2, QrCode, CheckCircle2, AlertCircle, RefreshCcw,
-    CheckSquare, Square, Calendar
+    Map as MapIcon,
+    Printer,
+    Trash2,
+    Edit3,
+    X,
+    Plus,
+    Loader2,
+    QrCode,
+    RefreshCcw,
+    CheckSquare,
+    Square,
+    Calendar
 } from 'lucide-react';
 import {
     getTables,
@@ -197,31 +206,42 @@ const DiningTablePage = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <div className="min-h-screen flex items-center justify-center bg-white">
+                <p className="font-bold text-gray-500">데이터를 불러오는 중입니다...</p>
             </div>
         );
     }
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
+            <nav className="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-70 shadow-sm no-print">
+                <div className="max-w-6xl mx-auto flex justify-between items-center">
+                    <div className="flex items-center gap-2 text-black font-black text-xl cursor-default uppercase tracking-tighter">
+                        <span>테이블 마스터 관리</span>
+                    </div>
+                    <div className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 uppercase tracking-widest">
+                        Store PID: <span className="text-slate-900 font-mono ml-1">{storePublicId.substring(0, 8)}</span>
+                    </div>
+                </div>
+            </nav>
+
             {/* 상단 일괄 액션바 */}
             {selectedIds.length > 0 && (
-                <div className="fixed top-0 left-0 w-full z-[60] bg-indigo-600 text-white p-4 shadow-2xl animate-in slide-in-from-top duration-300 no-print">
+                <div className="fixed top-[68px] left-0 w-full z-[60] bg-black text-white p-4 shadow-2xl animate-in slide-in-from-top duration-300 no-print">
                     <div className="max-w-6xl mx-auto flex justify-between items-center">
                         <div className="flex items-center gap-4">
                             <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">
-                                {selectedIds.length} Selected
+                                {selectedIds.length}개 선택됨
                             </span>
-                            <h2 className="font-bold hidden sm:block italic">BATCH ACTION MODE</h2>
+                            <h2 className="font-bold hidden sm:block italic">일괄 작업 모드</h2>
                         </div>
                         <div className="flex gap-3">
                             <button
                                 onClick={() => handleIssueQrs(selectedIds)}
                                 disabled={isActionLoading}
-                                className="bg-white text-indigo-600 px-6 py-2 rounded-xl font-black text-sm hover:bg-slate-100 transition-all flex items-center gap-2"
+                                className="bg-white text-black px-6 py-2 rounded-xl font-black text-sm hover:bg-slate-100 transition-all flex items-center gap-2"
                             >
-                                {isActionLoading ? <RefreshCcw size={16} className="animate-spin" /> : <QrCode size={16} />}
+                                <QrCode size={18} />
                                 QR 일괄 발급
                             </button>
                             <button onClick={() => setSelectedIds([])} className="p-2 hover:bg-white/10 rounded-lg transition">
@@ -233,31 +253,33 @@ const DiningTablePage = () => {
             )}
 
             {/* Header */}
-            <header className="bg-slate-900 shadow-xl no-print relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-transparent pointer-events-none"></div>
+            <header className="bg-white border-b border-gray-200 no-print relative overflow-hidden">
                 <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
                     <div className="flex items-center">
-                        <div className="text-white">
-                            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.4em] opacity-80">
+                        <div className="text-black">
+                            <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.4em] opacity-80">
                                 관리 매장 식별 코드: {storePublicId}
                             </p>
                         </div>
                     </div>
 
-                    <div className="bg-white/5 backdrop-blur-xl p-2 rounded-2xl flex items-center gap-2 border border-white/10 w-full max-w-sm">
+                    <div className="bg-gray-50 p-2 rounded-2xl flex items-center gap-2 border border-gray-200 w-full max-w-sm">
+                        <div className="pl-4 text-gray-400">
+                            <Plus size={18} />
+                        </div>
                         <input
                             type="text"
                             placeholder="새 테이블 추가 (예: 15, A-1)"
                             value={newTableCode}
                             onChange={(e) => setNewTableCode(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && addTable()}
-                            className="bg-transparent text-white placeholder:text-slate-500 px-4 py-2 w-full focus:outline-none font-bold"
+                            className="bg-transparent text-gray-900 placeholder:text-gray-400 px-2 py-2 w-full focus:outline-none font-bold"
                         />
                         <button
                             onClick={addTable}
-                            className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-indigo-500 transition-all active:scale-95 flex items-center gap-2 shrink-0 shadow-lg"
+                            className="bg-black text-white px-6 py-2.5 rounded-xl font-bold hover:bg-gray-800 transition-all active:scale-95 flex items-center gap-2 shrink-0 shadow-lg"
                         >
-                            <Plus size={18} /> 추가
+                            추가
                         </button>
                     </div>
                 </div>
@@ -268,14 +290,21 @@ const DiningTablePage = () => {
                 <section>
                     <div className="flex justify-between items-end mb-10">
                         <div className="flex items-start gap-4">
-                            <div className="p-2.5 bg-indigo-100 rounded-xl text-indigo-600 shadow-sm">
-                                <Map size={24} />
+                            <div className="p-3 bg-black text-white rounded-2xl shadow-xl">
+                                <MapIcon size={24} />
                             </div>
                             <div>
-                                <h2 className="text-2xl font-black text-slate-800 tracking-tight uppercase">Smart Floor Map</h2>
-                                <p className="text-slate-500 text-sm mt-1">QR 아이콘을 클릭하여 코드를 미리보거나 상세 정보를 확인하세요.</p>
+                                <h1 className="text-2xl font-black text-black tracking-tight uppercase">디지털 테이블 배치도</h1>
+                                <p className="text-gray-500 text-sm mt-1 font-bold">테이블을 클릭하여 상세 정보를 확인하거나 QR 코드를 관리하세요.</p>
                             </div>
                         </div>
+                        <button
+                            onClick={fetchData}
+                            className="p-3 text-slate-400 hover:text-black hover:bg-white rounded-xl transition-all border border-transparent hover:border-slate-100 shadow-sm hover:shadow-md"
+                            title="새로고침"
+                        >
+                            <RefreshCcw size={20} className={isLoading ? 'animate-spin' : ''} />
+                        </button>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -284,50 +313,52 @@ const DiningTablePage = () => {
                                 key={table.tablePublicId}
                                 className={`group relative aspect-square rounded-[2.5rem] border-2 transition-all duration-500 flex flex-col items-center justify-center shadow-sm hover:shadow-2xl hover:-translate-y-2 ${table.status === 'ACTIVE' ? 'bg-white border-slate-100' : 'bg-slate-100 border-slate-200 grayscale opacity-60'}`}
                             >
-                                <button
-                                    onClick={() => toggleSelection(table.tablePublicId)}
-                                    className={`absolute top-7 left-7 transition-all no-print z-20 ${selectedIds.includes(table.tablePublicId) ? 'text-indigo-600 scale-125' : 'text-slate-200 hover:text-slate-400'}`}
-                                >
-                                    {selectedIds.includes(table.tablePublicId) ? <CheckSquare size={20} /> : <Square size={20} />}
-                                </button>
+                                <div className="absolute top-7 left-7 flex gap-2 no-print z-20">
+                                    <button
+                                        onClick={() => toggleSelection(table.tablePublicId)}
+                                        className={`transition-all ${selectedIds.includes(table.tablePublicId) ? 'text-black scale-125' : 'text-slate-200 hover:text-slate-400'}`}
+                                    >
+                                        {selectedIds.includes(table.tablePublicId) ? <CheckSquare size={18} /> : <Square size={18} />}
+                                    </button>
+                                </div>
 
                                 <div className="absolute top-7 right-7 no-print z-20">
                                     {table.qrInfo ? (
                                         <button
                                             onClick={(e) => { e.stopPropagation(); setViewingQr(table); }}
-                                            className="p-1.5 bg-emerald-500 text-white rounded-lg border border-emerald-400 shadow-md hover:scale-110 transition-transform"
-                                            title="QR 코드 보기"
+                                            className="px-2 py-1 bg-green-600 text-white text-[10px] font-bold rounded-lg shadow-md hover:scale-110 transition-transform flex items-center gap-1"
                                         >
-                                            <QrCode size={16} />
+                                            <QrCode size={10} />
+                                            QR 보기
                                         </button>
                                     ) : (
-                                        <div className="p-1.5 bg-rose-50 text-rose-300 rounded-lg border border-rose-100" title="QR 미발급">
-                                            <AlertCircle size={16} />
+                                        <div className="px-2 py-1 bg-red-50 text-red-500 text-[10px] font-bold rounded-lg border border-red-100">
+                                            미발급
                                         </div>
                                     )}
                                 </div>
 
                                 <span className="text-4xl font-black text-slate-800 mb-1">{table.tableCode}</span>
                                 <div className="flex items-center gap-1.5">
-                                    <span className={`w-2 h-2 rounded-full ${table.status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></span>
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{table.status}</span>
+                                    <span className={`w-2 h-2 rounded-full ${table.status === 'ACTIVE' ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`}></span>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{table.status === 'ACTIVE' ? '활성' : '비활성'}</span>
                                 </div>
 
                                 <div className="absolute inset-0 bg-slate-900/5 rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity no-print flex items-end justify-center p-6 gap-2">
                                     {!table.qrInfo && (
                                         <button
                                             onClick={() => handleIssueQrs([table.tablePublicId])}
-                                            className="p-3 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 shadow-xl transition-transform active:scale-90"
-                                            title="QR 즉시 발급"
+                                            className="px-3 py-2 bg-black text-white text-[11px] font-bold rounded-xl hover:bg-gray-800 shadow-xl transition-all flex items-center gap-1.5"
                                         >
-                                            <QrCode size={18} />
+                                            <QrCode size={12} />
+                                            QR 발급
                                         </button>
                                     )}
-                                    <button onClick={() => setEditingTable(table)} className="p-3 bg-white text-slate-700 rounded-2xl hover:bg-slate-900 hover:text-white shadow-xl transition-all">
-                                        <Settings2 size={18} />
+                                    <button onClick={() => setEditingTable(table)} className="px-3 py-2 bg-white text-slate-700 text-[11px] font-bold rounded-xl hover:bg-slate-900 hover:text-white shadow-xl transition-all">
+                                        수정
                                     </button>
-                                    <button onClick={() => deleteTable(table.tablePublicId)} className="p-3 bg-white text-rose-600 rounded-2xl hover:bg-rose-600 hover:text-white shadow-xl transition-all">
-                                        <Trash2 size={18} />
+                                    <button onClick={() => deleteTable(table.tablePublicId)} className="px-3 py-2 bg-white text-red-600 text-[11px] font-bold rounded-xl hover:bg-red-600 hover:text-white shadow-xl transition-all">
+                                        삭제
                                     </button>
                                 </div>
                             </div>
@@ -340,35 +371,36 @@ const DiningTablePage = () => {
                     <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                         <div className="px-10 py-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
                             <div className="flex items-center gap-4">
-                                <button onClick={toggleAllSelection} className="p-2 text-slate-400 hover:text-indigo-600 transition no-print">
-                                    {selectedIds.length === tables.length && tables.length > 0 ? <CheckSquare size={24} /> : <Square size={24} />}
+                                <button onClick={toggleAllSelection} className="p-2 text-slate-400 hover:text-black transition no-print font-bold">
+                                    {selectedIds.length === tables.length && tables.length > 0 ? <CheckSquare size={20} /> : <Square size={20} />}
                                 </button>
                                 <div>
-                                    <h3 className="text-xl font-black text-slate-800 tracking-tight uppercase leading-none">Management List</h3>
-                                    <p className="text-[10px] text-slate-400 mt-2 font-black uppercase tracking-widest">Selected: {selectedIds.length} / Total: {tables.length}</p>
+                                    <h3 className="text-xl font-bold text-slate-800 tracking-tight uppercase leading-none">테이블 관리 리스트</h3>
+                                    <p className="text-[10px] text-gray-500 mt-2 font-black uppercase tracking-widest">선택됨: {selectedIds.length} / 전체: {tables.length}</p>
                                 </div>
                             </div>
-                            <button onClick={() => window.print()} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-500 hover:bg-slate-900 hover:text-white transition-all shadow-sm">
-                                <Printer size={20} />
+                            <button onClick={() => window.print()} className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-500 hover:bg-slate-900 hover:text-white transition-all shadow-sm font-bold text-xs flex items-center gap-2">
+                                <Printer size={14} />
+                                인쇄하기
                             </button>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
-                                <thead className="bg-slate-50/80 text-slate-400 text-[11px] font-black uppercase tracking-[0.2em] border-b border-slate-100">
+                                <thead className="bg-slate-50/80 text-gray-500 text-[11px] font-black uppercase tracking-[0.2em] border-b border-slate-100">
                                     <tr>
-                                        <th className="px-10 py-6">Identity</th>
-                                        <th className="px-10 py-6 text-center">Status</th>
-                                        <th className="px-10 py-6 text-center">QR & Created At</th>
-                                        <th className="px-10 py-6 text-right no-print">Actions</th>
+                                        <th className="px-10 py-6">식별 정보</th>
+                                        <th className="px-10 py-6 text-center">상태</th>
+                                        <th className="px-10 py-6 text-center">QR 및 생성 일시</th>
+                                        <th className="px-10 py-6 text-right no-print">관리</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
                                     {combinedData.map(t => (
-                                        <tr key={t.tablePublicId} className={`hover:bg-indigo-50/30 transition-colors group ${selectedIds.includes(t.tablePublicId) ? 'bg-indigo-50/50' : ''}`}>
+                                        <tr key={t.tablePublicId} className={`hover:bg-gray-50 transition-colors group ${selectedIds.includes(t.tablePublicId) ? 'bg-gray-100' : ''}`}>
                                             <td className="px-10 py-8">
                                                 <div className="flex items-center gap-5">
-                                                    <button onClick={() => toggleSelection(t.tablePublicId)} className="no-print">
-                                                        {selectedIds.includes(t.tablePublicId) ? <CheckSquare size={18} className="text-indigo-600" /> : <Square size={18} className="text-slate-200" />}
+                                                    <button onClick={() => toggleSelection(t.tablePublicId)} className="no-print font-bold">
+                                                        {selectedIds.includes(t.tablePublicId) ? <CheckSquare size={18} /> : <Square size={18} />}
                                                     </button>
                                                     <div>
                                                         <span className="text-2xl font-black text-slate-800 tracking-tighter block leading-none">{t.tableCode}</span>
@@ -377,9 +409,9 @@ const DiningTablePage = () => {
                                                 </div>
                                             </td>
                                             <td className="px-10 py-8 text-center">
-                                                <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest ${t.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${t.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
-                                                    {t.status}
+                                                <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest ${t.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${t.status === 'ACTIVE' ? 'bg-green-500' : 'bg-blue-500'}`}></span>
+                                                    {t.status === 'ACTIVE' ? '활성' : '비활성'}
                                                 </span>
                                             </td>
                                             <td className="px-10 py-8 text-center">
@@ -387,9 +419,9 @@ const DiningTablePage = () => {
                                                     <div className="flex flex-col items-center gap-1.5">
                                                         <button
                                                             onClick={() => setViewingQr(t)}
-                                                            className="flex items-center gap-2 text-emerald-600 font-black text-[10px] tracking-wider hover:underline"
+                                                            className="flex items-center gap-2 text-green-600 font-black text-[10px] tracking-wider hover:underline"
                                                         >
-                                                            <CheckCircle2 size={14} /> CONNECTED
+                                                            연결됨
                                                         </button>
                                                         <div className="flex items-center gap-1 text-[9px] text-slate-400 font-bold uppercase">
                                                             <Calendar size={10} />
@@ -399,16 +431,22 @@ const DiningTablePage = () => {
                                                 ) : (
                                                     <button
                                                         onClick={() => handleIssueQrs([t.tablePublicId])}
-                                                        className="text-indigo-600 hover:text-indigo-800 text-[10px] font-black uppercase tracking-widest border-b-2 border-indigo-200/50 hover:border-indigo-600 transition-all pb-0.5 no-print"
+                                                        className="text-black hover:text-gray-800 text-[10px] font-black uppercase tracking-widest border-b-2 border-gray-200 hover:border-black transition-all pb-0.5 no-print"
                                                     >
-                                                        Issue QR Code
+                                                        QR 코드 발급
                                                     </button>
                                                 )}
                                             </td>
                                             <td className="px-10 py-8 text-right no-print">
                                                 <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={() => setEditingTable(t)} className="p-2.5 text-slate-300 hover:text-slate-900 transition-all hover:bg-white rounded-lg shadow-sm"><Edit3 size={18} /></button>
-                                                    <button onClick={() => deleteTable(t.tablePublicId)} className="p-2.5 text-slate-300 hover:text-rose-600 transition-all hover:bg-white rounded-lg shadow-sm"><Trash2 size={18} /></button>
+                                                    <button onClick={() => setEditingTable(t)} className="px-3 py-1.5 text-slate-500 hover:text-black transition-all font-bold text-xs border border-gray-200 rounded-lg flex items-center gap-1">
+                                                        <Edit3 size={12} />
+                                                        수정
+                                                    </button>
+                                                    <button onClick={() => deleteTable(t.tablePublicId)} className="px-3 py-1.5 text-red-500 hover:text-red-700 transition-all font-bold text-xs border border-gray-200 rounded-lg flex items-center gap-1">
+                                                        <Trash2 size={12} />
+                                                        삭제
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -422,19 +460,24 @@ const DiningTablePage = () => {
 
             {/* QR 미리보기 모달 */}
             {viewingQr && viewingQr.qrInfo && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-6 no-print">
+                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6 no-print">
                     <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in duration-300">
-                        <div className="bg-slate-900 p-8 text-white flex justify-between items-center">
+                        <div className="bg-black p-8 text-white flex justify-between items-center">
                             <div>
-                                <h3 className="text-2xl font-black uppercase tracking-tighter">Table {viewingQr.tableCode} QR</h3>
-                                <p className="text-slate-500 text-[10px] font-black tracking-widest uppercase mt-1">QR Code Preview</p>
+                                <h3 className="text-2xl font-black uppercase tracking-tighter">테이블 {viewingQr.tableCode} QR</h3>
+                                <p className="text-gray-400 text-[10px] font-black tracking-widest uppercase mt-1">QR 코드 미리보기</p>
                             </div>
-                            <button onClick={() => setViewingQr(null)} className="text-slate-400 hover:text-white transition"><X size={24} /></button>
+                            <button onClick={() => setViewingQr(null)} className="text-gray-400 hover:text-white transition font-bold p-1">
+                                <X size={24} />
+                            </button>
                         </div>
                         <div className="p-10 flex flex-col items-center">
-                            <div className="bg-slate-50 p-6 rounded-[2.5rem] border-4 border-slate-100 shadow-inner mb-6 min-w-[12rem] min-h-[12rem] flex items-center justify-center">
+                            <div className="bg-gray-50 p-6 rounded-[2.5rem] border-4 border-gray-100 shadow-inner mb-6 min-w-[12rem] min-h-[12rem] flex items-center justify-center">
                                 {isQrLoading ? (
-                                    <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+                                    <div className="flex flex-col items-center gap-2">
+                                        <Loader2 className="animate-spin text-gray-300" size={32} />
+                                        <p className="font-bold text-gray-400 text-xs text-center">QR 이미지를<br />불러오는 중...</p>
+                                    </div>
                                 ) : qrBlobUrl ? (
                                     <img
                                         src={qrBlobUrl}
@@ -442,16 +485,19 @@ const DiningTablePage = () => {
                                         className="w-48 h-48"
                                     />
                                 ) : (
-                                    <div className="text-slate-400 text-[10px] font-black uppercase text-center">QR 이미지를<br />불러올 수 없습니다.</div>
+                                    <div className="text-gray-400 flex flex-col items-center gap-2">
+                                        <QrCode size={32} className="opacity-10" />
+                                        <div className="text-[10px] font-black uppercase text-center">QR 이미지를<br />불러올 수 없습니다.</div>
+                                    </div>
                                 )}
                             </div>
                             <div className="text-center space-y-2">
-                                <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">발급 일시</p>
-                                <p className="text-slate-800 font-black text-sm">{formatDate(viewingQr.qrInfo.createdAt)}</p>
+                                <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">발급 일시</p>
+                                <p className="text-gray-800 font-black text-sm">{formatDate(viewingQr.qrInfo.createdAt)}</p>
                             </div>
                             <button
                                 onClick={() => window.print()}
-                                className="mt-8 w-full py-4 rounded-2xl bg-slate-900 text-white font-black text-xs tracking-widest hover:bg-black transition-all shadow-xl active:scale-95"
+                                className="mt-8 w-full py-4 rounded-2xl bg-black text-white font-black text-xs tracking-widest hover:bg-gray-800 transition-all shadow-xl active:scale-95"
                             >
                                 QR 코드 인쇄하기
                             </button>
@@ -462,47 +508,47 @@ const DiningTablePage = () => {
 
             {/* Edit Modal */}
             {editingTable && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-6">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
                     <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-300">
-                        <div className="bg-slate-900 p-12 text-white flex justify-between items-center">
+                        <div className="bg-black p-12 text-white flex justify-between items-center">
                             <div>
-                                <h3 className="text-3xl font-black uppercase tracking-tighter">Edit Table</h3>
-                                <p className="text-slate-500 text-[10px] font-black tracking-widest uppercase mt-1">Property Tuning</p>
+                                <h3 className="text-3xl font-black uppercase tracking-tighter">테이블 정보 수정</h3>
+                                <p className="text-gray-400 text-[10px] font-black tracking-widest uppercase mt-1">설정 최적화</p>
                             </div>
-                            <button onClick={() => setEditingTable(null)} className="text-slate-500 hover:text-white transition"><X size={24} /></button>
+                            <button onClick={() => setEditingTable(null)} className="text-gray-400 hover:text-white transition font-bold text-xl">닫기</button>
                         </div>
                         <div className="p-12 space-y-10">
                             <div className="space-y-4">
-                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Table Label</label>
+                                <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest">테이블 코드</label>
                                 <input
                                     type="text"
                                     value={editingTable.tableCode}
                                     onChange={(e) => setEditingTable({ ...editingTable, tableCode: e.target.value })}
-                                    className="w-full border-2 border-slate-100 rounded-[1.5rem] px-8 py-5 focus:border-indigo-500 focus:outline-none font-black text-3xl text-slate-800 transition-all shadow-inner bg-slate-50 focus:bg-white"
+                                    className="w-full border-2 border-gray-100 rounded-[1.5rem] px-8 py-5 focus:border-black focus:outline-none font-black text-3xl text-slate-800 transition-all shadow-inner bg-gray-50 focus:bg-white"
                                 />
                             </div>
                             <div className="space-y-4">
-                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Status Configuration</label>
+                                <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest">상태 설정</label>
                                 <div className="grid grid-cols-2 gap-4">
                                     {(['ACTIVE', 'INACTIVE'] as const).map(st => (
                                         <button
                                             key={st}
                                             onClick={() => setEditingTable({ ...editingTable, status: st })}
-                                            className={`px-6 py-5 rounded-[1.5rem] text-[11px] font-black transition-all border-2 ${editingTable.status === st
-                                                ? 'bg-slate-900 border-slate-900 text-white shadow-2xl scale-105'
-                                                : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-50'
+                                            className={`px-6 py-5 rounded-[1.5rem] text-[11px] font-bold transition-all border-2 ${editingTable.status === st
+                                                ? 'bg-black border-black text-white shadow-2xl scale-105'
+                                                : 'bg-white border-gray-100 text-gray-400 hover:bg-gray-50'
                                                 }`}
                                         >
-                                            {st}
+                                            {st === 'ACTIVE' ? '활성 (ACTIVE)' : '비활성 (INACTIVE)'}
                                         </button>
                                     ))}
                                 </div>
                             </div>
                             <button
                                 onClick={handleUpdateTable}
-                                className="w-full py-6 rounded-[1.5rem] bg-indigo-600 text-white font-black text-sm tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 mt-4 active:scale-95 uppercase"
+                                className="w-full py-6 rounded-[1.5rem] bg-black text-white font-black text-sm tracking-widest hover:bg-gray-800 transition-all shadow-xl mt-4 active:scale-95 uppercase"
                             >
-                                Save Changes
+                                저장하기
                             </button>
                         </div>
                     </div>

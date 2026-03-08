@@ -2,15 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
     Search,
     Plus,
-    Trash2,
-    X,
-    PackageSearch,
-    PlusCircle,
-    Edit,
     Edit3,
-    Leaf,
-    ChevronLeft,
-    ChevronRight,
+    Trash2,
+    Loader2,
+    AlertCircle,
+    Save,
+    X,
 } from 'lucide-react';
 import {
     getIngredients,
@@ -38,7 +35,7 @@ const UNIT_LABELS: Record<IngredientUnit, string> = {
 const StatusBadge = ({ status }: { status: IngredientStatus }) => {
     const styles: Record<IngredientStatus, string> = {
         ACTIVE: 'bg-green-50 text-green-700 border border-green-200',
-        INACTIVE: 'bg-gray-100 text-gray-500 border border-gray-200',
+        INACTIVE: 'bg-blue-50 text-blue-700 border border-blue-200',
     };
 
     const labels: Record<IngredientStatus, string> = {
@@ -173,14 +170,12 @@ export default function IngredientPage() {
     const renderListView = () => (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                <div className="relative w-full lg:w-96">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                        <Search className="w-4 h-4" />
-                    </span>
+                <div className="relative w-full lg:w-96 group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
                     <input
                         type="text"
                         placeholder="식재료 명칭으로 검색..."
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none bg-white text-gray-900 placeholder:text-gray-400 transition-all shadow-sm"
+                        className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-black focus:outline-none bg-white text-gray-900 placeholder:text-gray-400 transition-all shadow-sm"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -190,7 +185,7 @@ export default function IngredientPage() {
                     onClick={() => setView('CREATE')}
                     className="w-full lg:w-auto bg-black text-white px-5 py-3 rounded-xl hover:bg-gray-800 transition flex items-center justify-center gap-2 font-semibold shadow-sm"
                 >
-                    <Plus className="w-4 h-4" />
+                    <Plus size={18} />
                     식재료 추가
                 </button>
             </div>
@@ -233,7 +228,10 @@ export default function IngredientPage() {
                             {isLoading ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                                        데이터를 불러오는 중입니다...
+                                        <div className="flex flex-col items-center gap-2">
+                                            <Loader2 className="animate-spin text-black" size={24} />
+                                            데이터를 불러오는 중입니다...
+                                        </div>
                                     </td>
                                 </tr>
                             ) : ingredients.length > 0 ? (
@@ -262,15 +260,17 @@ export default function IngredientPage() {
                                                         setView('EDIT');
                                                     }}
                                                     className="p-2 text-green-700 hover:bg-green-50 rounded-lg border border-transparent hover:border-green-200 transition-all text-xs flex items-center gap-1"
+                                                    title="수정"
                                                 >
-                                                    <Edit3 className="w-3.5 h-3.5" />
+                                                    <Edit3 size={14} />
                                                     수정
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(item.ingredientPublicId)}
                                                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-200 transition-all text-xs flex items-center gap-1"
+                                                    title="삭제"
                                                 >
-                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                    <Trash2 size={14} />
                                                     삭제
                                                 </button>
                                             </div>
@@ -279,9 +279,11 @@ export default function IngredientPage() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-20 text-center text-gray-500">
-                                        <PackageSearch className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                                        검색 결과가 없거나 등록된 식재료가 없습니다.
+                                    <td colSpan={5} className="px-6 py-20 text-center text-gray-500 font-bold">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <AlertCircle size={40} className="text-gray-300" />
+                                            데이터 검색 결과가 없습니다.
+                                        </div>
                                     </td>
                                 </tr>
                             )}
@@ -295,7 +297,6 @@ export default function IngredientPage() {
                         disabled={page === 0 || isLoading}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition"
                     >
-                        <ChevronLeft className="w-4 h-4" />
                         이전
                     </button>
 
@@ -309,11 +310,10 @@ export default function IngredientPage() {
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition"
                     >
                         다음
-                        <ChevronRight className="w-4 h-4" />
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 
     const renderFormView = (mode: 'CREATE' | 'EDIT') => {
@@ -330,28 +330,16 @@ export default function IngredientPage() {
 
     return (
         <div className="min-h-screen bg-white pb-20">
-            <header className="border-b border-gray-200 bg-white py-8 px-6 mb-10">
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center shadow-sm">
-                            <Leaf className="text-white w-6 h-6" />
-                        </div>
-                        <div className="flex flex-col">
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border border-green-200">
-                                    Ingredient Management
-                                </span>
-                                <span className="text-gray-400 text-[10px] font-mono">
-                                    ID: {storePublicId.substring(0, 8)}
-                                </span>
-                            </div>
-                            <p className="text-gray-500 text-xs mt-1 font-medium">
-                                식재료 마스터 데이터 및 재고 기준 관리
-                            </p>
-                        </div>
+            <nav className="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-30 shadow-sm">
+                <div className="max-w-6xl mx-auto flex justify-between items-center">
+                    <div className="flex items-center gap-2 text-black font-black text-xl cursor-default uppercase tracking-tighter">
+                        <span>식재료 마스터 관리</span>
+                    </div>
+                    <div className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 uppercase tracking-widest">
+                        Store PID: <span className="text-slate-900 font-mono ml-1">{storePublicId.substring(0, 8)}</span>
                     </div>
                 </div>
-            </header>
+            </nav>
 
             <main className="max-w-6xl mx-auto px-6">
                 {view === 'LIST' && renderListView()}
@@ -427,11 +415,6 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
             <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-200">
                 <div className="flex justify-between items-center mb-8">
                     <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900">
-                        {mode === 'EDIT' ? (
-                            <Edit className="text-green-600" />
-                        ) : (
-                            <PlusCircle className="text-green-600" />
-                        )}
                         {mode === 'EDIT' ? '식재료 정보 수정' : '신규 식재료 등록'}
                     </h2>
 
@@ -439,7 +422,7 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
                         onClick={() => setView('LIST')}
                         className="text-gray-400 hover:text-gray-700 p-1 transition"
                     >
-                        <X className="w-6 h-6" />
+                        <X size={20} />
                     </button>
                 </div>
 
@@ -452,7 +435,7 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
                             type="text"
                             required
                             placeholder="예: 국산 대파 1단"
-                            className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none bg-white text-gray-900 placeholder:text-gray-400 transition-all"
+                            className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-black focus:outline-none bg-white text-gray-900 placeholder:text-gray-400 transition-all"
                             value={form.name || ''}
                             onChange={(e) => setForm({ ...form, name: e.target.value })}
                         />
@@ -464,7 +447,7 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
                                 단위
                             </label>
                             <select
-                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none appearance-none bg-white text-gray-900"
+                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-black focus:outline-none appearance-none bg-white text-gray-900"
                                 value={form.unit || 'EA'}
                                 onChange={(e) =>
                                     setForm({ ...form, unit: e.target.value as IngredientUnit })
@@ -484,7 +467,7 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
                             </label>
                             <input
                                 type="number"
-                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none bg-white text-gray-900"
+                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-black focus:outline-none bg-white text-gray-900"
                                 value={form.lowStockThreshold ?? 0}
                                 onChange={(e) =>
                                     setForm({
@@ -510,8 +493,8 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
                                             setForm({ ...form, status: s as IngredientStatus })
                                         }
                                         className={`flex-1 py-3 text-sm font-bold rounded-xl border transition-all ${form.status === s
-                                                ? 'bg-green-600 text-white border-green-600 shadow-sm'
-                                                : 'bg-white text-gray-500 border-gray-200 hover:bg-green-50 hover:text-green-700 hover:border-green-200'
+                                            ? 'bg-black text-white border-black shadow-sm'
+                                            : 'bg-white text-gray-500 border-gray-200 hover:bg-slate-50'
                                             }`}
                                     >
                                         {s === 'ACTIVE' ? '활성 (ACTIVE)' : '비활성 (INACTIVE)'}
@@ -525,14 +508,16 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
                         <button
                             type="button"
                             onClick={() => setView('LIST')}
-                            className="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition"
+                            className="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition flex items-center justify-center gap-2"
                         >
+                            <X size={18} />
                             취소
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 shadow-sm transition active:scale-[0.98]"
+                            className="flex-1 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 shadow-sm transition active:scale-[0.98] flex items-center justify-center gap-2"
                         >
+                            <Save size={18} />
                             {mode === 'EDIT' ? '정보 업데이트' : '식재료 등록'}
                         </button>
                     </div>
