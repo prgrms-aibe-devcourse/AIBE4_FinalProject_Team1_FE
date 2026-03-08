@@ -69,5 +69,5 @@ export interface PurchaseOrderUpdateRequest {
  */
 export interface PurchaseOrderSearchRequest {
     status?: PurchaseOrderStatus | '';
-    keyword?: string;
+    search?: string;
 }

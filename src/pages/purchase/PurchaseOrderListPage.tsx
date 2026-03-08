@@ -57,6 +57,7 @@ export default function PurchaseOrderListPage() {
     const [pageData, setPageData] = useState<PageResponse<PurchaseOrderSummary> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<PurchaseOrderStatus | 'ALL'>('ALL');
     const [page, setPage] = useState(0);
 
@@ -74,13 +75,26 @@ export default function PurchaseOrderListPage() {
     const [editItems, setEditItems] = useState<PurchaseOrderItemRequest[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // 검색어 디바운싱
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // 검색어 변경 시 페이지 초기화
+    useEffect(() => {
+        setPage(0);
+    }, [debouncedSearchTerm]);
+
     const fetchOrders = async () => {
         try {
             setIsLoading(true);
             const storePublicId = requireStorePublicId();
             const response = await getPurchaseOrders(storePublicId, {
                 status: statusFilter === 'ALL' ? undefined : statusFilter,
-                keyword: searchTerm || undefined,
+                search: debouncedSearchTerm || undefined,
                 page,
                 size: 10
             });
@@ -95,16 +109,7 @@ export default function PurchaseOrderListPage() {
 
     useEffect(() => {
         fetchOrders();
-    }, [page, statusFilter]);
-
-    // 검색어 입력 시 0페이지로 이동하며 로드 (디바운스)
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setPage(0);
-            fetchOrders();
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
+    }, [page, statusFilter, debouncedSearchTerm]);
 
     const orders = pageData?.content || [];
 
