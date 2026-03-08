@@ -11,7 +11,7 @@ import {
     ChevronRight
 } from 'lucide-react';
 import {
-    getVendors,
+    getVendorPage,
     createVendor,
     updateVendor,
     deleteVendor
@@ -40,7 +40,6 @@ const StatusBadge = ({ status }: { status: VendorStatus }) => {
 export default function VendorPage() {
     const storePublicId = requireStorePublicId();
 
-    // --- State ---
     const [view, setView] = useState<'LIST' | 'CREATE' | 'EDIT'>('LIST');
     const [pageData, setPageData] = useState<PageResponse<VendorResponse> | null>(null);
     const [currentVendor, setCurrentVendor] = useState<VendorResponse | null>(null);
@@ -60,20 +59,19 @@ export default function VendorPage() {
 
     useEffect(() => {
         setPage(0);
-    }, [debouncedSearchTerm]);
+    }, [debouncedSearchTerm, statusFilter]);
 
-    // --- API 호출: 목록 로드 ---
     const loadVendors = async () => {
         setIsLoading(true);
         try {
-            const response = await getVendors(storePublicId, {
+            const response = await getVendorPage(storePublicId, {
                 search: debouncedSearchTerm || undefined,
                 status: statusFilter === 'ALL' ? undefined : statusFilter,
                 page,
                 size: 10,
                 sort: 'createdAt,desc'
             });
-            setPageData(response.data);
+            setPageData(response);
         } catch (error) {
             console.error("Failed to load vendors:", error);
             alert("데이터를 불러오는 중 오류가 발생했습니다.");
@@ -86,7 +84,6 @@ export default function VendorPage() {
         loadVendors();
     }, [page, statusFilter, debouncedSearchTerm, storePublicId, refreshTrigger]);
 
-    // --- Handlers ---
     const handleCreate = async (newData: {
         name: string;
         contactPerson?: string;
@@ -145,7 +142,6 @@ export default function VendorPage() {
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-6">
             <div className="max-w-7xl mx-auto space-y-6">
-                {/* 페이지 헤더 */}
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-extrabold text-gray-900">거래처 관리</h1>
@@ -155,7 +151,6 @@ export default function VendorPage() {
                     </div>
                 </div>
 
-                {/* 뷰 전환 */}
                 {view === 'LIST' && (
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
@@ -207,72 +202,71 @@ export default function VendorPage() {
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead className="bg-gray-50 border-b border-gray-100">
-                                        <tr>
-                                            <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">거래처명</th>
-                                            <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">담당자</th>
-                                            <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">연락처</th>
-                                            <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">이메일</th>
-                                            <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">리드타임</th>
-                                            <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">상태</th>
-                                            <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase text-right print:hidden">관리</th>
-                                        </tr>
+                                    <tr>
+                                        <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">거래처명</th>
+                                        <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">담당자</th>
+                                        <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">연락처</th>
+                                        <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">이메일</th>
+                                        <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">리드타임</th>
+                                        <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">상태</th>
+                                        <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase text-right print:hidden">관리</th>
+                                    </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-50">
-                                        {isLoading ? (
-                                            <tr>
-                                                <td colSpan={7} className="px-6 py-10 text-center text-gray-400">
-                                                    데이터 로딩 중...
+                                    {isLoading ? (
+                                        <tr>
+                                            <td colSpan={7} className="px-6 py-10 text-center text-gray-400">
+                                                데이터 로딩 중...
+                                            </td>
+                                        </tr>
+                                    ) : vendors.length > 0 ? (
+                                        vendors.map((item) => (
+                                            <tr key={item.vendorPublicId} className="hover:bg-gray-50 transition-colors group">
+                                                <td className="px-6 py-4 font-medium text-gray-900">{item.name}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">{item.contactPerson || '-'}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">{item.phone || '-'}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">{item.email || '-'}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-600 font-mono">
+                                                    {item.leadTimeDays ? `${item.leadTimeDays}일` : '-'}
                                                 </td>
-                                            </tr>
-                                        ) : vendors.length > 0 ? (
-                                            vendors.map((item) => (
-                                                <tr key={item.vendorPublicId} className="hover:bg-gray-50 transition-colors group">
-                                                    <td className="px-6 py-4 font-medium text-gray-900">{item.name}</td>
-                                                    <td className="px-6 py-4 text-sm text-gray-600">{item.contactPerson || '-'}</td>
-                                                    <td className="px-6 py-4 text-sm text-gray-600">{item.phone || '-'}</td>
-                                                    <td className="px-6 py-4 text-sm text-gray-600">{item.email || '-'}</td>
-                                                    <td className="px-6 py-4 text-sm text-gray-600 font-mono">
-                                                        {item.leadTimeDays ? `${item.leadTimeDays}일` : '-'}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <StatusBadge status={item.status} />
-                                                    </td>
-                                                    <td className="px-6 py-4 text-right print:hidden">
-                                                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <td className="px-6 py-4">
+                                                    <StatusBadge status={item.status} />
+                                                </td>
+                                                <td className="px-6 py-4 text-right print:hidden">
+                                                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button
+                                                            onClick={() => {
+                                                                setCurrentVendor(item);
+                                                                setView('EDIT');
+                                                            }}
+                                                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md border border-transparent hover:border-blue-100 transition-all font-bold text-xs flex items-center gap-1"
+                                                        >
+                                                            <Edit3 className="w-3.5 h-3.5" /> 수정
+                                                        </button>
+                                                        {item.status === 'ACTIVE' && (
                                                             <button
-                                                                onClick={() => {
-                                                                    setCurrentVendor(item);
-                                                                    setView('EDIT');
-                                                                }}
-                                                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md border border-transparent hover:border-blue-100 transition-all font-bold text-xs flex items-center gap-1"
+                                                                onClick={() => handleDelete(item.vendorPublicId)}
+                                                                className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md border border-transparent hover:border-rose-100 transition-all font-bold text-xs flex items-center gap-1"
                                                             >
-                                                                <Edit3 className="w-3.5 h-3.5" /> 수정
+                                                                <Trash2 className="w-3.5 h-3.5" /> 비활성화
                                                             </button>
-                                                            {item.status === 'ACTIVE' && (
-                                                                <button
-                                                                    onClick={() => handleDelete(item.vendorPublicId)}
-                                                                    className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md border border-transparent hover:border-rose-100 transition-all font-bold text-xs flex items-center gap-1"
-                                                                >
-                                                                    <Trash2 className="w-3.5 h-3.5" /> 비활성화
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan={7} className="px-6 py-20 text-center text-gray-400">
-                                                    <PackageSearch className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                                    등록된 거래처가 없습니다.
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
-                                        )}
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={7} className="px-6 py-20 text-center text-gray-400">
+                                                <PackageSearch className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                                등록된 거래처가 없습니다.
+                                            </td>
+                                        </tr>
+                                    )}
                                     </tbody>
                                 </table>
                             </div>
 
-                            {/* 페이징 컨트롤 */}
                             {pageData && pageData.totalElements > 0 && (
                                 <div className="flex justify-center items-center gap-4 py-6 border-t border-gray-100">
                                     <button
@@ -470,10 +464,11 @@ const VendorFormView = ({ mode, currentVendor, onClose, onCreate, onUpdate }: Ve
                                         key={s}
                                         type="button"
                                         onClick={() => setForm({ ...form, status: s })}
-                                        className={`flex-1 py-3 rounded-lg text-sm font-bold border transition-all ${form.status === s
-                                            ? "bg-black border-black text-white shadow-md"
-                                            : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
-                                            }`}
+                                        className={`flex-1 py-3 rounded-lg text-sm font-bold border transition-all ${
+                                            form.status === s
+                                                ? "bg-black border-black text-white shadow-md"
+                                                : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
+                                        }`}
                                     >
                                         {s === 'ACTIVE' ? '활성' : '비활성'}
                                     </button>
