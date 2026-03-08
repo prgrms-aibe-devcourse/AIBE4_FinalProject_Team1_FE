@@ -2,22 +2,22 @@ import apiClient from '../user/client.ts';
 import type {
     VendorResponse,
     VendorCreateRequest,
-    VendorUpdateRequest,
-    VendorSearchRequest
+    VendorUpdateRequest
 } from '@/types/reference/vendor';
-import type { PageResponse } from '@/types/common/common';
 
 /**
  * 거래처 목록 조회
  * GET /api/vendors/{storePublicId}
  *
  * @param storePublicId 매장 Public ID (UUID)
- * @param params 검색 및 페이지네이션 파라미터
+ * @param status 거래처 상태 (기본값: ACTIVE)
  */
-export const getVendors = (storePublicId: string, params?: VendorSearchRequest) =>
-    apiClient.get<PageResponse<VendorResponse>>(`/api/vendors/${storePublicId}`, {
-        params
+export const getVendors = async (storePublicId: string, status: string = 'ACTIVE'): Promise<VendorResponse[]> => {
+    const response = await apiClient.get<VendorResponse[]>(`/api/vendors/${storePublicId}`, {
+        params: { status }
     });
+    return response.data;
+};
 
 /**
  * 거래처 상세 조회

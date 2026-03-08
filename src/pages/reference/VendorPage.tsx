@@ -53,14 +53,35 @@ export default function VendorPage() {
     const loadVendors = async () => {
         setIsLoading(true);
         try {
-            const response = await getVendors(storePublicId, {
-                search: searchTerm || undefined,
-                status: statusFilter === 'ALL' ? undefined : statusFilter,
+            const status = statusFilter === 'ALL' ? 'ACTIVE' : statusFilter;
+            const allVendors = await getVendors(storePublicId, status);
+
+            // 클라이언트 사이드 필터링
+            let filtered = allVendors;
+            if (searchTerm) {
+                filtered = filtered.filter(v =>
+                    v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    v.contactPerson?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    v.phone?.includes(searchTerm) ||
+                    v.email?.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+
+            // 클라이언트 사이드 페이징
+            const size = 10;
+            const totalPages = Math.ceil(filtered.length / size);
+            const start = page * size;
+            const end = start + size;
+            const content = filtered.slice(start, end);
+
+            setPageData({
+                content,
+                totalPages,
+                totalElements: filtered.length,
+                size,
                 page,
-                size: 10,
-                sort: 'createdAt,desc'
+                hasNext: page < totalPages - 1
             });
-            setPageData(response.data);
         } catch (error) {
             console.error("Failed to load vendors:", error);
             alert("데이터를 불러오는 중 오류가 발생했습니다.");
