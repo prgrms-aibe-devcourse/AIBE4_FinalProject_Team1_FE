@@ -195,8 +195,8 @@ export default function PurchaseOrderListPage() {
         try {
             // 거래처 목록 불러오기
             const storePublicId = requireStorePublicId();
-            const vendorsResponse = await getVendors(storePublicId, { status: 'ACTIVE', size: 1000 });
-            setVendors(vendorsResponse.data.content);
+            const vendorsResponse = await getVendors(storePublicId, 'ACTIVE');
+            setVendors(vendorsResponse);
 
             // 수정용 데이터 초기화
             setEditVendorId(selectedOrder.vendorPublicId || '');
