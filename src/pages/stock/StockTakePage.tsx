@@ -514,7 +514,7 @@ const StockTakePage: React.FC = () => {
                                                         <td className="px-6 py-4">
                                                             <input
                                                                 type="number"
-                                                                step="0.01"
+                                                                step="1"
                                                                 value={stockTakeQty === 0 ? '' : stockTakeQty}
                                                                 disabled={status === 'CONFIRMED'}
                                                                 onChange={(e) =>

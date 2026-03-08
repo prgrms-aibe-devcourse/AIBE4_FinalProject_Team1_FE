@@ -421,6 +421,7 @@ const MenuPage: React.FC = () => {
                                             <input
                                                 required
                                                 type="number"
+                                                step="1"
                                                 value={formData.basePrice}
                                                 onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
                                                 className="w-full bg-slate-50 border-2 border-transparent focus:border-black focus:bg-white rounded-2xl p-4 font-bold text-slate-800 outline-none transition-all"
@@ -493,7 +494,7 @@ const MenuPage: React.FC = () => {
                                             <input
                                                 required
                                                 type="number"
-                                                step="0.001"
+                                                step="1"
                                                 placeholder="수량"
                                                 value={ing.qty}
                                                 onChange={(e) => handleIngredientQtyChange(index, e.target.value)}
