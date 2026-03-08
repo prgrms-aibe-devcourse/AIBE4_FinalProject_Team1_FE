@@ -22,7 +22,7 @@ import {
     type MenuStatus,
 } from '@/api';
 
-import { getIngredients, type IngredientResponse } from '@/api';
+import { getAllIngredients, type IngredientResponse } from '@/api';
 import { requireStorePublicId } from '@/utils/store.ts';
 
 /**
@@ -67,7 +67,7 @@ const MenuPage: React.FC = () => {
         try {
             const [menuData, ingredientData] = await Promise.all([
                 getMenus(storePublicId),
-                getIngredients(storePublicId),
+                getAllIngredients(storePublicId),
             ]);
             setMenus(menuData);
             setAvailableIngredients(ingredientData);

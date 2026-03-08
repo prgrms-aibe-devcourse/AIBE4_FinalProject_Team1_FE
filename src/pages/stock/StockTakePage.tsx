@@ -12,7 +12,7 @@ import {
     Info
 } from 'lucide-react';
 import { requireStorePublicId } from '@/utils/store.ts';
-import { getIngredients } from '@/api/reference/ingredient.ts';
+import { getAllIngredients } from '@/api/reference/ingredient.ts';
 import {
     createStockTakeSheet,
     confirmStockTakeSheet,
@@ -93,7 +93,7 @@ const StockTakePage: React.FC = () => {
                     setStatus('DRAFT');
                     setTitle(`${new Date().toLocaleDateString()} 정기 재고 실사`);
 
-                    const ingredients = await getIngredients(storePublicId);
+                    const ingredients = await getAllIngredients(storePublicId);
 
                     const initialItems: ViewStockTakeItem[] = ingredients.map((ing: any) => ({
                         ingredientPublicId: ing.ingredientPublicId,
