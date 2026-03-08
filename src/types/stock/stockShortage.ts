@@ -15,4 +15,11 @@ export interface StockShortageGroup {
     createdAt: string;
 }
 
+export interface StockShortageSearchParams {
+    page?: number;
+    size?: number;
+    from?: string;
+    to?: string;
+}
+
 export type StockShortageResponse = Pagination<StockShortageGroup>;
