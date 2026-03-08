@@ -102,8 +102,8 @@ export default function SalesOrderListPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pt-[72px]">
-            <div className="mx-auto max-w-7xl px-6 py-8">
+        <div className="min-h-screen bg-slate-50 py-8 px-6">
+            <div className="mx-auto max-w-7xl">
                 {/* 헤더 */}
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-slate-900">주문 현황</h1>

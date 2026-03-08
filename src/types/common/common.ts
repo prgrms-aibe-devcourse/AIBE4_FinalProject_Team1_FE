@@ -5,6 +5,17 @@
  */
 export interface Pagination<T> {
     content: T[];
+    totalElements: number;
+    totalPages: number;
+    size: number;
+    number: number;
+}
+
+/**
+ * 백엔드 PageResponse DTO에 대응하는 타입
+ */
+export interface PageResponse<T> {
+    content: T[];
     page: number;
     size: number;
     totalElements: number;

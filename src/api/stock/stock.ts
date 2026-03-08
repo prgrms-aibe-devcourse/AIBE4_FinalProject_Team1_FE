@@ -1,6 +1,6 @@
 import apiClient from '../user/client.ts';
 import type {
-    Pagination,
+    PageResponse,
     StockOrderDeductionRequest,
     StockDeductionResponse,
     StockInboundResponse,
@@ -27,7 +27,7 @@ export async function deductStock(storePublicId: string, request: StockOrderDedu
  * 입고 내역 목록 조회
  * GET /api/inbounds/{storePublicId}
  */
-export const getStockInbounds = async (storePublicId: string): Promise<Pagination<StockInboundResponse>> => {
+export const getStockInbounds = async (storePublicId: string): Promise<PageResponse<StockInboundResponse>> => {
     const response = await apiClient.get(`/stock/${storePublicId}/inbound`);
     return response.data;
 };
@@ -76,8 +76,8 @@ export async function recordWaste(storePublicId: string, request: DisposalReques
  * GET /api/disposal/{storePublicId}
  */
 
-export async function getWasteRecords(storePublicId: string, condition: DisposalSearchCondition, page: number = 0, size: number = 20): Promise<Pagination<DisposalResponse>> {
-    const response = await apiClient.get<Pagination<DisposalResponse>>(`/api/disposal/${storePublicId}`, {
+export async function getWasteRecords(storePublicId: string, condition: DisposalSearchCondition, page: number = 0, size: number = 20): Promise<PageResponse<DisposalResponse>> {
+    const response = await apiClient.get<PageResponse<DisposalResponse>>(`/api/disposal/${storePublicId}`, {
         params: {
             ...condition,
             page,
@@ -97,8 +97,8 @@ export const getStoreStockSummary = async (
     condition: StockSearchCondition,
     page: number = 0,
     size: number = 20
-): Promise<Pagination<StockSummaryResponse>> => {
-    const response = await apiClient.get<Pagination<StockSummaryResponse>>(
+): Promise<PageResponse<StockSummaryResponse>> => {
+    const response = await apiClient.get<PageResponse<StockSummaryResponse>>(
         `/api/stock/${storePublicId}/stocks`,
         {params: {...condition, page, size}}
     );
@@ -126,8 +126,8 @@ export const getIngredientBatchDetails = async (
  * 재고 이력 조회
  * GET /api/stockLogs/{storePublicId}
  */
-export async function getStockLogs(storePublicId: string, condition: StockLogSearchCondition, page: number = 0, size: number = 20): Promise<Pagination<StockLogResponse>> {
-    const response = await apiClient.get<Pagination<StockLogResponse>>(`/api/stockLogs/${storePublicId}`, {
+export async function getStockLogs(storePublicId: string, condition: StockLogSearchCondition, page: number = 0, size: number = 20): Promise<PageResponse<StockLogResponse>> {
+    const response = await apiClient.get<PageResponse<StockLogResponse>>(`/api/stockLogs/${storePublicId}`, {
         params: {
             ...condition,
             page,

@@ -3,17 +3,20 @@ import type {
     PurchaseOrderSummary,
     PurchaseOrderDetail,
     PurchaseOrderCreateRequest,
-    PurchaseOrderUpdateRequest
+    PurchaseOrderUpdateRequest,
+    PurchaseOrderSearchRequest
 } from '@/types/purchase/purchase';
+import type { PageResponse } from '@/types/common/common';
 
 /**
  * 발주서 목록 조회
  * GET /api/purchase-orders/{storePublicId}
  *
  * @param storePublicId 매장 Public ID (UUID)
+ * @param params 검색/필터/페이징 파라미터
  */
-export const getPurchaseOrders = (storePublicId: string) =>
-    apiClient.get<PurchaseOrderSummary[]>(`/api/purchase-orders/${storePublicId}`);
+export const getPurchaseOrders = (storePublicId: string, params?: PurchaseOrderSearchRequest & { page?: number; size?: number }) =>
+    apiClient.get<PageResponse<PurchaseOrderSummary>>(`/api/purchase-orders/${storePublicId}`, { params });
 
 /**
  * 발주서 상세 조회

@@ -11,6 +11,7 @@ export type PurchaseOrderStatus = 'ORDERED' | 'CANCELED';
 export interface PurchaseOrderItem {
     itemName: string;
     quantity: number;
+    unit: string;
     unitPrice: number;
     lineAmount: number;
 }
@@ -43,6 +44,7 @@ export interface PurchaseOrderDetail extends PurchaseOrderSummary {
 export interface PurchaseOrderItemRequest {
     itemName: string;
     quantity: number;
+    unit: string;
     unitPrice: number;
 }
 
@@ -60,4 +62,12 @@ export interface PurchaseOrderCreateRequest {
 export interface PurchaseOrderUpdateRequest {
     vendorPublicId: string;
     items: PurchaseOrderItemRequest[];
+}
+
+/**
+ * 발주서 검색 요청
+ */
+export interface PurchaseOrderSearchRequest {
+    status?: PurchaseOrderStatus | '';
+    keyword?: string;
 }

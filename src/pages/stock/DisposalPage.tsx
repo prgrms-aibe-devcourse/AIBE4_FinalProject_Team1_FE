@@ -15,7 +15,7 @@ import type {
     DisposalReason,
     DisposalItem
 } from "@/types/stock/disposal";
-import type {Pagination} from "@/types/common/common.ts";
+import type {PageResponse} from "@/types/common/common.ts";
 import {requireStorePublicId} from "@/utils/store.ts";
 
 // UI 표시용 사유 매핑
@@ -30,7 +30,7 @@ export default function DisposalPage() {
     const storePublicId = requireStorePublicId();
 
     // --- [1. 메인 내역 조회 상태] ---
-    const [mainData, setMainData] = useState<Pagination<DisposalResponse> | null>(null);
+    const [mainData, setMainData] = useState<PageResponse<DisposalResponse> | null>(null);
     const [mainPage, setMainPage] = useState(0);
     const [isMainLoading, setIsMainLoading] = useState(false);
     const [mainCondition, setMainCondition] = useState<DisposalSearchCondition>({
