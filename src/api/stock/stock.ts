@@ -8,7 +8,7 @@ import type {
     StockInboundListResponse,
     DisposalRequest,
     DisposalResponse,
-    DisposalSearchCondition, StockSummaryResponse, StockBatchResponse, StockSearchCondition,
+    DisposalSearchCondition, StockSummaryResponse, StockBatchResponse, StockSearchCondition, InboundSearchCondition,
 } from '@/types';
 import type {StockLogResponse, StockLogSearchCondition} from "@/types/stock/stockLog";
 
@@ -31,16 +31,19 @@ export async function deductStock(storePublicId: string, request: StockOrderDedu
  */
 export const getStockInbounds = async (
     storePublicId: string,
+    condition: InboundSearchCondition = {},
     page: number = 0,
-    size: number = 20
+    size: number = 20,
+    sort: string = 'createdAt,desc'
 ): Promise<Pagination<StockInboundListResponse>> => {
     const response = await apiClient.get<Pagination<StockInboundListResponse>>(
         `/api/stores/${storePublicId}/inbounds`,
         {
             params: {
+                ...condition,
                 page,
                 size,
-                sort: 'createdAt,desc'
+                sort
             }
         }
     );

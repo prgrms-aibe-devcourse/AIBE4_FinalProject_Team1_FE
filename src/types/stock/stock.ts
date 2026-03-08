@@ -47,21 +47,24 @@ export interface StockInboundResponse {
     confirmedByUserId: number | null;
     confirmedByUserName: string | null;
     confirmedAt: string | null;
+    inboundDate?: string | null;
+    createdAt?: string | null;
+    itemCount?: number;
+    totalCost?: number;
     items: StockInboundItemResponse[];
 }
 
 export interface StockInboundListResponse {
-    inboundId: number;
     inboundPublicId: string;
-    storeId: number;
     storeName: string;
-    vendorId: number | null;
+    vendorPublicId: string | null;
     vendorName: string | null;
     status: InboundStatus;
-    confirmedByUserId: number | null;
-    confirmedByUserName: string | null;
-    confirmedAt: string | null;
+    inboundDate: string | null;
     createdAt: string;
+    confirmedAt: string | null;
+    itemCount: number;
+    totalCost: number;
 }
 
 export interface Candidate {
@@ -157,4 +160,12 @@ export interface StockSearchCondition {
     ingredientName?: string;
     includeZeroStock?: boolean;
     expiryBefore?: string;
+}
+
+export interface InboundSearchCondition {
+    vendorName?: string;
+    itemKeyword?: string;
+    inboundPublicId?: string;
+    inboundDateFrom?: string;
+    inboundDateTo?: string;
 }
