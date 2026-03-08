@@ -5,20 +5,11 @@
  */
 export interface Pagination<T> {
     content: T[];
+    page: number;
+    size: number;
     totalElements: number;
     totalPages: number;
-    size: number;
-    number: number;
-}
-
-export interface DisposalPageResponse<T> {
-    content: T[];           // 데이터 목록
-    totalElements: number;  // 전체 아이템 수
-    totalPages: number;     // 전체 페이지 수
-    currentPage: number;    // 현재 페이지 (0부터 시작)
-    isFirst: boolean;       // 첫 페이지 여부
-    isLast: boolean;        // 마지막 페이지 여부
-    hasNext: boolean;       // 다음 페이지 존재 여부
+    hasNext: boolean;
 }
 
 /**

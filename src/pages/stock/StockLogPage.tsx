@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import type {StockLogResponse, TransactionType, StockLogSearchCondition} from '@/types/stockLog';
+import type {StockLogResponse, TransactionType, StockLogSearchCondition, ReferenceType} from '@/types/stockLog';
 import {getStockLogs} from '@/api/stock';
 import {requireStorePublicId} from "@/utils/store.ts";
 
@@ -22,9 +22,20 @@ const StockLogPage: React.FC = () => {
     const [endDate, setEndDate] = useState<string>('');
     const [typeFilter, setTypeFilter] = useState<FilterType>('ALL');
 
+    // --- [ReferenceType 라벨 매핑] ---
+    const getReferenceLabel = (refType: ReferenceType | undefined) => {
+        const labels: Record<ReferenceType, string> = {
+            INBOUND: '입고',
+            SALE: '판매완료',
+            WASTE: '폐기처리',
+            STOCK_TAKING: '재고실사',
+            OTHER: '기타'
+        };
+        return refType ? labels[refType] : '일반';
+    };
+
     // --- [유형별 색상 및 아이콘 설정] ---
     const getTypeConfig = (type: TransactionType | undefined) => {
-        // type이 없는 경우에 대한 기본값 처리
         if (!type) return {label: '기타', icon: 'ph-question', bg: 'bg-gray-50', text: 'text-gray-600'};
 
         const configs: Record<TransactionType, { label: string; icon: string; bg: string; text: string }> = {
@@ -48,7 +59,6 @@ const StockLogPage: React.FC = () => {
         if (!storePublicId) return;
         setLoading(true);
         try {
-            // 이제 인터페이스 정의에 의해 typeFilter가 'ALL'이면 undefined가 할당되어도 에러가 나지 않습니다.
             const condition: StockLogSearchCondition = {
                 ingredientName: searchQuery || undefined,
                 type: typeFilter === 'ALL' ? undefined : typeFilter,
@@ -62,7 +72,7 @@ const StockLogPage: React.FC = () => {
             else setStockHistory(prev => [...prev, ...response.content]);
 
             setTotalPages(response.totalPages);
-            setCurrentPage(response.currentPage);
+            setCurrentPage(response.page);
             setTotalElements(response.totalElements);
         } catch (error) {
             console.error("데이터 로드 실패:", error);
@@ -92,10 +102,18 @@ const StockLogPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
-                <button
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-300 hover:text-white border border-gray-700 rounded-lg transition-all">
-                    <i className="ph ph-file-csv"></i> 로그 내보내기 (CSV)
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => fetchLogs(0)}
+                        className="p-2 text-gray-400 hover:text-white transition-colors"
+                    >
+                        <i className={`ph-bold ph-arrows-clockwise text-xl ${loading ? 'animate-spin' : ''}`}></i>
+                    </button>
+                    <button
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-300 hover:text-white border border-gray-700 rounded-lg transition-all">
+                        <i className="ph ph-file-csv"></i> 로그 내보내기 (CSV)
+                    </button>
+                </div>
             </nav>
 
             <main className="flex-1 overflow-hidden flex flex-col p-8">
@@ -115,11 +133,19 @@ const StockLogPage: React.FC = () => {
                         <div className="flex gap-2">
                             <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3">
                                 <i className="ph ph-calendar text-gray-400"></i>
-                                <input type="date" className="bg-transparent text-xs font-bold py-3 outline-none"
-                                       value={startDate} onChange={(e) => setStartDate(e.target.value)}/>
+                                <input
+                                    type="date"
+                                    className="bg-transparent text-xs font-bold py-3 outline-none"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                />
                                 <span className="text-gray-300">~</span>
-                                <input type="date" className="bg-transparent text-xs font-bold py-3 outline-none"
-                                       value={endDate} onChange={(e) => setEndDate(e.target.value)}/>
+                                <input
+                                    type="date"
+                                    className="bg-transparent text-xs font-bold py-3 outline-none"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                />
                             </div>
                             <select
                                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-bold outline-none cursor-pointer"
@@ -145,7 +171,7 @@ const StockLogPage: React.FC = () => {
                                 <tr>
                                     <th className="px-6 py-4 w-44">날짜/시간</th>
                                     <th className="px-6 py-4 w-32">유형</th>
-                                    <th className="px-6 py-4">품목 정보</th>
+                                    <th className="px-6 py-4">품목 및 참조 정보</th>
                                     <th className="px-6 py-4 text-right">변동 수량</th>
                                     <th className="px-6 py-4 text-right">최종 재고</th>
                                     <th className="px-6 py-4">처리자</th>
@@ -154,11 +180,15 @@ const StockLogPage: React.FC = () => {
                                 <tbody className="divide-y divide-gray-100">
                                 {loading && currentPage === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="text-center py-20 text-gray-400">데이터를 불러오는 중...</td>
+                                        <td colSpan={6} className="text-center py-20 text-gray-400 font-medium">데이터를
+                                            불러오는 중...
+                                        </td>
                                     </tr>
                                 ) : stockHistory.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="text-center py-20 text-gray-400">조회된 내역이 없습니다.</td>
+                                        <td colSpan={6} className="text-center py-20 text-gray-400 font-medium">조회된 내역이
+                                            없습니다.
+                                        </td>
                                     </tr>
                                 ) : (
                                     stockHistory.map((log, index) => {
@@ -167,7 +197,7 @@ const StockLogPage: React.FC = () => {
                                         return (
                                             <tr key={index} className="hover:bg-gray-50 transition-colors">
                                                 <td className="px-6 py-4 text-gray-400 font-medium">
-                                                    {log.createAt ? new Date(log.createAt).toLocaleString('ko-KR', {
+                                                    {log.createdAt ? new Date(log.createdAt).toLocaleString('ko-KR', {
                                                         month: '2-digit',
                                                         day: '2-digit',
                                                         hour: '2-digit',
@@ -181,11 +211,17 @@ const StockLogPage: React.FC = () => {
                                                         </span>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <div className="flex flex-col">
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span
+                                                                className="font-bold text-gray-800">{log.ingredientName}</span>
+                                                            <span
+                                                                className="px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded text-[9px] font-medium border border-gray-200">
+                                                                    {getReferenceLabel(log.referenceType)} {log.referenceId ? `#${log.referenceId}` : ''}
+                                                                </span>
+                                                        </div>
                                                         <span
-                                                            className="font-bold text-gray-800">{log.ingredientName}</span>
-                                                        <span
-                                                            className="text-[10px] text-gray-400">ID: {log.batchId || '-'}</span>
+                                                            className="text-[10px] text-gray-400 font-mono">BATCH: {log.batchId || '-'}</span>
                                                     </div>
                                                 </td>
                                                 <td className={`px-6 py-4 text-right font-black text-sm ${qtyColor}`}>
@@ -208,17 +244,22 @@ const StockLogPage: React.FC = () => {
                             </table>
                         </div>
 
+                        {/* 하단 바 */}
                         <div
                             className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
                             <span
-                                className="text-[11px] font-bold text-gray-400 uppercase">검색 결과: {totalElements.toLocaleString()} 건</span>
+                                className="text-[11px] font-bold text-gray-400 uppercase tracking-tight">검색 결과: {totalElements.toLocaleString()} 건</span>
                             {currentPage + 1 < totalPages && (
                                 <button
-                                    className="px-5 py-2 bg-white border border-gray-200 rounded-xl text-[11px] font-bold text-gray-600 hover:bg-gray-100 transition-all flex items-center gap-2"
+                                    className="px-5 py-2 bg-white border border-gray-200 rounded-xl text-[11px] font-bold text-gray-600 hover:bg-gray-100 transition-all flex items-center gap-2 shadow-sm active:scale-95"
                                     onClick={() => fetchLogs(currentPage + 1)}
                                     disabled={loading}
                                 >
-                                    {loading ? '로딩 중...' : '+ 이전 기록 더보기'}
+                                    {loading ? (
+                                        <div
+                                            className="w-3 h-3 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                    ) : <i className="ph ph-plus"></i>}
+                                    이전 기록 더보기
                                 </button>
                             )}
                         </div>
