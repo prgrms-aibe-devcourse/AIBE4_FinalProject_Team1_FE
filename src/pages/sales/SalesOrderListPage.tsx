@@ -6,7 +6,9 @@ import { useEffect, useState } from 'react';
 import { getSalesOrders } from '@/api';
 import { requireStorePublicId } from '@/utils/store';
 import type { SalesOrderResponse, SalesOrderStatus } from '@/types/sales/salesOrder.ts';
+import type { PageResponse } from '@/types/common/common';
 import SalesOrderDetailModal from './SalesOrderDetailModal';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 type VIEW = 'LIST' | 'DETAIL';
 
@@ -55,12 +57,13 @@ function formatAmount(amount: number): string {
 
 export default function SalesOrderListPage() {
     const [view, setView] = useState<VIEW>('LIST');
-    const [orders, setOrders] = useState<SalesOrderResponse[]>([]);
+    const [pageData, setPageData] = useState<PageResponse<SalesOrderResponse> | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<SalesOrderResponse | null>(
         null
     );
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(0);
 
     const storePublicId = requireStorePublicId();
 
@@ -69,8 +72,11 @@ export default function SalesOrderListPage() {
         setIsLoading(true);
         setError(null);
         try {
-            const data = await getSalesOrders(storePublicId);
-            setOrders(data);
+            const response = await getSalesOrders(storePublicId, {
+                page,
+                size: 20
+            });
+            setPageData(response.data);
         } catch (err) {
             console.error('주문 목록 조회 실패:', err);
             setError('주문 목록을 불러오는데 실패했습니다.');
@@ -81,7 +87,7 @@ export default function SalesOrderListPage() {
 
     useEffect(() => {
         fetchOrders();
-    }, []);
+    }, [page]);
 
     // 주문 상세 보기
     const handleViewDetail = (order: SalesOrderResponse) => {
@@ -101,6 +107,8 @@ export default function SalesOrderListPage() {
         handleCloseDetail();
     };
 
+    const orders = pageData?.content || [];
+
     return (
         <div className="min-h-screen bg-slate-50 py-8 px-6">
             <div className="mx-auto max-w-7xl">
@@ -118,6 +126,11 @@ export default function SalesOrderListPage() {
                         <p className="text-sm font-semibold text-rose-700">{error}</p>
                     </div>
                 )}
+
+                {/* 전체 건수 */}
+                <div className="mb-4 text-sm text-slate-500 px-1">
+                    전체 <span className="font-bold text-slate-900">{pageData?.totalElements || 0}</span>건
+                </div>
 
                 {/* 주문 목록 테이블 */}
                 <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -220,6 +233,29 @@ export default function SalesOrderListPage() {
                             )}
                         </tbody>
                     </table>
+
+                    {/* 페이지네이션 컨트롤 */}
+                    {pageData && pageData.totalElements > 0 && (
+                        <div className="flex justify-center items-center gap-4 py-6 border-t border-gray-100">
+                            <button
+                                disabled={page === 0}
+                                onClick={() => setPage(page - 1)}
+                                className="p-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            <span className="text-sm font-bold text-gray-600">
+                                {pageData.page + 1} / {pageData.totalPages}
+                            </span>
+                            <button
+                                disabled={!pageData.hasNext}
+                                onClick={() => setPage(page + 1)}
+                                className="p-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                            >
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 

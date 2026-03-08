@@ -57,6 +57,7 @@ export default function PurchaseOrderListPage() {
     const [pageData, setPageData] = useState<PageResponse<PurchaseOrderSummary> | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<PurchaseOrderStatus | 'ALL'>('ALL');
     const [page, setPage] = useState(0);
 
@@ -74,13 +75,26 @@ export default function PurchaseOrderListPage() {
     const [editItems, setEditItems] = useState<PurchaseOrderItemRequest[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // 검색어 디바운싱
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // 검색어 변경 시 페이지 초기화
+    useEffect(() => {
+        setPage(0);
+    }, [debouncedSearchTerm]);
+
     const fetchOrders = async () => {
         try {
             setIsLoading(true);
             const storePublicId = requireStorePublicId();
             const response = await getPurchaseOrders(storePublicId, {
                 status: statusFilter === 'ALL' ? undefined : statusFilter,
-                keyword: searchTerm || undefined,
+                search: debouncedSearchTerm || undefined,
                 page,
                 size: 10
             });
@@ -95,16 +109,7 @@ export default function PurchaseOrderListPage() {
 
     useEffect(() => {
         fetchOrders();
-    }, [page, statusFilter]);
-
-    // 검색어 입력 시 0페이지로 이동하며 로드 (디바운스)
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setPage(0);
-            fetchOrders();
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
+    }, [page, statusFilter, debouncedSearchTerm]);
 
     const orders = pageData?.content || [];
 
@@ -190,8 +195,8 @@ export default function PurchaseOrderListPage() {
         try {
             // 거래처 목록 불러오기
             const storePublicId = requireStorePublicId();
-            const vendorsResponse = await getVendors(storePublicId, { status: 'ACTIVE', size: 1000 });
-            setVendors(vendorsResponse.data.content);
+            const vendorsResponse = await getVendors(storePublicId, 'ACTIVE');
+            setVendors(vendorsResponse);
 
             // 수정용 데이터 초기화
             setEditVendorId(selectedOrder.vendorPublicId || '');
@@ -680,31 +685,33 @@ export default function PurchaseOrderListPage() {
                     </div>
 
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
-                        <div className="w-full md:w-auto">
-                            <select
-                                value={statusFilter}
-                                onChange={(e) => {
-                                    setStatusFilter(e.target.value as PurchaseOrderStatus | 'ALL');
-                                    setPage(0);
-                                }}
-                                className="w-full md:w-auto px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white transition-all shadow-sm text-sm font-medium text-gray-900"
-                            >
-                                <option value="ALL">전체</option>
-                                <option value="ORDERED">발주 완료</option>
-                                <option value="CANCELED">발주 취소</option>
-                            </select>
-                        </div>
-                        <div className="relative w-full md:w-80">
-                            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                                <Search className="w-4 h-4" />
-                            </span>
-                            <input
-                                type="text"
-                                placeholder="주문번호 또는 거래처명으로 검색..."
-                                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white transition-all shadow-sm"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
+                            <div className="w-full md:w-auto">
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => {
+                                        setStatusFilter(e.target.value as PurchaseOrderStatus | 'ALL');
+                                        setPage(0);
+                                    }}
+                                    className="w-full md:w-auto px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white transition-all shadow-sm text-sm font-medium text-gray-900"
+                                >
+                                    <option value="ALL">전체</option>
+                                    <option value="ORDERED">발주 완료</option>
+                                    <option value="CANCELED">발주 취소</option>
+                                </select>
+                            </div>
+                            <div className="relative w-full md:w-80">
+                                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                    <Search className="w-4 h-4" />
+                                </span>
+                                <input
+                                    type="text"
+                                    placeholder="주문번호 또는 거래처명으로 검색..."
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white transition-all shadow-sm"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
                         </div>
                         <div className="flex gap-2 w-full md:w-auto">
                             <button

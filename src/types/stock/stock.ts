@@ -11,13 +11,10 @@ export interface StockDeductionResponse {
     message: string;
 }
 
-// ── Inbound ──────────────────────────────────────────────────────────────────
 export type InboundStatus = 'DRAFT' | 'CONFIRMED' | 'CANCELLED';
 
 export type ResolutionStatus =
-    | 'UNRESOLVED'
-    | 'AUTO_RESOLVED'
-    | 'PENDING'
+    | 'AUTO_SUGGESTED'
     | 'CONFIRMED'
     | 'FAILED';
 
@@ -28,6 +25,7 @@ export interface StockInboundItemResponse {
     ingredientId: number | null;
     ingredientName: string | null;
     rawProductName: string;
+    normalizedRawKey: string | null;
     quantity: number;
     unitCost: number;
     expirationDate: string | null;
@@ -51,7 +49,20 @@ export interface StockInboundResponse {
     items: StockInboundItemResponse[];
 }
 
-// ── Ingredient Resolution ─────────────────────────────────────────────────────
+export interface StockInboundListResponse {
+    inboundId: number;
+    inboundPublicId: string;
+    storeId: number;
+    storeName: string;
+    vendorId: number | null;
+    vendorName: string | null;
+    status: InboundStatus;
+    confirmedByUserId: number | null;
+    confirmedByUserName: string | null;
+    confirmedAt: string | null;
+    createdAt: string;
+}
+
 export interface Candidate {
     ingredientPublicId: string;
     ingredientName: string;
@@ -59,18 +70,6 @@ export interface Candidate {
     score: number;
 }
 
-export interface IngredientResolveResponse {
-    status: ResolutionStatus;
-    normalizedRawKey: string | null;
-    normalizedRawFull: string | null;
-    confidence: number | null;
-    resolvedIngredientPublicId: string | null;
-    resolvedIngredientName: string | null;
-    resolvedIngredientUnit: string | null;
-    candidates: Candidate[];
-}
-
-// ── Bulk Operations ───────────────────────────────────────────────────────────
 export interface BulkResolveResponse {
     totalCount: number;
     autoResolvedCount: number;
@@ -84,27 +83,6 @@ export interface BulkIngredientConfirmItem {
     chosenIngredientPublicId: string;
 }
 
-export interface BulkIngredientConfirmRequest {
-    items: BulkIngredientConfirmItem[];
-}
-
-export interface ItemConfirmResult {
-    inboundItemPublicId: string;
-    success: boolean;
-    confirmedIngredientPublicId: string | null;
-    ingredientName: string | null;
-    normalizedRawKey: string | null;
-    newMappingCreated: boolean;
-    errorMessage: string | null;
-}
-
-export interface BulkIngredientConfirmResponse {
-    totalCount: number;
-    successCount: number;
-    failedCount: number;
-    results: ItemConfirmResult[];
-}
-
 export interface BulkProductNormalizeResponse {
     totalCount: number;
     normalizedCount: number;
@@ -112,7 +90,6 @@ export interface BulkProductNormalizeResponse {
     failedCount: number;
 }
 
-// ── Manual Inbound Creation ──────────────────────────────────────────────────
 export interface ManualInboundItemRequest {
     rawProductName: string;
     quantity: number;
@@ -122,12 +99,11 @@ export interface ManualInboundItemRequest {
 }
 
 export interface ManualInboundRequest {
-    vendorId: number | null;
+    vendorPublicId: string | null;
     inboundDate: string;
     items: ManualInboundItemRequest[];
 }
 
-// ── Document-based Inbound Creation ──────────────────────────────────────────
 export interface StockInboundItemRequest {
     rawProductName: string;
     quantity: number;

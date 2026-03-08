@@ -1,9 +1,11 @@
 import apiClient from '../user/client.ts';
 import type {
+    Pagination,
     PageResponse,
     StockOrderDeductionRequest,
     StockDeductionResponse,
     StockInboundResponse,
+    StockInboundListResponse,
     DisposalRequest,
     DisposalResponse,
     DisposalSearchCondition, StockSummaryResponse, StockBatchResponse, StockSearchCondition,
@@ -24,24 +26,37 @@ export async function deductStock(storePublicId: string, request: StockOrderDedu
  */
 
 /**
- * 입고 내역 목록 조회
- * GET /api/inbounds/{storePublicId}
+ * 입고 내역 목록 조회 (페이징)
+ * GET /api/stores/{storePublicId}/inbounds
  */
-export const getStockInbounds = async (storePublicId: string): Promise<PageResponse<StockInboundResponse>> => {
-    const response = await apiClient.get(`/stock/${storePublicId}/inbound`);
+export const getStockInbounds = async (
+    storePublicId: string,
+    page: number = 0,
+    size: number = 20
+): Promise<Pagination<StockInboundListResponse>> => {
+    const response = await apiClient.get<Pagination<StockInboundListResponse>>(
+        `/api/stores/${storePublicId}/inbounds`,
+        {
+            params: {
+                page,
+                size,
+                sort: 'createdAt,desc'
+            }
+        }
+    );
     return response.data;
 };
 
 /**
  * 입고 상세 정보 조회 (UUID 기반)
- * GET /api/inbounds/{storePublicId}/{inboundPublicId}
+ * GET /api/stores/{storePublicId}/inbounds/{inboundPublicId}
  */
 export async function getStockInboundDetail(
     storePublicId: string,
     inboundPublicId: string
 ): Promise<StockInboundResponse> {
     const response = await apiClient.get<StockInboundResponse>(
-        `/api/inbounds/${storePublicId}/${inboundPublicId}`
+        `/api/stores/${storePublicId}/inbounds/${inboundPublicId}`
     );
     return response.data;
 }
