@@ -680,31 +680,33 @@ export default function PurchaseOrderListPage() {
                     </div>
 
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
-                        <div className="w-full md:w-auto">
-                            <select
-                                value={statusFilter}
-                                onChange={(e) => {
-                                    setStatusFilter(e.target.value as PurchaseOrderStatus | 'ALL');
-                                    setPage(0);
-                                }}
-                                className="w-full md:w-auto px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white transition-all shadow-sm text-sm font-medium text-gray-900"
-                            >
-                                <option value="ALL">전체</option>
-                                <option value="ORDERED">발주 완료</option>
-                                <option value="CANCELED">발주 취소</option>
-                            </select>
-                        </div>
-                        <div className="relative w-full md:w-80">
-                            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                                <Search className="w-4 h-4" />
-                            </span>
-                            <input
-                                type="text"
-                                placeholder="주문번호 또는 거래처명으로 검색..."
-                                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white transition-all shadow-sm"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
+                            <div className="w-full md:w-auto">
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => {
+                                        setStatusFilter(e.target.value as PurchaseOrderStatus | 'ALL');
+                                        setPage(0);
+                                    }}
+                                    className="w-full md:w-auto px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white transition-all shadow-sm text-sm font-medium text-gray-900"
+                                >
+                                    <option value="ALL">전체</option>
+                                    <option value="ORDERED">발주 완료</option>
+                                    <option value="CANCELED">발주 취소</option>
+                                </select>
+                            </div>
+                            <div className="relative w-full md:w-80">
+                                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                    <Search className="w-4 h-4" />
+                                </span>
+                                <input
+                                    type="text"
+                                    placeholder="주문번호 또는 거래처명으로 검색..."
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white transition-all shadow-sm"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
                         </div>
                         <div className="flex gap-2 w-full md:w-auto">
                             <button
