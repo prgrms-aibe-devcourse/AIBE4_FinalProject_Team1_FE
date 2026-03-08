@@ -1,4 +1,4 @@
-import type {IngredientUnit} from "@/types/reference/ingredient";
+import type { IngredientUnit } from "@/types/reference/ingredient";
 
 // ── Stock Deduction ──────────────────────────────────────────────────────────
 export interface StockOrderDeductionRequest {
@@ -26,10 +26,11 @@ export interface StockInboundItemResponse {
     ingredientName: string | null;
     rawProductName: string;
     normalizedRawKey: string | null;
+    normalizedRawFull?: string | null;
     quantity: number;
     unitCost: number;
     expirationDate: string | null;
-    resolutionStatus: ResolutionStatus;
+    resolutionStatus: ResolutionStatus | null;
     specText: string | null;
 }
 
@@ -70,12 +71,23 @@ export interface Candidate {
     score: number;
 }
 
+export interface BulkResolveItemResponse {
+    inboundItemPublicId: string;
+    rawProductName: string;
+    normalizedRawKey: string | null;
+    normalizedRawFull: string | null;
+    resolutionStatus: ResolutionStatus | null;
+    ingredientPublicId: string | null;
+    ingredientName: string | null;
+}
+
 export interface BulkResolveResponse {
     totalCount: number;
     autoResolvedCount: number;
-    pendingCount: number;
+    pendingCount?: number;
     failedCount: number;
     skippedCount: number;
+    items: BulkResolveItemResponse[];
 }
 
 export interface BulkIngredientConfirmItem {
