@@ -20,8 +20,8 @@ export default function PurchaseOrderCreatePage() {
         const fetchVendors = async () => {
             try {
                 const storePublicId = requireStorePublicId();
-                const response = await getVendors(storePublicId, { status: 'ACTIVE', size: 1000 });
-                setVendors(response.data.content);
+                const response = await getVendors(storePublicId, 'ACTIVE');
+                setVendors(response);
             } catch (error) {
                 console.error('거래처 목록 조회 실패:', error);
                 alert('거래처 목록을 불러오는데 실패했습니다.');

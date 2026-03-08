@@ -1,51 +1,45 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { getStockInbounds } from "@/api/stock/stock.ts";
-import type { StockInboundResponse } from "@/types";
+import type { StockInboundListResponse } from "@/types";
 import { requireStorePublicId } from "@/utils/store";
+import InboundDetailModal from "@/components/stock/InboundDetailModal";
 
-type FilterKey = "ALL" | "DRAFT" | "CONFIRMED" | "NEED_MAPPING";
-
-function formatDateOnly(dateStr?: string | null) {
+function formatDateTime(dateStr?: string | null) {
     if (!dateStr) return "-";
-    const idx = dateStr.indexOf("T");
-    return idx > 0 ? dateStr.slice(0, idx) : dateStr;
-}
-
-function getResolvedCount(items: any[] | undefined) {
-    if (!items || items.length === 0) return 0;
-    return items.filter((it) => {
-        const status = it.resolutionStatus;
-        return status === "CONFIRMED" || status === "AUTO_RESOLVED" || it.ingredientId != null;
-    }).length;
-}
-
-function getRepresentativeLabel(inbound: StockInboundResponse) {
-    const items = inbound.items ?? [];
-    if (items.length === 0) return "품목 없음";
-
-    const confirmed = items.find((it) => it.ingredientName);
-    if (confirmed?.ingredientName) return confirmed.ingredientName;
-
-    const raw = items[0]?.rawProductName?.trim();
-    return raw && raw.length > 0 ? raw : "재료 매핑 필요";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
 
 export default function StockInboundPage() {
-    const navigate = useNavigate();
     const storePublicId = requireStorePublicId();
 
-    const [inbounds, setInbounds] = useState<StockInboundResponse[]>([]);
+    const [inbounds, setInbounds] = useState<StockInboundListResponse[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<FilterKey>("ALL");
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [selectedInboundId, setSelectedInboundId] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const fetchList = async () => {
+    const fetchList = async (page: number = 0) => {
         if (!storePublicId) return;
         try {
             setLoading(true);
-            const data = await getStockInbounds(storePublicId);
-            const inboundList = Array.isArray(data) ? data : data?.content || [];
-            setInbounds(inboundList);
+            const data = await getStockInbounds(storePublicId, page, 20);
+
+            // CONFIRMED 상태만 필터링
+            const confirmedInbounds = data.content?.filter(
+                (inbound) => inbound.status === "CONFIRMED"
+            ) || [];
+
+            setInbounds(confirmedInbounds);
+            setTotalPages(data.totalPages || 0);
+            setCurrentPage(page);
         } catch (error) {
             console.error("입고 목록 로드 실패:", error);
             setInbounds([]);
@@ -55,239 +49,186 @@ export default function StockInboundPage() {
     };
 
     useEffect(() => {
-        fetchList();
+        fetchList(0);
     }, [storePublicId]);
 
-    const stats = useMemo(() => {
-        const all = inbounds ?? [];
-        const draft = all.filter((x) => x.status !== "CONFIRMED");
-        const confirmed = all.filter((x) => x.status === "CONFIRMED");
-
-        const needMappingCount = all.reduce((acc, inbound) => {
-            const items = inbound.items ?? [];
-            const total = items.length;
-            const resolved = getResolvedCount(items);
-            return acc + Math.max(total - resolved, 0);
-        }, 0);
-
-        const needMappingInboundCount = all.filter((inbound) => {
-            const items = inbound.items ?? [];
-            if (items.length === 0) return false;
-            const resolved = getResolvedCount(items);
-            return resolved < items.length;
-        }).length;
-
-        return {
-            total: all.length,
-            draft: draft.length,
-            confirmed: confirmed.length,
-            needMappingCount,
-            needMappingInboundCount,
-        };
-    }, [inbounds]);
-
-    const filteredInbounds = useMemo(() => {
-        const all = inbounds ?? [];
-
-        if (filter === "ALL") return all;
-        if (filter === "DRAFT") return all.filter((x) => x.status !== "CONFIRMED");
-        if (filter === "CONFIRMED") return all.filter((x) => x.status === "CONFIRMED");
-        if (filter === "NEED_MAPPING") {
-            return all.filter((inbound) => {
-                const items = inbound.items ?? [];
-                if (items.length === 0) return false;
-                const resolved = getResolvedCount(items);
-                return resolved < items.length;
-            });
-        }
-        return all;
-    }, [inbounds, filter]);
-
     const handleRowClick = (publicId: string) => {
-        navigate(`/stock/inbound/${publicId}`);
+        setSelectedInboundId(publicId);
+        setIsModalOpen(true);
+    };
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        setSelectedInboundId(null);
+    };
+
+    const handlePageChange = (page: number) => {
+        fetchList(page);
     };
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="mx-auto w-full max-w-6xl px-6 py-8">
-                {/* 상단 헤더: 검정 바 제거, 흰 배경 타이틀 + 검정 CTA */}
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="mx-auto w-full max-w-7xl px-6 py-8">
+                {/* 헤더 */}
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
                     <div>
-                        <h1 className="text-2xl font-black tracking-tight text-gray-900">입고 내역</h1>
+                        <h1 className="text-3xl font-black tracking-tight text-gray-900">입고 내역</h1>
                         <p className="mt-1 text-sm text-gray-500">
-                            입고 목록을 확인하고, 미매핑 품목은 검수/매핑을 진행하세요.
+                            확정된 입고 목록을 확인할 수 있습니다.
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="button"
-                            onClick={fetchList}
-                            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-black text-gray-800 hover:bg-gray-50"
-                        >
-                            새로고침
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => navigate("/stock/inbound/new")}
-                            className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-black text-white hover:bg-gray-900 transition"
-                        >
-                            새 입고 등록
-                        </button>
-                    </div>
+                    <button
+                        type="button"
+                        onClick={() => fetchList(currentPage)}
+                        className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        새로고침
+                    </button>
                 </div>
 
-                {/* 필터/요약 */}
-                <div className="mt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <button
-                            type="button"
-                            onClick={() => setFilter("ALL")}
-                            className={`rounded-xl px-3 py-2 text-xs font-black border transition ${filter === "ALL"
-                                    ? "border-black bg-black text-white"
-                                    : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-                                }`}
-                        >
-                            전체 {stats.total}
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => setFilter("DRAFT")}
-                            className={`rounded-xl px-3 py-2 text-xs font-black border transition ${filter === "DRAFT"
-                                    ? "border-black bg-black text-white"
-                                    : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-                                }`}
-                        >
-                            검수 중 {stats.draft}
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => setFilter("CONFIRMED")}
-                            className={`rounded-xl px-3 py-2 text-xs font-black border transition ${filter === "CONFIRMED"
-                                    ? "border-black bg-black text-white"
-                                    : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-                                }`}
-                        >
-                            확정 {stats.confirmed}
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => setFilter("NEED_MAPPING")}
-                            className={`rounded-xl px-3 py-2 text-xs font-black border transition ${filter === "NEED_MAPPING"
-                                    ? "border-black bg-black text-white"
-                                    : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-                                }`}
-                        >
-                            미매핑 {stats.needMappingCount}
-                        </button>
-                    </div>
-
-                    <div className="text-xs text-gray-500">
-                        미매핑 품목 {stats.needMappingCount}개 · 매핑 필요한 입고 {stats.needMappingInboundCount}건
-                    </div>
-                </div>
-
-                {/* 리스트 */}
-                <div className="mt-4">
+                {/* 목록 */}
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
                     {loading ? (
-                        <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center text-gray-400 font-bold animate-pulse">
-                            데이터 로드 중...
+                        <div className="p-20 text-center">
+                            <div className="inline-block animate-spin text-4xl text-gray-300 mb-4">⟳</div>
+                            <p className="text-gray-400 font-bold">데이터를 불러오는 중...</p>
                         </div>
-                    ) : filteredInbounds.length === 0 ? (
-                        <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center text-gray-400 font-bold">
-                            표시할 입고 내역이 없습니다.
+                    ) : inbounds.length === 0 ? (
+                        <div className="p-20 text-center">
+                            <p className="text-gray-400 font-bold text-lg">확정된 입고 내역이 없습니다.</p>
+                            <p className="text-gray-400 text-sm mt-2">입고 등록 후 확정하면 여기에 표시됩니다.</p>
                         </div>
                     ) : (
-                        <div className="space-y-3">
-                            {filteredInbounds.map((inbound) => {
-                                const items = inbound.items ?? [];
-                                const totalItems = items.length;
-                                const resolved = getResolvedCount(items);
-                                const unresolved = Math.max(totalItems - resolved, 0);
+                        <>
+                            {/* 테이블 헤더 */}
+                            <div className="bg-gray-50 border-b border-gray-200 px-6 py-3">
+                                <div className="grid grid-cols-12 gap-4 text-xs font-black text-gray-500 uppercase">
+                                    <div className="col-span-3">거래처</div>
+                                    <div className="col-span-3">확정 일시</div>
+                                    <div className="col-span-2">확정자</div>
+                                    <div className="col-span-2">상태</div>
+                                    <div className="col-span-2 text-right">작업</div>
+                                </div>
+                            </div>
 
-                                const isConfirmed = inbound.status === "CONFIRMED";
-                                const showMapping = !isConfirmed && totalItems > 0;
-
-                                const dateText =
-                                    // inboundDate가 응답에 추가됐다면 우선 표시(없으면 confirmedAt)
-                                    formatDateOnly((inbound as any).inboundDate) !== "-"
-                                        ? formatDateOnly((inbound as any).inboundDate)
-                                        : formatDateOnly(inbound.confirmedAt);
-
-                                return (
+                            {/* 목록 */}
+                            <div className="divide-y divide-gray-100">
+                                {inbounds.map((inbound) => (
                                     <div
                                         key={inbound.inboundPublicId}
+                                        className="px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer"
                                         onClick={() => handleRowClick(inbound.inboundPublicId)}
-                                        className="cursor-pointer rounded-2xl border border-gray-200 bg-white p-5 hover:border-gray-300 hover:shadow-sm transition"
                                     >
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="min-w-0">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="truncate text-sm font-black text-gray-900">
-                                                        {inbound.vendorName || "거래처 미지정"}
-                                                    </div>
-
-                                                    <span
-                                                        className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase border ${isConfirmed
-                                                                ? "bg-gray-50 text-gray-700 border-gray-200"
-                                                                : "bg-amber-50 text-amber-700 border-amber-100"
-                                                            }`}
-                                                    >
-                                                        {isConfirmed ? "CONFIRMED" : "DRAFT"}
-                                                    </span>
-
-                                                    {showMapping && unresolved > 0 && (
-                                                        <span className="px-2 py-1 rounded-lg text-[10px] font-black bg-red-50 text-red-700 border border-red-100">
-                                                            미매핑 {unresolved}개
-                                                        </span>
-                                                    )}
+                                        <div className="grid grid-cols-12 gap-4 items-center">
+                                            {/* 거래처 */}
+                                            <div className="col-span-3">
+                                                <div className="font-bold text-gray-900">
+                                                    {inbound.vendorName || "거래처 미지정"}
                                                 </div>
-
-                                                <div className="mt-1 text-xs text-gray-500">
-                                                    {dateText} · ID:{" "}
-                                                    <span className="font-mono">{inbound.inboundPublicId.split("-")[0]}</span>
+                                                <div className="text-xs text-gray-400 font-mono mt-0.5">
+                                                    {inbound.inboundPublicId.split("-")[0]}
                                                 </div>
-
-                                                <div className="mt-3 text-sm text-gray-700">
-                                                    <span className="font-bold text-gray-900">대표 품목</span>{" "}
-                                                    <span>{getRepresentativeLabel(inbound)}</span>
-                                                    {totalItems > 1 && (
-                                                        <span className="ml-2 text-xs text-gray-400">외 {totalItems - 1}건</span>
-                                                    )}
-                                                </div>
-
-                                                {showMapping && (
-                                                    <div className="mt-3 text-xs text-gray-500">
-                                                        매핑 진행: <span className="font-bold text-gray-900">{resolved}</span> / {totalItems}
-                                                    </div>
-                                                )}
                                             </div>
 
-                                            <div className="flex flex-col items-end gap-2">
+                                            {/* 확정 일시 */}
+                                            <div className="col-span-3 text-sm text-gray-600">
+                                                {formatDateTime(inbound.confirmedAt)}
+                                            </div>
+
+                                            {/* 확정자 */}
+                                            <div className="col-span-2 text-sm text-gray-600">
+                                                {inbound.confirmedByUserName || "-"}
+                                            </div>
+
+                                            {/* 상태 */}
+                                            <div className="col-span-2">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200">
+                                                    CONFIRMED
+                                                </span>
+                                            </div>
+
+                                            {/* 작업 */}
+                                            <div className="col-span-2 text-right">
                                                 <button
                                                     type="button"
-                                                    className={`px-3 py-2 rounded-xl text-xs font-black transition border ${isConfirmed
-                                                            ? "bg-white border-gray-200 text-gray-700"
-                                                            : unresolved > 0
-                                                                ? "bg-black text-white border-black hover:bg-gray-900"
-                                                                : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
-                                                        }`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleRowClick(inbound.inboundPublicId);
+                                                    }}
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gray-900 text-white text-xs font-bold hover:bg-black transition-colors"
                                                 >
-                                                    {isConfirmed ? "상세 보기" : unresolved > 0 ? "검수/매핑" : "검수 완료"}
+                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                    상세
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
+                                ))}
+                            </div>
+
+                            {/* 페이징 */}
+                            {totalPages > 1 && (
+                                <div className="border-t border-gray-200 px-6 py-4 flex items-center justify-center gap-2">
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 0}
+                                        className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        이전
+                                    </button>
+
+                                    <div className="flex items-center gap-1">
+                                        {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                                            const pageNum = currentPage < 3 ? i : currentPage - 2 + i;
+                                            if (pageNum >= totalPages) return null;
+
+                                            return (
+                                                <button
+                                                    key={pageNum}
+                                                    onClick={() => handlePageChange(pageNum)}
+                                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
+                                                        pageNum === currentPage
+                                                            ? "bg-gray-900 text-white"
+                                                            : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                                    }`}
+                                                >
+                                                    {pageNum + 1}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage >= totalPages - 1}
+                                        className="px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        다음
+                                    </button>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
+
+            {/* 상세 모달 */}
+            <InboundDetailModal
+                isOpen={isModalOpen}
+                onClose={handleModalClose}
+                storePublicId={storePublicId}
+                inboundPublicId={selectedInboundId}
+                onConfirmSuccess={() => {
+                    fetchList(currentPage);
+                }}
+            />
         </div>
     );
 }

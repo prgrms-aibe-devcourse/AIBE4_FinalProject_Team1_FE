@@ -3,21 +3,79 @@ import type {
     VendorResponse,
     VendorCreateRequest,
     VendorUpdateRequest,
-    VendorSearchRequest
+    VendorStatus
 } from '@/types/reference/vendor';
 import type { PageResponse } from '@/types/common/common';
 
+export type GetVendorPageParams = {
+    search?: string;
+    status?: VendorStatus;
+    page?: number;
+    size?: number;
+    sort?: string;
+};
+
+function isPageResponse<T>(data: unknown): data is PageResponse<T> {
+    return typeof data === 'object' && data !== null && 'content' in data;
+}
+
+function toPageResponse<T>(data: T[] | PageResponse<T>): PageResponse<T> {
+    if (isPageResponse<T>(data)) {
+        return data;
+    }
+
+    return {
+        content: data,
+        totalElements: data.length,
+        totalPages: 1,
+        page: 0,
+        size: data.length,
+        hasNext: false,
+        hasPrevious: false
+    } as PageResponse<T>;
+}
+
 /**
- * 거래처 목록 조회
+ * 거래처 목록 조회 (기존 배열 반환 방식 유지)
  * GET /api/vendors/{storePublicId}
  *
  * @param storePublicId 매장 Public ID (UUID)
- * @param params 검색 및 페이지네이션 파라미터
+ * @param status 거래처 상태 (기본값: ACTIVE)
  */
-export const getVendors = (storePublicId: string, params?: VendorSearchRequest) =>
-    apiClient.get<PageResponse<VendorResponse>>(`/api/vendors/${storePublicId}`, {
-        params
-    });
+export const getVendors = async (
+    storePublicId: string,
+    status: string = 'ACTIVE'
+): Promise<VendorResponse[]> => {
+    const response = await apiClient.get<VendorResponse[] | PageResponse<VendorResponse>>(
+        `/api/vendors/${storePublicId}`,
+        {
+            params: { status }
+        }
+    );
+
+    const data = response.data;
+    if (Array.isArray(data)) {
+        return data;
+    }
+
+    return data.content ?? [];
+};
+
+/**
+ * 거래처 목록 페이지 조회
+ * GET /api/vendors/{storePublicId}
+ */
+export const getVendorPage = async (
+    storePublicId: string,
+    params: GetVendorPageParams = {}
+): Promise<PageResponse<VendorResponse>> => {
+    const response = await apiClient.get<VendorResponse[] | PageResponse<VendorResponse>>(
+        `/api/vendors/${storePublicId}`,
+        { params }
+    );
+
+    return toPageResponse(response.data);
+};
 
 /**
  * 거래처 상세 조회
