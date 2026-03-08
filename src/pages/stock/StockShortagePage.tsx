@@ -1,21 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-    Package,
-    Search,
-    ArrowRight,
-    ShoppingCart,
-    ChevronLeft,
-    ChevronRight,
-    Box,
-    Loader2,
-    CalendarDays,
-    RotateCcw,
-    Filter,
-    RefreshCw
-} from 'lucide-react';
 import { requireStorePublicId } from '@/utils/store.ts';
 import { getStockShortages } from '@/api/stock/stockShortage';
 import type { StockShortageGroup } from '@/types/stock/stockShortage';
+import {
+    RefreshCw,
+    Search,
+    Loader2,
+    Package,
+    ArrowRight,
+    RotateCcw,
+    ChevronLeft,
+    ChevronRight,
+    AlertCircle,
+    Calendar,
+    Filter
+} from 'lucide-react';
 
 const StockShortagePage: React.FC = () => {
     const storePublicId = requireStorePublicId();
@@ -161,23 +160,24 @@ const StockShortagePage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-900 pb-10">
-            <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 backdrop-blur shadow-sm">
+        <div className="min-h-screen bg-white text-gray-900 pb-10 pt-10">
+
+            <header className="border-b border-gray-100 bg-white/95 backdrop-blur">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
-                    <div className="flex h-16 items-center justify-between">
+                    <div className="flex h-20 items-center justify-between">
                         <div>
-                            <h1 className="text-xl font-bold tracking-tight text-black">재고 부족 현황</h1>
-                            <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-                                Store ID: {storePublicId.substring(0, 8)}...
+                            <h1 className="text-2xl font-black tracking-tight text-black">부족 품목 요약</h1>
+                            <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                관리 매장 식재료 실시간 현황
                             </p>
                         </div>
 
                         <button
                             onClick={handleRefresh}
-                            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                            className="inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3 text-sm font-black text-white transition hover:bg-gray-800 shadow-xl shadow-slate-200 active:scale-95"
                         >
-                            <RefreshCw className="h-4 w-4" />
-                            새로고침
+                            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                            현황 새로고침
                         </button>
                     </div>
                 </div>
@@ -190,7 +190,6 @@ const StockShortagePage: React.FC = () => {
                             <span className="text-xs font-black uppercase tracking-widest text-gray-400">
                                 주문 기준
                             </span>
-                            <Box className="h-4 w-4 text-black" />
                         </div>
                         <div className="text-2xl font-black text-black">{data.totalElements}</div>
                         <p className="mt-1 text-sm text-gray-500">전체 부족 주문 수</p>
@@ -201,7 +200,6 @@ const StockShortagePage: React.FC = () => {
                             <span className="text-xs font-black uppercase tracking-widest text-gray-400">
                                 현재 화면
                             </span>
-                            <Package className="h-4 w-4 text-black" />
                         </div>
                         <div className="text-2xl font-black text-black">{visibleShortageCount}</div>
                         <p className="mt-1 text-sm text-gray-500">현재 조건에서 보이는 부족 품목 수</p>
@@ -212,7 +210,6 @@ const StockShortagePage: React.FC = () => {
                             <span className="text-xs font-black uppercase tracking-widest text-gray-400">
                                 조회 기간
                             </span>
-                            <CalendarDays className="h-4 w-4 text-black" />
                         </div>
                         <div className="text-base font-black text-black break-keep">{formatDateRangeLabel()}</div>
                         <p className="mt-1 text-sm text-gray-500">기간 지정 없으면 전체 조회</p>
@@ -221,7 +218,7 @@ const StockShortagePage: React.FC = () => {
 
                 <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                     <div className="mb-4 flex items-center gap-2">
-                        <Filter className="h-4 w-4 text-gray-500" />
+                        <Filter className="h-4 w-4 text-gray-400" />
                         <h2 className="text-sm font-black tracking-wide text-gray-700">조회 조건</h2>
                     </div>
 
@@ -249,13 +246,13 @@ const StockShortagePage: React.FC = () => {
                         <div className="lg:col-span-4">
                             <label className="mb-2 block text-xs font-bold text-gray-500">검색</label>
                             <div className="group relative">
-                                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-black" />
+                                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-black" />
                                 <input
                                     type="text"
                                     placeholder="주문 번호 또는 품목명을 입력하세요"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-12 pr-4 outline-none transition focus:border-black focus:ring-4 focus:ring-black/5"
+                                    className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-11 pr-4 outline-none transition focus:border-black focus:ring-4 focus:ring-black/5"
                                 />
                             </div>
                         </div>
@@ -270,10 +267,11 @@ const StockShortagePage: React.FC = () => {
                             </button>
                             <button
                                 onClick={handleResetFilters}
-                                className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 font-bold text-gray-700 transition hover:bg-gray-50"
+                                className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 font-bold text-gray-700 transition hover:bg-gray-50 gap-2"
                                 title="초기화"
                             >
                                 <RotateCcw className="h-4 w-4" />
+                                초기화
                             </button>
                         </div>
                     </div>
@@ -285,8 +283,8 @@ const StockShortagePage: React.FC = () => {
 
                 <div className="space-y-6">
                     {isLoading ? (
-                        <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-24 text-gray-400 shadow-sm">
-                            <Loader2 className="mb-4 h-10 w-10 animate-spin text-black" />
+                        <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-24 text-gray-400 shadow-sm gap-3">
+                            <Loader2 className="h-8 w-8 animate-spin text-black" />
                             <p className="font-bold text-gray-600">데이터를 불러오는 중입니다...</p>
                         </div>
                     ) : filteredContent.length > 0 ? (
@@ -307,7 +305,7 @@ const StockShortagePage: React.FC = () => {
                                     </div>
 
                                     <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-bold text-gray-500">
-                                        <ShoppingCart className="h-3 w-3 text-gray-400" />
+                                        <Calendar className="h-3 w-3 text-gray-400" />
                                         발생 일시: {formatDate(group.createdAt)}
                                     </div>
                                 </div>
@@ -330,8 +328,8 @@ const StockShortagePage: React.FC = () => {
                                                 >
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100">
-                                                                <Package className="h-4 w-4 text-gray-500" />
+                                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100/80">
+                                                                <Package className="h-4 w-4 text-gray-400" />
                                                             </div>
                                                             <div>
                                                                 <div className="text-sm font-bold text-gray-900">
@@ -353,8 +351,8 @@ const StockShortagePage: React.FC = () => {
                                                     </td>
 
                                                     <td className="bg-gray-100 px-6 py-4 text-center">
-                                                        <span className="inline-flex items-center font-black text-black">
-                                                            <ArrowRight className="mr-1 h-3 w-3" />
+                                                        <span className="inline-flex items-center gap-1.5 font-black text-black">
+                                                            <ArrowRight className="h-3.5 w-3.5 text-gray-400" />
                                                             {item.shortageAmount.toLocaleString()} {item.unit}
                                                         </span>
                                                     </td>
@@ -367,7 +365,7 @@ const StockShortagePage: React.FC = () => {
                         ))
                     ) : (
                         <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-white py-24 text-gray-400 shadow-sm">
-                            <Package className="mb-4 h-12 w-12 opacity-20" />
+                            <AlertCircle className="mb-4 h-12 w-12 opacity-20 text-gray-300" />
                             <p className="font-bold text-gray-700">조건에 맞는 재고 부족 내역이 없습니다.</p>
                             <p className="mt-2 text-sm text-gray-400">기간을 넓히거나 검색어를 초기화해보세요.</p>
                         </div>
@@ -390,8 +388,8 @@ const StockShortagePage: React.FC = () => {
                                 onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
                                 disabled={currentPage === 0}
                                 className={`inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition ${currentPage === 0
-                                        ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
-                                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                                    ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
+                                    : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                                     }`}
                             >
                                 <ChevronLeft className="h-4 w-4" />
@@ -417,8 +415,8 @@ const StockShortagePage: React.FC = () => {
                                     key={pageIndex}
                                     onClick={() => setCurrentPage(pageIndex)}
                                     className={`h-10 w-10 rounded-lg border text-sm font-bold transition-all ${currentPage === pageIndex
-                                            ? 'border-black bg-black text-white'
-                                            : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                                        ? 'border-black bg-black text-white'
+                                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     {pageIndex + 1}
@@ -443,8 +441,8 @@ const StockShortagePage: React.FC = () => {
                                 onClick={() => setCurrentPage((p) => Math.min(data.totalPages - 1, p + 1))}
                                 disabled={currentPage === data.totalPages - 1}
                                 className={`inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition ${currentPage === data.totalPages - 1
-                                        ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
-                                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                                    ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
+                                    : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                                     }`}
                             >
                                 다음

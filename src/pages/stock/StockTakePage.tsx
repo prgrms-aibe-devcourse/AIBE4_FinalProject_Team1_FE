@@ -1,18 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-    ClipboardCheck,
-    Save,
-    CheckCircle,
-    Search,
-    AlertCircle,
-    ChevronLeft,
-    Download,
-    Printer,
-    Info
-} from 'lucide-react';
 import { requireStorePublicId } from '@/utils/store.ts';
-import { getIngredients } from '@/api/reference/ingredient.ts';
+import { getAllIngredients } from '@/api/reference/ingredient.ts';
 import {
     createStockTakeSheet,
     confirmStockTakeSheet,
@@ -25,6 +14,17 @@ import type {
     StockTakeDraftSaveRequest,
     StockTakeConfirmRequest
 } from '@/types/stock/stockTake';
+import {
+    Save,
+    Search,
+    AlertCircle,
+    ChevronLeft,
+    Download,
+    Printer,
+    CheckCircle2,
+    Package,
+    HelpCircle
+} from 'lucide-react';
 
 type ViewStockTakeItem = {
     ingredientPublicId: string;
@@ -93,7 +93,7 @@ const StockTakePage: React.FC = () => {
                     setStatus('DRAFT');
                     setTitle(`${new Date().toLocaleDateString()} 정기 재고 실사`);
 
-                    const ingredients = await getIngredients(storePublicId);
+                    const ingredients = await getAllIngredients(storePublicId);
 
                     const initialItems: ViewStockTakeItem[] = ingredients.map((ing: any) => ({
                         ingredientPublicId: ing.ingredientPublicId,
@@ -303,19 +303,17 @@ const StockTakePage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-            <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 pt-10">
+
+            <header className="bg-white border-b border-gray-100 no-print">
+                <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => navigate('/stock/stocktakes')}
-                            className="p-2 hover:bg-slate-100 rounded-lg transition text-slate-500"
+                            className="p-3 bg-slate-50 text-slate-400 hover:text-black hover:bg-white border border-transparent hover:border-slate-200 rounded-2xl transition-all"
                         >
-                            <ChevronLeft size={20} />
+                            <ChevronLeft size={24} />
                         </button>
-
-                        <div className="h-6 w-px bg-slate-200" />
-
                         <div>
                             <div className="flex items-center gap-2">
                                 <input
@@ -328,15 +326,13 @@ const StockTakePage: React.FC = () => {
                                         }
                                     }}
                                     disabled={status === 'CONFIRMED'}
-                                    className="text-lg font-bold text-slate-800 bg-transparent border-none outline-none focus:ring-2 focus:ring-emerald-200 rounded px-1 transition-all"
+                                    className="text-2xl font-black text-slate-800 bg-transparent border-none outline-none focus:ring-2 focus:ring-black/5 rounded px-1 transition-all italic tracking-tighter"
                                 />
 
                                 <span
                                     className={`text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider ${status === 'CONFIRMED'
-                                        ? 'bg-blue-500 text-white'
-                                        : status === 'SAVED'
-                                            ? 'bg-emerald-500 text-white'
-                                            : 'bg-amber-400 text-white'
+                                        ? 'bg-emerald-500 text-white'
+                                        : 'bg-blue-500 text-white'
                                         }`}
                                 >
                                     {status === 'CONFIRMED'
@@ -347,29 +343,29 @@ const StockTakePage: React.FC = () => {
                                 </span>
                             </div>
 
-                            <p className="text-xs text-slate-400 font-medium">
-                                Store ID: {storePublicId.substring(0, 8)}...
+                            <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                전표 PID: {sheetPublicId?.substring(0, 16).toUpperCase() || 'NEW SHEET'}
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={handleSave}
                             disabled={isProcessing || status === 'CONFIRMED'}
-                            className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition disabled:opacity-50"
+                            className="hidden md:flex items-center gap-2 px-6 py-3 text-sm font-black text-white bg-black hover:bg-slate-800 rounded-2xl transition shadow-xl shadow-slate-200 disabled:opacity-30 active:scale-95"
                         >
-                            <Save size={18} className={isProcessing ? 'animate-spin' : ''} />
-                            임시저장
+                            <Save size={18} />
+                            임시 저장
                         </button>
 
                         <button
                             onClick={handleConfirm}
                             disabled={isProcessing || status === 'CONFIRMED'}
-                            className="flex items-center gap-2 px-5 py-2 text-sm font-black text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition shadow-lg shadow-slate-200 disabled:bg-slate-300"
+                            className="flex items-center gap-2 px-8 py-3 text-sm font-black text-white bg-emerald-600 hover:bg-emerald-700 rounded-2xl transition shadow-xl shadow-emerald-100 disabled:opacity-30 active:scale-95"
                         >
-                            <CheckCircle size={18} />
-                            최종확정
+                            <CheckCircle2 size={18} />
+                            실사 확정
                         </button>
                     </div>
                 </div>
@@ -378,7 +374,7 @@ const StockTakePage: React.FC = () => {
             <main className="max-w-7xl mx-auto px-4 py-6">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-32 bg-white rounded-2xl border border-slate-200 shadow-sm">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4" />
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4" />
                         <p className="text-slate-500 font-medium">실사 정보를 불러오는 중입니다...</p>
                     </div>
                 ) : (
@@ -396,14 +392,14 @@ const StockTakePage: React.FC = () => {
                                             / {summary.total}
                                         </span>
                                     </h2>
-                                    <div className="text-emerald-500 font-bold text-sm">
+                                    <div className="text-green-500 font-bold text-sm">
                                         {Math.round(summary.progress)}%
                                     </div>
                                 </div>
 
                                 <div className="w-full h-1.5 bg-slate-100 rounded-full mt-3 overflow-hidden">
                                     <div
-                                        className="h-full bg-emerald-500 transition-all duration-500"
+                                        className="h-full bg-green-500 transition-all duration-500"
                                         style={{ width: `${summary.progress}%` }}
                                     />
                                 </div>
@@ -412,7 +408,7 @@ const StockTakePage: React.FC = () => {
                             <div className="md:col-span-2 bg-slate-900 rounded-2xl p-5 shadow-xl flex items-center justify-between text-white">
                                 <div>
                                     <h3 className="font-bold flex items-center gap-2">
-                                        <Info size={16} className="text-amber-400" />
+                                        <HelpCircle size={16} className="text-emerald-500" />
                                         실사 가이드
                                     </h3>
                                     <p className="text-xs text-slate-400 mt-1 leading-relaxed">
@@ -428,18 +424,14 @@ const StockTakePage: React.FC = () => {
                                 </div>
 
                                 <div className="hidden lg:block opacity-20">
-                                    <ClipboardCheck size={64} />
                                 </div>
                             </div>
                         </section>
 
                         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                             <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row justify-between gap-4">
-                                <div className="relative flex-1 max-w-md">
-                                    <Search
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                                        size={18}
-                                    />
+                                <div className="relative flex-1 max-w-md group">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-black transition-colors" size={16} />
                                     <input
                                         type="text"
                                         placeholder="품목명 또는 코드 검색..."
@@ -451,18 +443,18 @@ const StockTakePage: React.FC = () => {
 
                                 <div className="flex items-center gap-2">
                                     <button
-                                        className="p-2.5 text-slate-500 hover:bg-slate-100 rounded-xl transition"
-                                        title="엑셀 내보내기"
+                                        className="px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition flex items-center gap-1.5"
                                         type="button"
                                     >
-                                        <Download size={20} />
+                                        <Download size={14} />
+                                        다운로드
                                     </button>
                                     <button
-                                        className="p-2.5 text-slate-500 hover:bg-slate-100 rounded-xl transition"
-                                        title="인쇄"
+                                        className="px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition flex items-center gap-1.5"
                                         type="button"
                                     >
-                                        <Printer size={20} />
+                                        <Printer size={14} />
+                                        인쇄
                                     </button>
                                 </div>
                             </div>
@@ -492,11 +484,16 @@ const StockTakePage: React.FC = () => {
                                                             }`}
                                                     >
                                                         <td className="px-6 py-4">
-                                                            <div className="font-bold text-slate-800 group-hover:text-blue-600 transition">
-                                                                {item.name}
-                                                            </div>
-                                                            <div className="text-[10px] text-slate-400 font-medium">
-                                                                CODE: {item.ingredientPublicId}
+                                                            <div className="flex items-center gap-2">
+                                                                <Package size={16} className="text-slate-200" />
+                                                                <div>
+                                                                    <div className="font-bold text-slate-800 group-hover:text-blue-600 transition">
+                                                                        {item.name}
+                                                                    </div>
+                                                                    <div className="text-[10px] text-slate-400 font-medium">
+                                                                        CODE: {item.ingredientPublicId}
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </td>
 
@@ -507,7 +504,7 @@ const StockTakePage: React.FC = () => {
                                                         <td className="px-6 py-4">
                                                             <input
                                                                 type="number"
-                                                                step="0.01"
+                                                                step="1"
                                                                 value={stockTakeQty === 0 ? '' : stockTakeQty}
                                                                 disabled={status === 'CONFIRMED'}
                                                                 onChange={(e) =>
@@ -546,7 +543,10 @@ const StockTakePage: React.FC = () => {
                                                     colSpan={5}
                                                     className="px-6 py-20 text-center text-slate-400 italic font-medium"
                                                 >
-                                                    일치하는 품목이 없습니다.
+                                                    <div className="flex flex-col items-center gap-2">
+                                                        <AlertCircle size={32} className="opacity-20" />
+                                                        일치하는 품목이 없습니다.
+                                                    </div>
                                                 </td>
                                             </tr>
                                         )}
@@ -590,7 +590,6 @@ const StockTakePage: React.FC = () => {
                             </div>
 
                             <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
-                                <AlertCircle size={14} className="text-amber-500" />
                                 최종 확정 시 현재 입력된 값이 그대로 반영되며, 이후 장부 재고가 업데이트됩니다.
                             </div>
                         </div>

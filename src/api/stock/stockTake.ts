@@ -1,18 +1,26 @@
 import apiClient from '../user/client.ts';
+import type { PageResponse } from '@/types/common/common';
 import type {
     StockTakeSheetResponse,
     StockTakeSheetCreateRequest,
     StockTakeDetailResponse,
     StockTakeDraftSaveRequest,
     StockTakeConfirmRequest,
+    StockTakeSheetSearchRequest,
 } from '../../types/stock/stockTake.ts';
 
 /**
  * 재고 실사 시트 목록 조회
  * GET /api/stocktakes/{storePublicId}
  */
-export async function getStockTakeSheets(storePublicId: string): Promise<StockTakeSheetResponse[]> {
-    const response = await apiClient.get<StockTakeSheetResponse[]>(`/api/stocktakes/${storePublicId}`);
+export async function getStockTakeSheets(
+    storePublicId: string,
+    params?: StockTakeSheetSearchRequest
+): Promise<PageResponse<StockTakeSheetResponse>> {
+    const response = await apiClient.get<PageResponse<StockTakeSheetResponse>>(
+        `/api/stocktakes/${storePublicId}`,
+        { params }
+    );
     return response.data;
 }
 

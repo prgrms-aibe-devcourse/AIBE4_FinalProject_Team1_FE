@@ -132,7 +132,7 @@ function MegaMenu({
             {sections.map((sec) => (
               <div key={sec.title} className="min-w-[120px]">
                 {/* 큰 카테고리(굵게/조금 크게) */}
-                <div className="text-[14px] font-extrabold text-slate-400">
+                <div className="text-[14px] font-black text-slate-800">
                   {sec.title}
                 </div>
 
@@ -144,7 +144,7 @@ function MegaMenu({
                         type="button"
                         onClick={() => onNavigate(it.path)}
                         className={cn(
-                          "text-[13px] font-semibold text-slate-900",
+                          "text-[13px] font-bold text-slate-700",
                           "rounded-md px-2 py-1 -ml-2",
                           "hover:bg-slate-100 transition-colors",
                         )}
@@ -215,7 +215,7 @@ export default function Navbar() {
   };
 
   const topItemBase =
-    "text-sm font-semibold px-3 py-2 rounded-md transition-colors text-slate-700 hover:text-slate-900 hover:bg-slate-100";
+    "text-sm font-bold px-3 py-2 rounded-md transition-colors text-slate-700 hover:text-slate-900 hover:bg-slate-100";
   const topItemOpen = "bg-slate-100 text-slate-900";
 
   const handleProtectedNav = (path: string) => {
