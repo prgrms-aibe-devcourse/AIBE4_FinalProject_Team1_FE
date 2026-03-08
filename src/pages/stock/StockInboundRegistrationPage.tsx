@@ -38,6 +38,10 @@ type OCRItemShape = OCRItem & {
     } | null;
 };
 
+type InboundDetailNavigationState = {
+    resolvedNormalizedKeyByItemId: Record<string, string>;
+};
+
 function newId() {
     return crypto.randomUUID?.() ?? `${Date.now()}_${Math.random()}`;
 }
@@ -254,9 +258,20 @@ export default function StockInboundRegistrationPage() {
             const inboundPublicId = createResponse.inboundPublicId;
 
             await normalizeAllProductNames(storeId, inboundPublicId);
-            await resolveAllIngredients(storeId, inboundPublicId);
+            const resolveResponse = await resolveAllIngredients(storeId, inboundPublicId);
 
-            navigate(`/stock/inbound/${inboundPublicId}`);
+            const resolvedNormalizedKeyByItemId = resolveResponse.items.reduce<Record<string, string>>((acc, item) => {
+                if (item.normalizedRawKey) {
+                    acc[item.inboundItemPublicId] = item.normalizedRawKey;
+                }
+                return acc;
+            }, {});
+
+            navigate(`/stock/inbound/${inboundPublicId}`, {
+                state: {
+                    resolvedNormalizedKeyByItemId,
+                } satisfies InboundDetailNavigationState,
+            });
         } catch (error) {
             console.error(error);
             alert("입고 생성 또는 정규화 처리 중 오류가 발생했습니다. 다시 시도해주십시오.");

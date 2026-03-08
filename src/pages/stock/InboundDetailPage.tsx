@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { requireStorePublicId } from '@/utils/store';
 import {
     fetchInboundDetail,
@@ -26,6 +26,10 @@ type ConfirmIngredientPayload = {
     existingIngredientPublicId?: string;
     newIngredientName?: string;
     newIngredientUnit?: string;
+};
+
+type InboundDetailLocationState = {
+    resolvedNormalizedKeyByItemId?: Record<string, string>;
 };
 
 function StatusBadge({ status }: { status: string | null }) {
@@ -74,15 +78,21 @@ export default function InboundDetailPage() {
     const { inboundPublicId } = useParams<{ inboundPublicId: string }>();
     const storePublicId = requireStorePublicId();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const locationState = location.state as InboundDetailLocationState | null;
 
     const [inbound, setInbound] = useState<StockInboundResponse | null>(null);
-
     const [loadingDetail, setLoadingDetail] = useState(true);
     const [loadingConfirmFinal, setLoadingConfirmFinal] = useState(false);
     const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [modalItem, setModalItem] = useState<StockInboundItemResponse | null>(null);
+
+    const [resolvedNormalizedKeyByItemId] = useState<Record<string, string>>(
+        () => locationState?.resolvedNormalizedKeyByItemId ?? {}
+    );
 
     const [toast, setToast] = useState<ToastState>({
         visible: false,
@@ -355,6 +365,7 @@ export default function InboundDetailPage() {
                             {inbound.items.map((item, idx) => {
                                 const itemId = item.inboundItemPublicId;
                                 const isLoadingThis = loadingItemId === itemId;
+                                const resolvedNormalizedRawKey = resolvedNormalizedKeyByItemId[itemId];
 
                                 let actionLabel = '재료 선택';
                                 if (item.resolutionStatus === 'FAILED') actionLabel = '매핑';
@@ -371,9 +382,9 @@ export default function InboundDetailPage() {
 
                                         <td className="px-4 py-4">
                                             {item.ingredientName ? (
-                                                <span className="font-bold">
-                                                        {item.ingredientName}
-                                                    </span>
+                                                <span className="font-bold">{item.ingredientName}</span>
+                                            ) : resolvedNormalizedRawKey ? (
+                                                <span className="font-bold">{resolvedNormalizedRawKey}</span>
                                             ) : item.normalizedRawKey ? (
                                                 <span className="font-bold">{item.normalizedRawKey}</span>
                                             ) : (

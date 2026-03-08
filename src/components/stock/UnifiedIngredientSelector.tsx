@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Candidate, StockInboundItemResponse, IngredientResponse } from '@/types';
+import type { PageResponse } from '@/types/common/common';
 import { getAllIngredients } from '@/api/reference/ingredient';
 import { requireStorePublicId } from '@/utils/store';
 
@@ -20,13 +21,55 @@ interface UnifiedIngredientSelectorProps {
     onClose: () => void;
 }
 
+function toIngredientList(
+    response: IngredientResponse[] | PageResponse<IngredientResponse>
+): IngredientResponse[] {
+    if (Array.isArray(response)) {
+        return response;
+    }
+    return response.content ?? [];
+}
+
+function getPreferredMappedLabel(item: StockInboundItemResponse | null): string {
+    if (!item) return '';
+    return (
+        item.ingredientName?.trim() ||
+        item.normalizedRawKey?.trim() ||
+        ''
+    );
+}
+
+function getInitialSearchQuery(item: StockInboundItemResponse | null): string {
+    if (!item) return '';
+    return (
+        item.ingredientName?.trim() ||
+        item.normalizedRawKey?.trim() ||
+        item.rawProductName?.trim() ||
+        ''
+    );
+}
+
+function getInitialCreateName(item: StockInboundItemResponse | null, currentSearchQuery: string): string {
+    if (currentSearchQuery.trim()) {
+        return currentSearchQuery.trim();
+    }
+
+    if (!item) return '';
+
+    return (
+        item.normalizedRawKey?.trim() ||
+        item.rawProductName?.trim() ||
+        ''
+    );
+}
+
 export default function UnifiedIngredientSelector({
-    isOpen,
-    item,
-    suggestions,
-    onConfirm,
-    onClose,
-}: UnifiedIngredientSelectorProps) {
+                                                      isOpen,
+                                                      item,
+                                                      suggestions,
+                                                      onConfirm,
+                                                      onClose,
+                                                  }: UnifiedIngredientSelectorProps) {
     const storePublicId = requireStorePublicId();
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -40,13 +83,23 @@ export default function UnifiedIngredientSelector({
 
         setLoadingIngredients(true);
         getAllIngredients(storePublicId)
-            .then(setAllIngredients)
+            .then((response) => {
+                setAllIngredients(toIngredientList(response));
+            })
             .catch(console.error)
             .finally(() => setLoadingIngredients(false));
 
-        setSearchQuery(item.ingredientName?.trim() || item.rawProductName || '');
+        setSearchQuery(getInitialSearchQuery(item));
         setCreateUnit('EA');
     }, [isOpen, storePublicId, item]);
+
+    const currentMappedLabel = useMemo(() => {
+        return getPreferredMappedLabel(item);
+    }, [item]);
+
+    const createIngredientName = useMemo(() => {
+        return getInitialCreateName(item, searchQuery);
+    }, [item, searchQuery]);
 
     const availableUnits = useMemo<IngredientUnit[]>(() => {
         const units = allIngredients
@@ -84,10 +137,10 @@ export default function UnifiedIngredientSelector({
     }, [searchQuery, allIngredients]);
 
     const exactNameExists = useMemo(() => {
-        const query = searchQuery.trim().toLowerCase();
+        const query = createIngredientName.trim().toLowerCase();
         if (!query) return false;
         return allIngredients.some((ing) => ing.name.trim().toLowerCase() === query);
-    }, [allIngredients, searchQuery]);
+    }, [allIngredients, createIngredientName]);
 
     const handleSelectExisting = async (ingredientPublicId: string) => {
         if (!item || submitting) return;
@@ -108,13 +161,13 @@ export default function UnifiedIngredientSelector({
     };
 
     const handleCreateNew = async () => {
-        if (!item || !storePublicId || !searchQuery.trim() || submitting) return;
+        if (!item || !storePublicId || !createIngredientName.trim() || submitting) return;
 
         try {
             setSubmitting(true);
             await onConfirm({
                 inboundItemPublicId: item.inboundItemPublicId,
-                newIngredientName: searchQuery.trim(),
+                newIngredientName: createIngredientName.trim(),
                 newIngredientUnit: createUnit,
             });
             onClose();
@@ -142,7 +195,7 @@ export default function UnifiedIngredientSelector({
                         <div className="mt-2 text-xs text-gray-500">
                             현재 매핑:
                             <span className="ml-1 font-bold text-gray-800">
-                                {item.ingredientName ?? '미매핑'}
+                                {currentMappedLabel || '미매핑'}
                             </span>
                         </div>
                     </div>
@@ -233,7 +286,7 @@ export default function UnifiedIngredientSelector({
                         </div>
                     </div>
 
-                    {searchQuery.trim() && !exactNameExists && (
+                    {createIngredientName.trim() && !exactNameExists && (
                         <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                             <div className="mb-3">
                                 <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-tighter">
@@ -273,13 +326,14 @@ export default function UnifiedIngredientSelector({
 
                             <button
                                 onClick={handleCreateNew}
-                                disabled={submitting || !searchQuery.trim()}
-                                className={`mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black transition-all ${submitting || !searchQuery.trim()
+                                disabled={submitting || !createIngredientName.trim()}
+                                className={`mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black transition-all ${
+                                    submitting || !createIngredientName.trim()
                                         ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
                                         : 'bg-black text-white hover:bg-gray-900'
-                                    }`}
+                                }`}
                             >
-                                {submitting ? '처리 중...' : `'${searchQuery.trim()}' 새 재료로 생성 후 확정`}
+                                {submitting ? '처리 중...' : `'${createIngredientName.trim()}' 새 재료로 생성 후 확정`}
                             </button>
                         </div>
                     )}
