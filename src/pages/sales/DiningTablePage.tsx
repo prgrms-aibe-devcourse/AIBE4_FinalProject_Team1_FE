@@ -214,20 +214,10 @@ const DiningTablePage = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
-            <nav className="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-70 shadow-sm no-print">
-                <div className="max-w-6xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-2 text-black font-black text-xl cursor-default uppercase tracking-tighter">
-                        <span>테이블 마스터 관리</span>
-                    </div>
-                    <div className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 uppercase tracking-widest">
-                        Store PID: <span className="text-slate-900 font-mono ml-1">{storePublicId.substring(0, 8)}</span>
-                    </div>
-                </div>
-            </nav>
 
             {/* 상단 일괄 액션바 */}
             {selectedIds.length > 0 && (
-                <div className="fixed top-[68px] left-0 w-full z-[60] bg-black text-white p-4 shadow-2xl animate-in slide-in-from-top duration-300 no-print">
+                <div className="fixed top-0 left-0 w-full z-[60] bg-black text-white p-4 shadow-2xl animate-in slide-in-from-top duration-300 no-print">
                     <div className="max-w-6xl mx-auto flex justify-between items-center">
                         <div className="flex items-center gap-4">
                             <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">
@@ -257,9 +247,8 @@ const DiningTablePage = () => {
                 <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
                     <div className="flex items-center">
                         <div className="text-black">
-                            <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.4em] opacity-80">
-                                관리 매장 식별 코드: {storePublicId}
-                            </p>
+                            <h1 className="text-3xl font-black text-black tracking-tight uppercase">테이블 마스터 관리</h1>
+                            <p className="text-gray-500 text-sm mt-1 font-bold">QR 코드를 생성하고 배치도를 관리하세요.</p>
                         </div>
                     </div>
 

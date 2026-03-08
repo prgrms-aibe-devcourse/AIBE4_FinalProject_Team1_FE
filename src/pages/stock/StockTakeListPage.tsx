@@ -131,24 +131,14 @@ const StockTakeListPage = () => {
     };
 
     return (
-        <div className="bg-slate-50 min-h-screen">
-            <nav className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-20 shadow-sm">
-                <div className="max-w-6xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-2 text-black font-black text-xl cursor-default uppercase tracking-tighter">
-                        <span>재고 실사 관리</span>
-                    </div>
-                    <div className="text-sm font-medium text-slate-400">
-                        매장 코드: <span className="text-slate-800">{storePublicId.substring(0, 8)}</span>
-                    </div>
-                </div>
-            </nav>
+        <div className="bg-slate-50 min-h-screen pt-10">
 
             <main className="max-w-6xl mx-auto p-6">
                 <div className="animate-in fade-in duration-500">
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold text-slate-800">재고 실사 내역</h1>
-                            <p className="text-slate-500 text-sm mt-1">
+                            <h1 className="text-3xl font-black text-black tracking-tight">재고 실사 내역</h1>
+                            <p className="text-slate-500 text-sm mt-1 font-medium">
                                 이전에 작성된 실사 전표를 확인하거나 새로 작성합니다.
                             </p>
                         </div>
