@@ -37,8 +37,8 @@ const UNIT_LABELS: Record<IngredientUnit, string> = {
 
 const StatusBadge = ({ status }: { status: IngredientStatus }) => {
     const styles: Record<IngredientStatus, string> = {
-        ACTIVE: 'bg-green-500/10 text-green-400 border border-green-500/20',
-        INACTIVE: 'bg-zinc-800 text-zinc-400 border border-zinc-700',
+        ACTIVE: 'bg-green-50 text-green-700 border border-green-200',
+        INACTIVE: 'bg-gray-100 text-gray-500 border border-gray-200',
     };
 
     const labels: Record<IngredientStatus, string> = {
@@ -160,8 +160,7 @@ export default function IngredientPage() {
             await deleteIngredient(storePublicId, ingredientPublicId);
             alert('삭제되었습니다.');
 
-            const nextPage =
-                ingredients.length === 1 && page > 0 ? page - 1 : page;
+            const nextPage = ingredients.length === 1 && page > 0 ? page - 1 : page;
 
             setPage(nextPage);
             await loadIngredients(nextPage, debouncedSearchTerm);
@@ -175,13 +174,13 @@ export default function IngredientPage() {
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                 <div className="relative w-full lg:w-96">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-500">
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                         <Search className="w-4 h-4" />
                     </span>
                     <input
                         type="text"
                         placeholder="식재료 명칭으로 검색..."
-                        className="w-full pl-10 pr-4 py-3 border border-zinc-800 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none bg-zinc-950 text-zinc-100 placeholder:text-zinc-500 transition-all shadow-sm"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none bg-white text-gray-900 placeholder:text-gray-400 transition-all shadow-sm"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -189,50 +188,67 @@ export default function IngredientPage() {
 
                 <button
                     onClick={() => setView('CREATE')}
-                    className="w-full lg:w-auto bg-green-500 text-black px-5 py-3 rounded-xl hover:bg-green-400 transition flex items-center justify-center gap-2 font-semibold shadow-lg"
+                    className="w-full lg:w-auto bg-black text-white px-5 py-3 rounded-xl hover:bg-gray-800 transition flex items-center justify-center gap-2 font-semibold shadow-sm"
                 >
                     <Plus className="w-4 h-4" />
                     식재료 추가
                 </button>
             </div>
 
-            <div className="bg-zinc-950 rounded-2xl shadow-sm border border-zinc-800 overflow-hidden">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 px-6 py-4 border-b border-zinc-800 bg-black">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 px-6 py-4 border-b border-gray-200 bg-white">
                     <div>
-                        <h2 className="text-lg font-bold text-white">식재료 목록</h2>
-                        <p className="text-sm text-zinc-400 mt-1">{pageLabel}</p>
+                        <h2 className="text-lg font-bold text-gray-900">식재료 목록</h2>
+                        <p className="text-sm text-gray-500 mt-1">{pageLabel}</p>
                     </div>
 
-                    <div className="text-sm text-zinc-500">
+                    <div className="text-sm text-gray-500">
                         페이지 {totalPages === 0 ? 0 : page + 1} / {totalPages}
                     </div>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-zinc-900 border-b border-zinc-800">
+                        <thead className="bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th className="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-wider">식재료명</th>
-                                <th className="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-wider">단위</th>
-                                <th className="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-wider">알림 임계치</th>
-                                <th className="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-wider">상태</th>
-                                <th className="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-wider text-right">관리</th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    식재료명
+                                </th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    단위
+                                </th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    알림 임계치
+                                </th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    상태
+                                </th>
+                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">
+                                    관리
+                                </th>
                             </tr>
                         </thead>
 
-                        <tbody className="divide-y divide-zinc-800">
+                        <tbody className="divide-y divide-gray-100">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-zinc-500">
+                                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
                                         데이터를 불러오는 중입니다...
                                     </td>
                                 </tr>
                             ) : ingredients.length > 0 ? (
                                 ingredients.map((item) => (
-                                    <tr key={item.ingredientPublicId} className="hover:bg-zinc-900/70 transition-colors group">
-                                        <td className="px-6 py-4 font-medium text-zinc-100">{item.name}</td>
-                                        <td className="px-6 py-4 text-sm text-zinc-300">{UNIT_LABELS[item.unit]}</td>
-                                        <td className="px-6 py-4 text-sm text-zinc-300 font-mono">
+                                    <tr
+                                        key={item.ingredientPublicId}
+                                        className="hover:bg-gray-50 transition-colors group"
+                                    >
+                                        <td className="px-6 py-4 font-medium text-gray-900">
+                                            {item.name}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">
+                                            {UNIT_LABELS[item.unit]}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-gray-600 font-mono">
                                             {item.lowStockThreshold?.toLocaleString() ?? '-'}
                                         </td>
                                         <td className="px-6 py-4">
@@ -245,14 +261,14 @@ export default function IngredientPage() {
                                                         setCurrentIngredient(item);
                                                         setView('EDIT');
                                                     }}
-                                                    className="p-2 text-green-400 hover:bg-green-500/10 rounded-lg border border-transparent hover:border-green-500/20 transition-all text-xs flex items-center gap-1"
+                                                    className="p-2 text-green-700 hover:bg-green-50 rounded-lg border border-transparent hover:border-green-200 transition-all text-xs flex items-center gap-1"
                                                 >
                                                     <Edit3 className="w-3.5 h-3.5" />
                                                     수정
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(item.ingredientPublicId)}
-                                                    className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg border border-transparent hover:border-red-500/20 transition-all text-xs flex items-center gap-1"
+                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-200 transition-all text-xs flex items-center gap-1"
                                                 >
                                                     <Trash2 className="w-3.5 h-3.5" />
                                                     삭제
@@ -263,7 +279,7 @@ export default function IngredientPage() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-20 text-center text-zinc-500">
+                                    <td colSpan={5} className="px-6 py-20 text-center text-gray-500">
                                         <PackageSearch className="w-12 h-12 mx-auto mb-3 opacity-30" />
                                         검색 결과가 없거나 등록된 식재료가 없습니다.
                                     </td>
@@ -273,24 +289,24 @@ export default function IngredientPage() {
                     </table>
                 </div>
 
-                <div className="flex items-center justify-between px-6 py-4 border-t border-zinc-800 bg-black">
+                <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-white">
                     <button
                         onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                         disabled={page === 0 || isLoading}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-800 transition"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition"
                     >
                         <ChevronLeft className="w-4 h-4" />
                         이전
                     </button>
 
-                    <div className="text-sm text-zinc-400">
+                    <div className="text-sm text-gray-500">
                         {totalPages === 0 ? 0 : page + 1} / {totalPages}
                     </div>
 
                     <button
                         onClick={() => setPage((prev) => (hasNext ? prev + 1 : prev))}
                         disabled={!hasNext || isLoading}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-800 transition"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition"
                     >
                         다음
                         <ChevronRight className="w-4 h-4" />
@@ -313,23 +329,23 @@ export default function IngredientPage() {
     };
 
     return (
-        <div className="min-h-screen bg-black pb-20">
-            <header className="border-b border-zinc-900 bg-zinc-950 py-8 px-6 mb-10">
+        <div className="min-h-screen bg-white pb-20">
+            <header className="border-b border-gray-200 bg-white py-8 px-6 mb-10">
                 <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-green-500 rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/10">
-                            <Leaf className="text-black w-6 h-6" />
+                        <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center shadow-sm">
+                            <Leaf className="text-white w-6 h-6" />
                         </div>
                         <div className="flex flex-col">
                             <div className="flex items-center gap-2 flex-wrap">
-                                <span className="bg-green-500/10 text-green-400 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border border-green-500/20">
+                                <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border border-green-200">
                                     Ingredient Management
                                 </span>
-                                <span className="text-zinc-600 text-[10px] font-mono">
+                                <span className="text-gray-400 text-[10px] font-mono">
                                     ID: {storePublicId.substring(0, 8)}
                                 </span>
                             </div>
-                            <p className="text-zinc-500 text-xs mt-1 font-medium">
+                            <p className="text-gray-500 text-xs mt-1 font-medium">
                                 식재료 마스터 데이터 및 재고 기준 관리
                             </p>
                         </div>
@@ -343,7 +359,7 @@ export default function IngredientPage() {
                 {view === 'EDIT' && renderFormView('EDIT')}
             </main>
 
-            <footer className="max-w-6xl mx-auto px-6 mt-20 text-center text-zinc-600 text-xs">
+            <footer className="max-w-6xl mx-auto px-6 mt-20 text-center text-gray-400 text-xs">
                 <p>© {new Date().getFullYear()} Inventory Master System</p>
             </footer>
         </div>
@@ -408,20 +424,20 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-2xl mx-auto">
-            <div className="bg-zinc-950 rounded-2xl shadow-lg p-8 border border-zinc-800">
+            <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-200">
                 <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-xl font-bold flex items-center gap-2 text-white">
+                    <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900">
                         {mode === 'EDIT' ? (
-                            <Edit className="text-green-400" />
+                            <Edit className="text-green-600" />
                         ) : (
-                            <PlusCircle className="text-green-400" />
+                            <PlusCircle className="text-green-600" />
                         )}
                         {mode === 'EDIT' ? '식재료 정보 수정' : '신규 식재료 등록'}
                     </h2>
 
                     <button
                         onClick={() => setView('LIST')}
-                        className="text-zinc-500 hover:text-zinc-300 p-1 transition"
+                        className="text-gray-400 hover:text-gray-700 p-1 transition"
                     >
                         <X className="w-6 h-6" />
                     </button>
@@ -429,14 +445,14 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label className="block text-sm font-bold text-zinc-300 mb-2">
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
                             식재료 명칭 *
                         </label>
                         <input
                             type="text"
                             required
                             placeholder="예: 국산 대파 1단"
-                            className="w-full p-3 border border-zinc-800 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none bg-black text-zinc-100 placeholder:text-zinc-500 transition-all"
+                            className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none bg-white text-gray-900 placeholder:text-gray-400 transition-all"
                             value={form.name || ''}
                             onChange={(e) => setForm({ ...form, name: e.target.value })}
                         />
@@ -444,11 +460,11 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-bold text-zinc-300 mb-2">
+                            <label className="block text-sm font-bold text-gray-700 mb-2">
                                 단위
                             </label>
                             <select
-                                className="w-full p-3 border border-zinc-800 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none appearance-none bg-black text-zinc-100"
+                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none appearance-none bg-white text-gray-900"
                                 value={form.unit || 'EA'}
                                 onChange={(e) =>
                                     setForm({ ...form, unit: e.target.value as IngredientUnit })
@@ -463,12 +479,12 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
                         </div>
 
                         <div>
-                            <label className="block text-sm font-bold text-zinc-300 mb-2">
+                            <label className="block text-sm font-bold text-gray-700 mb-2">
                                 저재고 경고 기준
                             </label>
                             <input
                                 type="number"
-                                className="w-full p-3 border border-zinc-800 rounded-xl focus:ring-2 focus:ring-green-500 focus:outline-none bg-black text-zinc-100"
+                                className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none bg-white text-gray-900"
                                 value={form.lowStockThreshold ?? 0}
                                 onChange={(e) =>
                                     setForm({
@@ -482,7 +498,7 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
 
                     {mode === 'EDIT' && (
                         <div>
-                            <label className="block text-sm font-bold text-zinc-300 mb-2">
+                            <label className="block text-sm font-bold text-gray-700 mb-2">
                                 관리 상태
                             </label>
                             <div className="flex gap-3">
@@ -494,8 +510,8 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
                                             setForm({ ...form, status: s as IngredientStatus })
                                         }
                                         className={`flex-1 py-3 text-sm font-bold rounded-xl border transition-all ${form.status === s
-                                                ? 'bg-green-500 text-black border-green-500 shadow-md'
-                                                : 'bg-black text-zinc-400 border-zinc-800 hover:bg-zinc-900'
+                                                ? 'bg-green-600 text-white border-green-600 shadow-sm'
+                                                : 'bg-white text-gray-500 border-gray-200 hover:bg-green-50 hover:text-green-700 hover:border-green-200'
                                             }`}
                                     >
                                         {s === 'ACTIVE' ? '활성 (ACTIVE)' : '비활성 (INACTIVE)'}
@@ -509,13 +525,13 @@ const FormViewInner: React.FC<FormViewInnerProps> = ({
                         <button
                             type="button"
                             onClick={() => setView('LIST')}
-                            className="flex-1 py-3 border border-zinc-800 rounded-xl font-bold text-zinc-300 hover:bg-zinc-900 transition"
+                            className="flex-1 py-3 border border-gray-200 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition"
                         >
                             취소
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 py-3 bg-green-500 text-black rounded-xl font-bold hover:bg-green-400 shadow-lg transition active:scale-[0.98]"
+                            className="flex-1 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 shadow-sm transition active:scale-[0.98]"
                         >
                             {mode === 'EDIT' ? '정보 업데이트' : '식재료 등록'}
                         </button>

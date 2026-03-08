@@ -390,8 +390,8 @@ const StockShortagePage: React.FC = () => {
                                 onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
                                 disabled={currentPage === 0}
                                 className={`inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition ${currentPage === 0
-                                        ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
-                                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                                    ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
+                                    : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                                     }`}
                             >
                                 <ChevronLeft className="h-4 w-4" />
@@ -417,8 +417,8 @@ const StockShortagePage: React.FC = () => {
                                     key={pageIndex}
                                     onClick={() => setCurrentPage(pageIndex)}
                                     className={`h-10 w-10 rounded-lg border text-sm font-bold transition-all ${currentPage === pageIndex
-                                            ? 'border-black bg-black text-white'
-                                            : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                                        ? 'border-black bg-black text-white'
+                                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     {pageIndex + 1}
@@ -443,8 +443,8 @@ const StockShortagePage: React.FC = () => {
                                 onClick={() => setCurrentPage((p) => Math.min(data.totalPages - 1, p + 1))}
                                 disabled={currentPage === data.totalPages - 1}
                                 className={`inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition ${currentPage === data.totalPages - 1
-                                        ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
-                                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                                    ? 'cursor-not-allowed border-gray-100 bg-gray-50 text-gray-300'
+                                    : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                                     }`}
                             >
                                 다음

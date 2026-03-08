@@ -303,7 +303,7 @@ const StockTakePage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+        <div className="min-h-screen bg-white font-sans text-gray-900">
             <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -357,7 +357,7 @@ const StockTakePage: React.FC = () => {
                         <button
                             onClick={handleSave}
                             disabled={isProcessing || status === 'CONFIRMED'}
-                            className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition disabled:opacity-50"
+                            className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-100 rounded-xl transition disabled:opacity-50"
                         >
                             <Save size={18} className={isProcessing ? 'animate-spin' : ''} />
                             임시저장
@@ -366,7 +366,7 @@ const StockTakePage: React.FC = () => {
                         <button
                             onClick={handleConfirm}
                             disabled={isProcessing || status === 'CONFIRMED'}
-                            className="flex items-center gap-2 px-5 py-2 text-sm font-black text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition shadow-lg shadow-slate-200 disabled:bg-slate-300"
+                            className="flex items-center gap-2 px-5 py-2 text-sm font-bold text-white bg-black hover:bg-gray-800 rounded-xl transition disabled:bg-gray-300"
                         >
                             <CheckCircle size={18} />
                             최종확정
