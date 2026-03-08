@@ -11,8 +11,8 @@ import {
     Loader2
 } from 'lucide-react';
 import { requireStorePublicId } from '@/utils/store.ts';
-import { getStockShortages } from '@/api/stock/stockTakeShortage.ts';
-import type { StockShortageGroup } from '@/types/stock/stockTakeShortage.ts';
+import { getStockShortages } from '@/api/stock/stockShortage';
+import type { StockShortageGroup } from '@/types/stock/stockShortage';
 
 const StockTakeShortagePage: React.FC = () => {
     const storePublicId = requireStorePublicId();

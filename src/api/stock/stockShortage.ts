@@ -1,5 +1,5 @@
 import apiClient from '../user/client.ts';
-import type { StockShortageResponse } from '../../types/stock/stockTakeShortage.ts';
+import type { StockShortageResponse } from '../../types/stock/stockShortage.ts';
 
 /**
  * 재고 부족 목록 조회
