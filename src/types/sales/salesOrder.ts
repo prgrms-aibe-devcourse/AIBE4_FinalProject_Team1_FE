@@ -21,5 +21,3 @@ export interface SalesOrderResponse {
     tableCode: string;
     items: SalesOrderItemResponse[];
 }
-
-export type SalesOrderListResponse = SalesOrderResponse[];
