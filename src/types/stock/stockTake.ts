@@ -20,11 +20,20 @@ export interface StockTakeConfirmRequest {
     items: StockTakeItemQuantityRequest[];
 }
 
+export interface StockTakeSheetSearchRequest {
+    title?: string;
+    from?: string;
+    to?: string;
+    page?: number;
+    size?: number;
+}
+
 export interface StockTakeSheetResponse {
     sheetPublicId: string;
     title: string;
     status: StockTakeStatus;
     createdAt: string;
+    confirmedAt: string;
 }
 
 export interface StockTakeItemResponse {
