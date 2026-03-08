@@ -285,14 +285,6 @@ export default function StockInboundRegistrationPage() {
             <div className="mx-auto w-full max-w-5xl px-6 py-8">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-start gap-3">
-                        <button
-                            type="button"
-                            onClick={() => navigate(-1)}
-                            className="mt-1 inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-800 transition hover:bg-gray-50"
-                        >
-                            ← 뒤로
-                        </button>
-
                         <div>
                             <h1 className="text-2xl font-black tracking-tight text-gray-900">입고 등록</h1>
                             <p className="mt-1 text-sm text-gray-500">수기로 입고 정보를 등록합니다</p>
