@@ -15,7 +15,7 @@ import type {
     DisposalReason,
     DisposalItem
 } from "@/types/stock/disposal";
-import type {Pagination} from "@/types/common";
+import type {Pagination} from "@/types/common/common.ts";
 import {requireStorePublicId} from "@/utils/store.ts";
 
 // UI 표시용 사유 매핑
