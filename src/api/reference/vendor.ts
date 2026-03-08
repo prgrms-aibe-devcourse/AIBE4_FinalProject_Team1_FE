@@ -1,16 +1,22 @@
 import apiClient from '../user/client.ts';
-import type { VendorResponse, VendorCreateRequest, VendorUpdateRequest, VendorStatus } from '@/types/reference/vendor';
+import type {
+    VendorResponse,
+    VendorCreateRequest,
+    VendorUpdateRequest,
+    VendorSearchRequest
+} from '@/types/reference/vendor';
+import type { PageResponse } from '@/types/common/common';
 
 /**
  * 거래처 목록 조회
  * GET /api/vendors/{storePublicId}
  *
  * @param storePublicId 매장 Public ID (UUID)
- * @param status 상태 필터 (ACTIVE | INACTIVE) - 선택적, 기본값 ACTIVE
+ * @param params 검색 및 페이지네이션 파라미터
  */
-export const getVendors = (storePublicId: string, status?: VendorStatus) =>
-    apiClient.get<VendorResponse[]>(`/api/vendors/${storePublicId}`, {
-        params: status ? { status } : { status: 'ACTIVE' }
+export const getVendors = (storePublicId: string, params?: VendorSearchRequest) =>
+    apiClient.get<PageResponse<VendorResponse>>(`/api/vendors/${storePublicId}`, {
+        params
     });
 
 /**

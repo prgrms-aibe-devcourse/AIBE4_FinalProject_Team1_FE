@@ -11,6 +11,18 @@ export interface Pagination<T> {
     number: number;
 }
 
+/**
+ * 백엔드 PageResponse DTO에 대응하는 타입
+ */
+export interface PageResponse<T> {
+    content: T[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    hasNext: boolean;
+}
+
 export interface DisposalPageResponse<T> {
     content: T[];           // 데이터 목록
     totalElements: number;  // 전체 아이템 수

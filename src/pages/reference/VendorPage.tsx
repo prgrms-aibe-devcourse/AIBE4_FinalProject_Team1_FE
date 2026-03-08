@@ -6,7 +6,9 @@ import {
     X,
     PackageSearch,
     PlusCircle,
-    Edit3
+    Edit3,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 import {
     getVendors,
@@ -14,13 +16,15 @@ import {
     updateVendor,
     deleteVendor
 } from '@/api/reference/vendor.ts';
-import type { VendorResponse, VendorStatus } from '@/types';
+import type { VendorResponse, VendorStatus } from '@/types/reference/vendor';
+import type { PageResponse, ApiError } from '@/types/common/common';
 import { requireStorePublicId } from '@/utils/store.ts';
+import axios from 'axios';
 
 const StatusBadge = ({ status }: { status: VendorStatus }) => {
     const styles = {
-        ACTIVE: "bg-amber-100 text-amber-700 border border-amber-200",
-        INACTIVE: "bg-slate-100 text-slate-500 border border-slate-200"
+        ACTIVE: "bg-emerald-50 text-emerald-700 border border-emerald-100",
+        INACTIVE: "bg-gray-100 text-gray-500 border border-gray-200"
     };
     const labels = {
         ACTIVE: "활성",
@@ -38,17 +42,25 @@ export default function VendorPage() {
 
     // --- State ---
     const [view, setView] = useState<'LIST' | 'CREATE' | 'EDIT'>('LIST');
-    const [vendors, setVendors] = useState<VendorResponse[]>([]);
+    const [pageData, setPageData] = useState<PageResponse<VendorResponse> | null>(null);
     const [currentVendor, setCurrentVendor] = useState<VendorResponse | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState<VendorStatus | 'ALL'>('ALL');
     const [isLoading, setIsLoading] = useState(true);
+    const [page, setPage] = useState(0);
 
     // --- API 호출: 목록 로드 ---
     const loadVendors = async () => {
         setIsLoading(true);
         try {
-            const response = await getVendors(storePublicId);
-            setVendors(response.data);
+            const response = await getVendors(storePublicId, {
+                search: searchTerm || undefined,
+                status: statusFilter === 'ALL' ? undefined : statusFilter,
+                page,
+                size: 10,
+                sort: 'createdAt,desc'
+            });
+            setPageData(response.data);
         } catch (error) {
             console.error("Failed to load vendors:", error);
             alert("데이터를 불러오는 중 오류가 발생했습니다.");
@@ -59,7 +71,16 @@ export default function VendorPage() {
 
     useEffect(() => {
         loadVendors();
-    }, []);
+    }, [page, statusFilter]);
+
+    // 검색어 입력 시 0페이지로 이동하며 로드
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setPage(0);
+            loadVendors();
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     // --- Handlers ---
     const handleCreate = async (newData: {
@@ -76,7 +97,11 @@ export default function VendorPage() {
             loadVendors();
         } catch (error) {
             console.error("Failed to create vendor:", error);
-            alert("등록에 실패했습니다.");
+            if (axios.isAxiosError<ApiError>(error) && error.response?.data?.message) {
+                alert(error.response.data.message);
+            } else {
+                alert("등록에 실패했습니다.");
+            }
         }
     };
 
@@ -86,7 +111,8 @@ export default function VendorPage() {
                 contactPerson: updatedData.contactPerson || undefined,
                 phone: updatedData.phone || undefined,
                 email: updatedData.email || undefined,
-                leadTimeDays: updatedData.leadTimeDays || undefined
+                leadTimeDays: updatedData.leadTimeDays || undefined,
+                status: updatedData.status
             });
             alert("정보가 수정되었습니다.");
             setView('LIST');
@@ -110,23 +136,33 @@ export default function VendorPage() {
         }
     };
 
-    const filteredVendors = useMemo(() => {
-        return vendors.filter(item =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [vendors, searchTerm]);
+    const vendors = useMemo(() => pageData?.content || [], [pageData]);
 
     const ListView = () => (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
-                <div className="relative w-full md:w-96">
+                <div className="w-full md:w-auto">
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => {
+                            setStatusFilter(e.target.value as VendorStatus | 'ALL');
+                            setPage(0);
+                        }}
+                        className="w-full md:w-auto px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white transition-all shadow-sm text-sm font-medium text-gray-900"
+                    >
+                        <option value="ALL">전체</option>
+                        <option value="ACTIVE">활성</option>
+                        <option value="INACTIVE">비활성</option>
+                    </select>
+                </div>
+                <div className="relative w-full md:w-80">
                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                         <Search className="w-4 h-4" />
                     </span>
                     <input
                         type="text"
                         placeholder="거래처명으로 검색..."
-                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white transition-all shadow-sm"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-white transition-all shadow-sm"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -141,77 +177,112 @@ export default function VendorPage() {
                 </div>
             </div>
 
+            <div className="flex justify-between items-end px-1">
+                <div className="text-sm text-gray-500">
+                    전체 <span className="font-bold text-gray-900">{pageData?.totalElements || 0}</span>건
+                </div>
+            </div>
+
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-slate-50 border-b border-gray-100">
-                        <tr>
-                            <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase">거래처명</th>
-                            <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase">담당자</th>
-                            <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase">연락처</th>
-                            <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase">이메일</th>
-                            <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase">리드타임</th>
-                            <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase">상태</th>
-                            <th className="px-6 py-4 text-sm font-bold text-slate-500 uppercase text-right print:hidden">관리</th>
-                        </tr>
+                        <thead className="bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">거래처명</th>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">담당자</th>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">연락처</th>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">이메일</th>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">리드타임</th>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase">상태</th>
+                                <th className="px-6 py-4 text-sm font-bold text-gray-500 uppercase text-right print:hidden">관리</th>
+                            </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                        {isLoading ? (
-                            <tr>
-                                <td colSpan={7} className="px-6 py-10 text-center text-gray-400">
-                                    데이터 로딩 중...
-                                </td>
-                            </tr>
-                        ) : filteredVendors.length > 0 ? (
-                            filteredVendors.map((item) => (
-                                <tr key={item.vendorPublicId} className="hover:bg-slate-50 transition-colors group">
-                                    <td className="px-6 py-4 font-medium text-slate-900">{item.name}</td>
-                                    <td className="px-6 py-4 text-sm text-slate-600">{item.contactPerson || '-'}</td>
-                                    <td className="px-6 py-4 text-sm text-slate-600">{item.phone || '-'}</td>
-                                    <td className="px-6 py-4 text-sm text-slate-600">{item.email || '-'}</td>
-                                    <td className="px-6 py-4 text-sm text-slate-600 font-mono">
-                                        {item.leadTimeDays ? `${item.leadTimeDays}일` : '-'}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <StatusBadge status={item.status} />
-                                    </td>
-                                    <td className="px-6 py-4 text-right print:hidden">
-                                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button
-                                                onClick={() => {
-                                                    setCurrentVendor(item);
-                                                    setView('EDIT');
-                                                }}
-                                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md border border-transparent hover:border-blue-100 transition-all font-bold text-xs flex items-center gap-1"
-                                            >
-                                                <Edit3 className="w-3.5 h-3.5" /> 수정
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(item.vendorPublicId)}
-                                                className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md border border-transparent hover:border-rose-100 transition-all font-bold text-xs flex items-center gap-1"
-                                            >
-                                                <Trash2 className="w-3.5 h-3.5" /> 삭제
-                                            </button>
-                                        </div>
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={7} className="px-6 py-10 text-center text-gray-400">
+                                        데이터 로딩 중...
                                     </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={7} className="px-6 py-20 text-center text-gray-400">
-                                    <PackageSearch className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                                    등록된 거래처가 없습니다.
-                                </td>
-                            </tr>
-                        )}
+                            ) : vendors.length > 0 ? (
+                                vendors.map((item) => (
+                                    <tr key={item.vendorPublicId} className="hover:bg-gray-50 transition-colors group">
+                                        <td className="px-6 py-4 font-medium text-gray-900">{item.name}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">{item.contactPerson || '-'}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">{item.phone || '-'}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-600">{item.email || '-'}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-600 font-mono">
+                                            {item.leadTimeDays ? `${item.leadTimeDays}일` : '-'}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <StatusBadge status={item.status} />
+                                        </td>
+                                        <td className="px-6 py-4 text-right print:hidden">
+                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => {
+                                                        setCurrentVendor(item);
+                                                        setView('EDIT');
+                                                    }}
+                                                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md border border-transparent hover:border-blue-100 transition-all font-bold text-xs flex items-center gap-1"
+                                                >
+                                                    <Edit3 className="w-3.5 h-3.5" /> 수정
+                                                </button>
+                                                {item.status === 'ACTIVE' && (
+                                                    <button
+                                                        onClick={() => handleDelete(item.vendorPublicId)}
+                                                        className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md border border-transparent hover:border-rose-100 transition-all font-bold text-xs flex items-center gap-1"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" /> 비활성화
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={7} className="px-6 py-20 text-center text-gray-400">
+                                        <PackageSearch className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                        등록된 거래처가 없습니다.
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
+
+                {/* 페이징 컨트롤 */}
+                {pageData && pageData.totalElements > 0 && (
+                    <div className="flex justify-center items-center gap-4 py-6 border-t border-gray-100">
+                        <button
+                            disabled={page === 0}
+                            onClick={() => setPage(page - 1)}
+                            className="p-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <span className="text-sm font-bold text-gray-600">
+                            {pageData.page + 1} / {pageData.totalPages}
+                        </span>
+                        <button
+                            disabled={!pageData.hasNext}
+                            onClick={() => setPage(page + 1)}
+                            className="p-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        >
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
 
-    const FormView = ({ mode }: { mode: 'CREATE' | 'EDIT' }) => {
+    interface FormViewProps {
+        mode: 'CREATE' | 'EDIT';
+    }
+
+    const FormView = ({ mode }: FormViewProps) => {
         const [form, setForm] = useState<Partial<VendorResponse>>(
             mode === 'EDIT' && currentVendor
                 ? { ...currentVendor }
@@ -246,9 +317,9 @@ export default function VendorPage() {
                     <div className="flex justify-between items-center mb-8">
                         <h2 className="text-xl font-bold flex items-center gap-2">
                             {mode === 'EDIT' ? (
-                                <Edit3 className="text-amber-600" />
+                                <Edit3 className="text-gray-900" />
                             ) : (
-                                <PlusCircle className="text-amber-600" />
+                                <PlusCircle className="text-gray-900" />
                             )}
                             {mode === 'EDIT' ? '거래처 정보 수정' : '신규 거래처 등록'}
                         </h2>
@@ -269,7 +340,7 @@ export default function VendorPage() {
                                 type="text"
                                 required
                                 placeholder="예: 신선마트"
-                                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-gray-50 focus:bg-white transition-all"
+                                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-gray-50 focus:bg-white transition-all"
                                 value={form.name}
                                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                                 disabled={mode === 'EDIT'}
@@ -289,7 +360,7 @@ export default function VendorPage() {
                                 <input
                                     type="text"
                                     placeholder="예: 김철수"
-                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-gray-50 focus:bg-white"
+                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-gray-50 focus:bg-white transition-all"
                                     value={form.contactPerson || ''}
                                     onChange={(e) =>
                                         setForm({ ...form, contactPerson: e.target.value })
@@ -303,7 +374,7 @@ export default function VendorPage() {
                                 <input
                                     type="tel"
                                     placeholder="예: 010-1234-5678"
-                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-gray-50 focus:bg-white"
+                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-gray-50 focus:bg-white transition-all"
                                     value={form.phone || ''}
                                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
                                 />
@@ -318,7 +389,7 @@ export default function VendorPage() {
                                 <input
                                     type="email"
                                     placeholder="예: vendor@example.com"
-                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-gray-50 focus:bg-white"
+                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-gray-50 focus:bg-white transition-all"
                                     value={form.email || ''}
                                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                                 />
@@ -332,7 +403,7 @@ export default function VendorPage() {
                                     min="1"
                                     max="365"
                                     placeholder="1"
-                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none bg-gray-50 focus:bg-white"
+                                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black focus:outline-none bg-gray-50 focus:bg-white transition-all"
                                     value={form.leadTimeDays || ''}
                                     onChange={(e) =>
                                         setForm({ ...form, leadTimeDays: Number(e.target.value) })
@@ -343,6 +414,29 @@ export default function VendorPage() {
                                 </p>
                             </div>
                         </div>
+
+                        {mode === 'EDIT' && (
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">
+                                    거래처 상태
+                                </label>
+                                <div className="flex gap-4">
+                                    {(['ACTIVE', 'INACTIVE'] as const).map((s) => (
+                                        <button
+                                            key={s}
+                                            type="button"
+                                            onClick={() => setForm({ ...form, status: s })}
+                                            className={`flex-1 py-3 rounded-lg text-sm font-bold border transition-all ${form.status === s
+                                                ? "bg-black border-black text-white shadow-md"
+                                                : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
+                                                }`}
+                                        >
+                                            {s === 'ACTIVE' ? '활성' : '비활성'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="pt-6 flex gap-3">
                             <button
@@ -366,14 +460,14 @@ export default function VendorPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 py-8 px-6">
+        <div className="min-h-screen bg-gray-50 py-8 px-6">
             <div className="max-w-7xl mx-auto space-y-6">
                 {/* 페이지 헤더 */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">거래처 관리</h1>
-                        <p className="text-sm text-slate-600 mt-1">
-                            발주를 위한 거래처 정보를 관리합니다.
+                        <h1 className="text-2xl font-extrabold text-gray-900">거래처 관리</h1>
+                        <p className="text-sm text-gray-600 mt-1">
+                            거래처 정보를 관리합니다.
                         </p>
                     </div>
                 </div>

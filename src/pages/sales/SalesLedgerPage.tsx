@@ -157,7 +157,7 @@ export default function SalesLedgerPage() {
     const monthLabel = `${monthCursor.getFullYear()}.${String(monthCursor.getMonth() + 1).padStart(2, '0')}`;
 
     return (
-        <div className="min-h-screen bg-slate-50 pt-[72px]">
+        <div className="min-h-screen bg-slate-50">
             <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-6 py-8 lg:grid-cols-[280px_1fr]">
                 <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                     <div className="mb-4 flex items-center justify-between">
@@ -181,8 +181,8 @@ export default function SalesLedgerPage() {
                                                     setPage(0);
                                                 }}
                                                 className={`w-full rounded-xl px-3 py-2 text-left text-sm font-semibold transition-colors ${active
-                                                        ? 'bg-indigo-50 text-indigo-700'
-                                                        : 'text-slate-700 hover:bg-slate-100'
+                                                    ? 'bg-indigo-50 text-indigo-700'
+                                                    : 'text-slate-700 hover:bg-slate-100'
                                                     }`}
                                             >
                                                 {date.getDate()}일

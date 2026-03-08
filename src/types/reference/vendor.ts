@@ -44,4 +44,16 @@ export interface VendorUpdateRequest {
     phone?: string;
     email?: string;
     leadTimeDays?: number;
+    status?: VendorStatus;
+}
+
+/**
+ * 거래처 검색 요청 파라미터
+ */
+export interface VendorSearchRequest {
+    status?: VendorStatus;
+    search?: string;
+    page?: number;
+    size?: number;
+    sort?: string;
 }

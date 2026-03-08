@@ -12,7 +12,7 @@ export default function PurchaseOrderCreatePage() {
     const [vendors, setVendors] = useState<VendorResponse[]>([]);
     const [selectedVendorId, setSelectedVendorId] = useState<string>('');
     const [items, setItems] = useState<PurchaseOrderItemRequest[]>([
-        { itemName: '', quantity: 1, unitPrice: 0 }
+        { itemName: '', quantity: 1, unit: 'EA', unitPrice: 0 }
     ]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -20,8 +20,8 @@ export default function PurchaseOrderCreatePage() {
         const fetchVendors = async () => {
             try {
                 const storePublicId = requireStorePublicId();
-                const response = await getVendors(storePublicId, 'ACTIVE');
-                setVendors(response.data);
+                const response = await getVendors(storePublicId, { status: 'ACTIVE', size: 1000 });
+                setVendors(response.data.content);
             } catch (error) {
                 console.error('거래처 목록 조회 실패:', error);
                 alert('거래처 목록을 불러오는데 실패했습니다.');
@@ -32,7 +32,7 @@ export default function PurchaseOrderCreatePage() {
     }, []);
 
     const handleAddItem = () => {
-        setItems([...items, { itemName: '', quantity: 1, unitPrice: 0 }]);
+        setItems([...items, { itemName: '', quantity: 1, unit: 'EA', unitPrice: 0 }]);
     };
 
     const handleRemoveItem = (index: number) => {
@@ -109,7 +109,7 @@ export default function PurchaseOrderCreatePage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pt-[72px]">
+        <div className="min-h-screen bg-slate-50 py-8 px-6">
             <div className="mx-auto max-w-4xl px-6 py-8">
                 {/* 헤더 */}
                 <div className="mb-8">
@@ -136,7 +136,7 @@ export default function PurchaseOrderCreatePage() {
                         <select
                             value={selectedVendorId}
                             onChange={(e) => setSelectedVendorId(e.target.value)}
-                            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-medium text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all"
+                            className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-black focus:outline-none bg-gray-50 focus:bg-white transition-all"
                             required
                         >
                             <option value="">거래처를 선택하세요</option>
@@ -157,7 +157,7 @@ export default function PurchaseOrderCreatePage() {
                             <button
                                 type="button"
                                 onClick={handleAddItem}
-                                className="flex items-center gap-1 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-100 transition-colors"
+                                className="flex items-center gap-1 rounded-lg bg-black text-white px-3 py-1.5 text-xs font-semibold hover:bg-gray-900 transition-colors"
                             >
                                 <Plus className="h-4 w-4" />
                                 항목 추가
@@ -166,14 +166,17 @@ export default function PurchaseOrderCreatePage() {
 
                         <div className="space-y-3">
                             {/* 테이블 헤더 */}
-                            <div className="grid grid-cols-12 gap-3 px-4 py-2">
-                                <div className="col-span-4">
+                            <div className="grid grid-cols-12 gap-2 px-4 py-2">
+                                <div className="col-span-3">
                                     <span className="text-xs font-bold text-slate-500 uppercase">품목명</span>
                                 </div>
                                 <div className="col-span-2 text-center">
                                     <span className="text-xs font-bold text-slate-500 uppercase">수량</span>
                                 </div>
-                                <div className="col-span-3 text-right">
+                                <div className="col-span-2 text-center">
+                                    <span className="text-xs font-bold text-slate-500 uppercase">단위</span>
+                                </div>
+                                <div className="col-span-2 text-right">
                                     <span className="text-xs font-bold text-slate-500 uppercase">단가</span>
                                 </div>
                                 <div className="col-span-2 text-right">
@@ -185,10 +188,10 @@ export default function PurchaseOrderCreatePage() {
                             {items.map((item, index) => (
                                 <div
                                     key={index}
-                                    className="grid grid-cols-12 gap-3 items-start p-4 rounded-xl border border-slate-200 hover:border-amber-300 transition-colors"
+                                    className="grid grid-cols-12 gap-2 items-start p-4 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors"
                                 >
                                     {/* 품목명 */}
-                                    <div className="col-span-4">
+                                    <div className="col-span-3">
                                         <input
                                             type="text"
                                             placeholder="예: 양파, 감자"
@@ -196,7 +199,7 @@ export default function PurchaseOrderCreatePage() {
                                             onChange={(e) =>
                                                 handleItemChange(index, 'itemName', e.target.value)
                                             }
-                                            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-900 focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-black focus:outline-none bg-gray-50 focus:bg-white"
                                             required
                                         />
                                     </div>
@@ -211,32 +214,67 @@ export default function PurchaseOrderCreatePage() {
                                             onChange={(e) =>
                                                 handleItemChange(index, 'quantity', parseInt(e.target.value) || 0)
                                             }
-                                            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-900 text-center focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-slate-900 text-center focus:ring-2 focus:ring-black focus:outline-none bg-gray-50 focus:bg-white"
                                             required
                                         />
                                     </div>
 
+                                    {/* 단위 */}
+                                    <div className="col-span-2">
+                                        {item.unit === '기타' ? (
+                                            <input
+                                                type="text"
+                                                placeholder="단위 입력"
+                                                value={item.unit}
+                                                onChange={(e) =>
+                                                    handleItemChange(index, 'unit', e.target.value)
+                                                }
+                                                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-slate-900 text-center focus:ring-2 focus:ring-black focus:outline-none bg-gray-50 focus:bg-white"
+                                                required
+                                            />
+                                        ) : (
+                                            <select
+                                                value={item.unit}
+                                                onChange={(e) =>
+                                                    handleItemChange(index, 'unit', e.target.value)
+                                                }
+                                                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-black focus:outline-none bg-gray-50 focus:bg-white"
+                                                required
+                                            >
+                                                <option value="EA">EA</option>
+                                                <option value="G">G</option>
+                                                <option value="ML">ML</option>
+                                                <option value="KG">KG</option>
+                                                <option value="L">L</option>
+                                                <option value="박스">박스</option>
+                                                <option value="기타">기타</option>
+                                            </select>
+                                        )}
+                                    </div>
+
                                     {/* 단가 */}
-                                    <div className="col-span-3">
+                                    <div className="col-span-2">
                                         <input
-                                            type="number"
+                                            type="text"
+                                            inputMode="decimal"
                                             placeholder="10000"
-                                            min="0"
-                                            step="0.01"
-                                            value={item.unitPrice}
-                                            onChange={(e) =>
-                                                handleItemChange(index, 'unitPrice', parseFloat(e.target.value) || 0)
-                                            }
-                                            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-900 text-right focus:border-amber-500 focus:ring-2 focus:ring-amber-200"
+                                            value={item.unitPrice || ''}
+                                            onChange={(e) => {
+                                                const value = e.target.value;
+                                                if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                                    handleItemChange(index, 'unitPrice', value === '' ? 0 : parseFloat(value));
+                                                }
+                                            }}
+                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-slate-900 text-right focus:ring-2 focus:ring-black focus:outline-none bg-gray-50 focus:bg-white"
                                             required
                                         />
                                     </div>
 
                                     {/* 합계 */}
                                     <div className="col-span-2 flex items-center justify-end">
-                    <span className="text-sm font-semibold text-slate-900">
-                      {formatCurrency(item.quantity * item.unitPrice)}
-                    </span>
+                                        <span className="text-sm font-semibold text-slate-900">
+                                            {formatCurrency(item.quantity * item.unitPrice)}
+                                        </span>
                                     </div>
 
                                     {/* 삭제 버튼 */}
@@ -256,12 +294,12 @@ export default function PurchaseOrderCreatePage() {
                     </div>
 
                     {/* 총액 */}
-                    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+                    <div className="rounded-2xl border border-slate-300 bg-slate-100 p-6 shadow-sm">
                         <div className="flex items-center justify-between">
                             <span className="text-lg font-bold text-slate-900">총 금액</span>
-                            <span className="text-2xl font-extrabold text-amber-700">
-                {formatCurrency(calculateTotal())}
-              </span>
+                            <span className="text-2xl font-extrabold text-slate-900">
+                                {formatCurrency(calculateTotal())}
+                            </span>
                         </div>
                     </div>
 
@@ -270,14 +308,14 @@ export default function PurchaseOrderCreatePage() {
                         <button
                             type="button"
                             onClick={handleCancel}
-                            className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all"
+                            className="rounded-lg border border-gray-200 bg-white px-6 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all"
                             disabled={isSubmitting}
                         >
                             취소
                         </button>
                         <button
                             type="submit"
-                            className="rounded-xl bg-amber-600 px-6 py-3 text-sm font-bold text-white hover:bg-amber-700 transition-all active:scale-95 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="rounded-lg bg-black text-white px-6 py-3 text-sm font-bold hover:bg-gray-900 transition-all active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? '생성 중...' : '발주서 생성'}
