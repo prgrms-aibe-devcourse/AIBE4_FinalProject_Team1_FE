@@ -1,3 +1,6 @@
+import type {IngredientUnit} from "@/types/reference/ingredient";
+
+// ── Stock Deduction ──────────────────────────────────────────────────────────
 export interface StockOrderDeductionRequest {
     storeId: number;
     salesOrderId: number;
@@ -114,4 +117,32 @@ export interface StockInboundRequest {
     sourceDocumentId: number;
     sourcePurchaseOrderId: number;
     items: StockInboundItemRequest[];
+}
+
+// --- StockQuery Types ---
+
+export type StockBatchStatus = 'OPEN' | 'CLOSED';
+
+export interface StockSummaryResponse {
+    ingredientId: string;
+    ingredientName: string;
+    totalRemainingQuantity: number;
+    unit: IngredientUnit;
+    batchCount: number;
+    minExpirationDate: string | null;
+}
+
+export interface StockBatchResponse {
+    stockBatchId: number;
+    rawProductName: string;
+    remainingQuantity: number;
+    expirationDate: string;
+    createdAt: string;
+    status: StockBatchStatus;
+}
+
+export interface StockSearchCondition {
+    ingredientName?: string;
+    includeZeroStock?: boolean;
+    expiryBefore?: string;
 }

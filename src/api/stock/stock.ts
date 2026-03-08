@@ -1,14 +1,14 @@
 import apiClient from '../user/client.ts';
 import type {
     Pagination,
+    PageResponse,
     StockOrderDeductionRequest,
     StockDeductionResponse,
     StockInboundResponse,
     StockInboundListResponse,
     DisposalRequest,
     DisposalResponse,
-    DisposalSearchCondition,
-    DisposalPageResponse,
+    DisposalSearchCondition, StockSummaryResponse, StockBatchResponse, StockSearchCondition,
 } from '@/types';
 import type {StockLogResponse, StockLogSearchCondition} from "@/types/stock/stockLog";
 
@@ -91,8 +91,8 @@ export async function recordWaste(storePublicId: string, request: DisposalReques
  * GET /api/disposal/{storePublicId}
  */
 
-export async function getWasteRecords(storePublicId: string, condition: DisposalSearchCondition, page: number = 0, size: number = 20): Promise<DisposalPageResponse<DisposalResponse>> {
-    const response = await apiClient.get<DisposalPageResponse<DisposalResponse>>(`/api/disposal/${storePublicId}`, {
+export async function getWasteRecords(storePublicId: string, condition: DisposalSearchCondition, page: number = 0, size: number = 20): Promise<PageResponse<DisposalResponse>> {
+    const response = await apiClient.get<PageResponse<DisposalResponse>>(`/api/disposal/${storePublicId}`, {
         params: {
             ...condition,
             page,
@@ -103,6 +103,37 @@ export async function getWasteRecords(storePublicId: string, condition: Disposal
     return response.data;
 }
 
+/**
+ * 1. 매장 전체 재고 요약 목록 조회 (무한 스크롤/검색용)
+ * 폐기 시 품목 검색도 이 API를 사용합니다.
+ */
+export const getStoreStockSummary = async (
+    storePublicId: string,
+    condition: StockSearchCondition,
+    page: number = 0,
+    size: number = 20
+): Promise<PageResponse<StockSummaryResponse>> => {
+    const response = await apiClient.get<PageResponse<StockSummaryResponse>>(
+        `/api/stock/${storePublicId}/stocks`,
+        {params: {...condition, page, size}}
+    );
+    return response.data;
+};
+
+/**
+ * 2. 특정 품목의 상세 배치 목록 조회
+ * 품목을 선택했을 때 어떤 배치를 폐기할지 결정하기 위해 호출합니다.
+ */
+export const getIngredientBatchDetails = async (
+    storePublicId: string,
+    ingredientPublicId: string
+): Promise<StockBatchResponse[]> => {
+    const response = await apiClient.get<StockBatchResponse[]>(
+        `/api/stock/${storePublicId}/${ingredientPublicId}/batches`
+    );
+    return response.data;
+};
+
 /** * --- 이력(Log) 관련 API 추가 ---
  */
 
@@ -110,8 +141,8 @@ export async function getWasteRecords(storePublicId: string, condition: Disposal
  * 재고 이력 조회
  * GET /api/stockLogs/{storePublicId}
  */
-export async function getStockLogs(storePublicId: string, condition: StockLogSearchCondition, page: number = 0, size: number = 20): Promise<DisposalPageResponse<StockLogResponse>> {
-    const response = await apiClient.get<DisposalPageResponse<StockLogResponse>>(`/api/stockLogs/${storePublicId}`, {
+export async function getStockLogs(storePublicId: string, condition: StockLogSearchCondition, page: number = 0, size: number = 20): Promise<PageResponse<StockLogResponse>> {
+    const response = await apiClient.get<PageResponse<StockLogResponse>>(`/api/stockLogs/${storePublicId}`, {
         params: {
             ...condition,
             page,

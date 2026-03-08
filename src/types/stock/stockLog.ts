@@ -10,7 +10,7 @@ export interface StockLogSearchCondition {
 }
 
 export interface StockLogResponse {
-    createAt?: string;
+    createdAt?: string;
     ingredientName?: string;
     batchId?: string;
     type?: TransactionType | undefined;

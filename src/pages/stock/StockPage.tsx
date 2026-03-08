@@ -1,344 +1,268 @@
+import {useState, useEffect} from 'react';
 import {useNavigate} from "react-router-dom";
+import {getStoreStockSummary, getIngredientBatchDetails} from "@/api/stock/stock";
+import type {StockSummaryResponse, StockSearchCondition, StockBatchResponse} from "@/types/stock/stock";
+import {requireStorePublicId} from "@/utils/store.ts";
 
 export default function StockPage() {
     const navigate = useNavigate();
+    const storePublicId = requireStorePublicId();
 
-    // 샘플 데이터
-    const stockItems = [
-        {
-            id: 1,
-            name: "서울우유 1L",
-            identifier: "Barcode: 8801111...",
-            category: "유제품",
-            currentStock: 45,
-            unit: "EA",
-            optimalStock: 20,
-            expirationDate: "2024-05-28",
-            status: "safe",
-        },
-        {
-            id: 2,
-            name: "국내산 삼겹살 1kg",
-            identifier: "공급처: 글로벌 미트",
-            category: "정육",
-            currentStock: 2,
-            unit: "KG",
-            optimalStock: 10,
-            expirationDate: "2024-05-23",
-            status: "danger",
-        },
-        {
-            id: 3,
-            name: "청경채 (박스)",
-            identifier: "신선식품 (냉장)",
-            category: "채소",
-            currentStock: 3,
-            unit: "BOX",
-            optimalStock: 2,
-            expirationDate: "2024-05-22 (내일)",
-            status: "warning",
-        },
-        {
-            id: 4,
-            name: "백설 참기름 1.8L",
-            identifier: "Barcode: 880222...",
-            category: "식재료",
-            currentStock: 8,
-            unit: "EA",
-            optimalStock: 5,
-            expirationDate: "2025-01-10",
-            status: "safe",
-        },
-    ];
+    const [items, setItems] = useState<StockSummaryResponse[]>([]);
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
+    const [loading, setLoading] = useState(false);
 
-    const getStatusTagClass = (status: string) => {
-        switch (status) {
-            case "danger":
-                return "tag-danger";
-            case "warning":
-                return "tag-warning";
-            case "safe":
-            default:
-                return "tag-safe";
+    const [selectedItem, setSelectedItem] = useState<StockSummaryResponse | null>(null);
+    const [batches, setBatches] = useState<StockBatchResponse[]>([]);
+    const [batchLoading, setBatchLoading] = useState(false);
+
+    const [condition, setCondition] = useState<StockSearchCondition>({
+        ingredientName: '',
+        includeZeroStock: true
+    });
+
+    const fetchStockData = async (targetPage: number) => {
+        if (!storePublicId) return;
+        setLoading(true);
+        try {
+            const response = await getStoreStockSummary(storePublicId, condition, targetPage, 15);
+            setItems(response.content);
+            setTotalPages(response.totalPages);
+            setTotalElements(response.totalElements);
+            setPage(response.page);
+        } catch (error) {
+            console.error("재고 로드 실패:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRowClick = async (item: StockSummaryResponse) => {
+        if (selectedItem?.ingredientId === item.ingredientId) {
+            setSelectedItem(null);
+            setBatches([]);
+            return;
+        }
+        setSelectedItem(item);
+        setBatchLoading(true);
+        try {
+            const data = await getIngredientBatchDetails(storePublicId, item.ingredientId);
+            setBatches(data);
+        } catch (error) {
+            setBatches([]);
+        } finally {
+            setBatchLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStockData(0);
+        setSelectedItem(null);
+    }, [condition.ingredientName, condition.includeZeroStock, storePublicId]);
+
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 0 && newPage < totalPages) {
+            fetchStockData(newPage);
+            setSelectedItem(null);
+            window.scrollTo(0, 0);
         }
     };
 
     return (
-        <div className="flex flex-col space-y-6">
-            {/* 페이지 헤더 */}
-            <div className="bg-[#1a1a1a] h-16 flex items-center justify-between px-6 shadow-md rounded-xl z-10">
-                <div className="flex items-center gap-8">
-                    <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                            <i className="ph-fill ph-stack text-white text-2xl"></i>
-                        </div>
-                        <div>
-                            <h1 className="text-lg font-bold text-white leading-tight">
-                                재고<span className="text-gray-400">관리</span>
-                            </h1>
-                            <p className="text-[10px] text-gray-500 font-medium uppercase tracking-widest">
-                                Inventory Master
-                            </p>
-                        </div>
+        <div className="min-h-screen bg-gray-50">
+            <div className="mx-auto w-full max-w-6xl px-6 py-8">
+                {/* 상단 헤더: 입고 페이지와 동일한 스타일 */}
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-black tracking-tight text-gray-900">재고 현황</h1>
+                        <p className="mt-1 text-sm text-gray-500">
+                            매장의 전체 재고를 확인하고 유통기한별 상세 배치를 관리하세요.
+                        </p>
                     </div>
-
-                    {/* 페이지 메뉴 */}
-                    <div className="flex gap-6 h-16">
+                    <div className="flex items-center gap-2">
                         <button
-                            className="flex items-center px-2 text-sm font-bold text-white border-b-2 border-white transition-all">
-                            재고 현황
+                            onClick={() => fetchStockData(page)}
+                            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-black text-gray-800 hover:bg-gray-50"
+                        >
+                            새로고침
+                        </button>
+                        <button
+                            onClick={() => navigate(`/stock/${storePublicId}/disposal`)}
+                            className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-black text-white hover:bg-gray-900 transition"
+                        >
+                            폐기 관리 이동
                         </button>
                     </div>
                 </div>
 
-                <div className="flex gap-3">
-                    <button
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-300 hover:text-white border border-gray-700 rounded-lg transition-all">
-                        <i className="ph ph-barcode"></i> 바코드 스캔
-                    </button>
-                    <button
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all shadow-md">
-                        <i className="ph ph-download-simple"></i> 재고 실사표 출력
-                    </button>
-                </div>
-            </div>
-
-            {/* 메인 콘텐츠 */}
-            <div className="space-y-6">
-                {/* 재고 요약 대시보드 */}
-                <div className="grid grid-cols-4 gap-6">
-                    <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">
-                            전체 품목
-                        </p>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-black text-gray-800">428</span>
-                            <span className="text-xs text-gray-400 font-medium">종류</span>
-                        </div>
-                    </div>
-                    <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-                        <p className="text-[10px] font-bold text-red-500 uppercase mb-1">
-                            재고 부족
-                        </p>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-black text-red-600">12</span>
-                            <span className="text-xs text-gray-400 font-medium">품목</span>
-                        </div>
-                    </div>
-                    <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-                        <p className="text-[10px] font-bold text-orange-500 uppercase mb-1">
-                            유통기한 임박
-                        </p>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-2xl font-black text-orange-600">07</span>
-                            <span className="text-xs text-gray-400 font-medium">
-                품목 (3일 내)
-              </span>
-                        </div>
-                    </div>
-                    <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">
-                            총 재고 자산
-                        </p>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-black text-gray-800">₩14.2M</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 검색 및 고급 필터 */}
-                <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
+                {/* 검색 및 필터 바 */}
+                <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center">
                     <div className="relative flex-1">
                         <i className="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input
                             type="text"
-                            placeholder="품목명, 바코드, 카테고리 검색..."
-                            className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:bg-white transition-all"
+                            placeholder="품목명으로 검색..."
+                            className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:border-black outline-none transition-all"
+                            onChange={(e) => setCondition(prev => ({...prev, ingredientName: e.target.value}))}
                         />
                     </div>
-                    <div className="flex gap-2">
-                        <select
-                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-bold outline-none cursor-pointer">
-                            <option>전체 카테고리</option>
-                            <option>육류/냉동</option>
-                            <option>채소/신선</option>
-                            <option>소스/조미료</option>
-                            <option>가공식품</option>
-                        </select>
-                        <select
-                            className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-bold outline-none cursor-pointer text-red-600">
-                            <option>필터: 전체 보기</option>
-                            <option>재고 부족 품목만</option>
-                            <option>유통기한 임박 품목만</option>
-                        </select>
-                    </div>
-                </div>
-
-                {/* 재고 리스트 */}
-                <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                    <table className="w-full text-left text-xs">
-                        <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider">
-                                품목 정보
-                            </th>
-                            <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider">
-                                카테고리
-                            </th>
-                            <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider">
-                                현재 재고
-                            </th>
-                            <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider">
-                                적정 재고
-                            </th>
-                            <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider">
-                                유통기한
-                            </th>
-                            <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider">
-                                상태
-                            </th>
-                            <th className="px-6 py-4 font-bold text-gray-500 uppercase tracking-wider">
-                                관리
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                        {stockItems.map((item) => (
-                            <tr
-                                key={item.id}
-                                className={`hover:bg-gray-50 transition-colors ${
-                                    item.status === "danger"
-                                        ? "bg-red-50/30"
-                                        : item.status === "warning"
-                                            ? "bg-orange-50/30"
-                                            : ""
-                                }`}
-                            >
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <div
-                                            className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                                            <i className="ph ph-image text-xl"></i>
-                                        </div>
-                                        <div className="flex flex-col">
-                        <span className="font-bold text-gray-800 text-[13px]">
-                          {item.name}
-                        </span>
-                                            <span className="text-[10px] text-gray-400">
-                          {item.identifier}
-                        </span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-gray-500 font-medium">
-                                    {item.category}
-                                </td>
-                                <td className="px-6 py-4">
-                    <span
-                        className={`text-[13px] font-black ${
-                            item.status === "danger" ? "text-red-600" : "text-gray-800"
+                    <button
+                        onClick={() => setCondition(prev => ({...prev, includeZeroStock: !prev.includeZeroStock}))}
+                        className={`rounded-xl px-4 py-2.5 text-xs font-black border transition ${condition.includeZeroStock
+                            ? "border-black bg-black text-white"
+                            : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
                         }`}
                     >
-                      {item.currentStock}
-                    </span>{" "}
-                                    <span className="text-gray-400">{item.unit}</span>
-                                </td>
-                                <td className="px-6 py-4 text-gray-400 font-medium">
-                                    {item.optimalStock} {item.unit}
-                                </td>
-                                <td
-                                    className={`px-6 py-4 font-medium ${
-                                        item.status === "warning" ? "text-orange-600 font-black" : "text-gray-600"
-                                    }`}
-                                >
-                                    {item.expirationDate}
-                                </td>
-                                <td className="px-6 py-4">
-                    <span
-                        className={`stock-tag ${getStatusTagClass(item.status)}`}
-                    >
-                      {item.status === "danger"
-                          ? "재고부족"
-                          : item.status === "warning"
-                              ? "기한 임박"
-                              : "정상"}
-                    </span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    {item.status === "danger" ? (
-                                        <button
-                                            className="px-3 py-1.5 bg-red-600 text-white font-bold rounded-lg text-[10px] hover:bg-red-700 transition-all">
-                                            즉시 발주
-                                        </button>
-                                    ) : item.status === "warning" ? (
-                                        <button
-                                            onClick={() => navigate("/stock/disposal")}
-                                            className="px-3 py-1.5 bg-orange-500 text-white font-bold rounded-lg text-[10px] hover:bg-orange-600 transition-all"
-                                        >
-                                            폐기 처리
-                                        </button>
-                                    ) : (
-                                        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                            <i className="ph ph-dots-three-vertical text-lg"></i>
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                        품절 포함 {condition.includeZeroStock ? 'ON' : 'OFF'}
+                    </button>
+                </div>
 
-                    {/* 페이지네이션 */}
-                    <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                            Total 428 Items
-                        </p>
-                        <div className="flex gap-1">
-                            <button
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-400 hover:text-black transition-all">
-                                <i className="ph ph-caret-left"></i>
-                            </button>
-                            <button
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-xs">
-                                1
-                            </button>
-                            <button
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-600 font-bold text-xs">
-                                2
-                            </button>
-                            <button
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-600 font-bold text-xs">
-                                3
-                            </button>
-                            <button
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-400 hover:text-black transition-all">
-                                <i className="ph ph-caret-right"></i>
-                            </button>
+                {/* 메인 리스트: 입고 페이지 리스트 스타일 계승 */}
+                <div className="mt-4 space-y-3">
+                    {loading ? (
+                        <div
+                            className="rounded-2xl border border-gray-200 bg-white p-10 text-center text-gray-400 font-bold animate-pulse">
+                            데이터 로드 중...
                         </div>
+                    ) : items.length === 0 ? (
+                        <div
+                            className="rounded-2xl border border-gray-200 bg-white p-10 text-center text-gray-400 font-bold">
+                            재고 데이터가 없습니다.
+                        </div>
+                    ) : (
+                        items.map((item) => (
+                            <div
+                                key={item.ingredientId}
+                                onClick={() => handleRowClick(item)}
+                                className={`cursor-pointer rounded-2xl border p-5 transition ${
+                                    selectedItem?.ingredientId === item.ingredientId
+                                        ? "border-black bg-gray-50 shadow-sm"
+                                        : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+                                }`}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <div
+                                                className="text-sm font-black text-gray-900">{item.ingredientName}</div>
+                                            <span
+                                                className="px-2 py-0.5 rounded-lg text-[10px] font-black bg-gray-100 text-gray-600 border border-gray-200">
+                                                {item.batchCount} BATCHES
+                                            </span>
+                                        </div>
+                                        <div className="mt-1 text-xs text-gray-500">
+                                            ID: <span className="font-mono">{item.ingredientId}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-8">
+                                        <div className="text-right">
+                                            <div className="text-[10px] font-black text-gray-400 uppercase">Total
+                                                Stock
+                                            </div>
+                                            <div className="text-sm font-black text-gray-900">
+                                                {item.totalRemainingQuantity.toLocaleString()} <span
+                                                className="text-[10px] text-gray-500">{item.unit}</span>
+                                            </div>
+                                        </div>
+                                        <div className="text-right min-w-[100px]">
+                                            <div className="text-[10px] font-black text-gray-400 uppercase">Exp.
+                                                Closest
+                                            </div>
+                                            <div
+                                                className={`text-sm font-black ${item.minExpirationDate ? 'text-red-600' : 'text-gray-300'}`}>
+                                                {item.minExpirationDate || '-'}
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(`/stock/${storePublicId}/disposal?id=${item.ingredientId}`);
+                                            }}
+                                            className="px-3 py-2 rounded-xl border border-gray-200 bg-white text-xs font-black text-gray-700 hover:bg-gray-50 transition"
+                                        >
+                                            폐기 관리
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* 페이지네이션 */}
+                <div className="mt-6 flex items-center justify-between">
+                    <div className="text-xs font-bold text-gray-400">
+                        PAGE {page + 1} OF {totalPages} · TOTAL {totalElements}
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            disabled={page === 0}
+                            onClick={() => handlePageChange(page - 1)}
+                            className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 bg-white disabled:opacity-30"
+                        >
+                            <i className="ph ph-caret-left"></i>
+                        </button>
+                        <button
+                            disabled={page === totalPages - 1}
+                            onClick={() => handlePageChange(page + 1)}
+                            className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 bg-white disabled:opacity-30"
+                        >
+                            <i className="ph ph-caret-right"></i>
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            {/* 푸터 바 */}
-            <footer
-                className="h-10 bg-white border-t border-gray-200 flex items-center justify-between px-6 text-[10px] text-gray-400 font-medium uppercase tracking-tighter shrink-0">
-                <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                    마지막 업데이트:{" "}
-                    <span className="text-blue-500 font-bold ml-1">오늘 14:22:05</span>
-                </div>
-                <div className="flex gap-6">
-          <span className="hover:text-black cursor-pointer transition-colors">
-            시스템 설정
-          </span>
-                    <span className="hover:text-black cursor-pointer transition-colors">
-            데이터 백업
-          </span>
-                    <span className="hover:text-black cursor-pointer transition-colors">
-            v1.2.0
-          </span>
-                </div>
-            </footer>
+                {/* --- 상세 배치 현황: 카드 스타일 --- */}
+                {selectedItem && (
+                    <div
+                        className="mt-10 pt-8 border-t border-gray-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <span
+                                    className="px-2 py-1 rounded-lg bg-black text-white text-[10px] font-black uppercase">Detail</span>
+                                <h2 className="text-xl font-black text-gray-900">{selectedItem.ingredientName} 배치
+                                    내역</h2>
+                            </div>
+                            <button onClick={() => setSelectedItem(null)} className="text-gray-400 hover:text-gray-900">
+                                <i className="ph ph-x text-2xl"></i>
+                            </button>
+                        </div>
+
+                        {batchLoading ? (
+                            <div className="p-10 text-center text-gray-400 font-bold">로딩 중...</div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {batches.map((batch) => (
+                                    <div key={batch.stockBatchId}
+                                         className="rounded-2xl border border-gray-200 bg-white p-5">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <div
+                                                    className="text-[10px] font-black text-gray-400 uppercase">Expiration
+                                                    Date
+                                                </div>
+                                                <div
+                                                    className="text-sm font-black text-red-600">{batch.expirationDate}</div>
+                                                <div
+                                                    className="mt-2 text-[10px] text-gray-400 font-medium">{batch.rawProductName}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-[10px] font-black text-gray-400 uppercase">Stock
+                                                </div>
+                                                <div
+                                                    className="text-lg font-black text-gray-900">{batch.remainingQuantity}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
