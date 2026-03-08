@@ -227,6 +227,7 @@ export default function StockInboundRegistrationPage() {
         const v = validate();
         setErrors(v);
         if (v.length > 0) return;
+        if (!storePublicId) return;
 
         const payload: ManualInboundRequest = {
             inboundDate,
@@ -243,46 +244,22 @@ export default function StockInboundRegistrationPage() {
         try {
             setSubmitting(true);
 
-            const response = await createManualInbound(String(storePublicId), payload);
-            if (!response || !response.inboundPublicId) {
-                throw new Error("Invalid response from server");
+            const storeId = String(storePublicId);
+
+            const createResponse = await createManualInbound(storeId, payload);
+            if (!createResponse?.inboundPublicId) {
+                throw new Error("입고 생성 응답이 올바르지 않습니다.");
             }
 
-            const inboundPublicId = response.inboundPublicId;
+            const inboundPublicId = createResponse.inboundPublicId;
 
-            let productNormalizationFailed = false;
-            let ingredientResolutionFailed = false;
-
-            try {
-                await normalizeAllProductNames(String(storePublicId), inboundPublicId);
-            } catch (error) {
-                productNormalizationFailed = true;
-                console.error("Product name normalization failed:", error);
-            }
-
-            if (!productNormalizationFailed) {
-                try {
-                    await resolveAllIngredients(String(storePublicId), inboundPublicId);
-                } catch (error) {
-                    ingredientResolutionFailed = true;
-                    console.error("Ingredient resolution failed:", error);
-                }
-            }
-
-            if (productNormalizationFailed || ingredientResolutionFailed) {
-                const failedSteps: string[] = [];
-                if (productNormalizationFailed) failedSteps.push("상품명 정규화");
-                if (ingredientResolutionFailed) failedSteps.push("재료 매핑");
-
-                alert(
-                    `입고는 등록되었지만 ${failedSteps.join(", ")} 중 일부 오류가 발생했습니다. 상세 화면에서 확인해 주세요.`
-                );
-            }
+            await normalizeAllProductNames(storeId, inboundPublicId);
+            await resolveAllIngredients(storeId, inboundPublicId);
 
             navigate(`/stock/inbound/${inboundPublicId}`);
         } catch (error) {
             console.error(error);
-            alert("오류가 발생하였습니다. 다시 시도해주십시오.");
+            alert("입고 생성 또는 정규화 처리 중 오류가 발생했습니다. 다시 시도해주십시오.");
         } finally {
             setSubmitting(false);
         }
