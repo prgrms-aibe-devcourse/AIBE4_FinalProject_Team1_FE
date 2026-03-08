@@ -255,24 +255,14 @@ const MenuPage: React.FC = () => {
     };
 
     return (
-        <div className="bg-white min-h-screen text-slate-800 font-sans">
-            <nav className="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-30 shadow-sm">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-2 text-black font-black text-xl cursor-default uppercase tracking-tighter">
-                        <span>메뉴 마스터 관리</span>
-                    </div>
-                    <div className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 uppercase tracking-widest">
-                        Store PID: <span className="text-slate-900 font-mono ml-1">{storePublicId.substring(0, 8)}</span>
-                    </div>
-                </div>
-            </nav>
+        <div className="bg-white min-h-screen text-slate-800 font-sans pt-10">
 
             <main className="max-w-7xl mx-auto p-8">
                 {viewMode === 'LIST' ? (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
                             <div>
-                                <h1 className="text-3xl font-bold tracking-tight text-black">메뉴 관리</h1>
+                                <h1 className="text-3xl font-black tracking-tight text-black">메뉴 관리</h1>
                                 <p className="text-slate-500 mt-1 font-medium italic">
                                     매장 메뉴를 등록하고 구성 식재료 레시피를 관리합니다.
                                 </p>
@@ -421,6 +411,7 @@ const MenuPage: React.FC = () => {
                                             <input
                                                 required
                                                 type="number"
+                                                step="1"
                                                 value={formData.basePrice}
                                                 onChange={(e) => setFormData({ ...formData, basePrice: e.target.value })}
                                                 className="w-full bg-slate-50 border-2 border-transparent focus:border-black focus:bg-white rounded-2xl p-4 font-bold text-slate-800 outline-none transition-all"
@@ -493,7 +484,7 @@ const MenuPage: React.FC = () => {
                                             <input
                                                 required
                                                 type="number"
-                                                step="0.001"
+                                                step="1"
                                                 placeholder="수량"
                                                 value={ing.qty}
                                                 onChange={(e) => handleIngredientQtyChange(index, e.target.value)}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Candidate, StockInboundItemResponse, IngredientResponse } from '@/types';
-import { getIngredients } from '@/api/reference/ingredient';
+import { getAllIngredients } from '@/api/reference/ingredient';
 import { requireStorePublicId } from '@/utils/store';
 
 type IngredientUnit = NonNullable<IngredientResponse['unit']>;
@@ -21,12 +21,12 @@ interface UnifiedIngredientSelectorProps {
 }
 
 export default function UnifiedIngredientSelector({
-                                                      isOpen,
-                                                      item,
-                                                      suggestions,
-                                                      onConfirm,
-                                                      onClose,
-                                                  }: UnifiedIngredientSelectorProps) {
+    isOpen,
+    item,
+    suggestions,
+    onConfirm,
+    onClose,
+}: UnifiedIngredientSelectorProps) {
     const storePublicId = requireStorePublicId();
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -39,7 +39,7 @@ export default function UnifiedIngredientSelector({
         if (!isOpen || !storePublicId || !item) return;
 
         setLoadingIngredients(true);
-        getIngredients(storePublicId)
+        getAllIngredients(storePublicId)
             .then(setAllIngredients)
             .catch(console.error)
             .finally(() => setLoadingIngredients(false));
@@ -274,11 +274,10 @@ export default function UnifiedIngredientSelector({
                             <button
                                 onClick={handleCreateNew}
                                 disabled={submitting || !searchQuery.trim()}
-                                className={`mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black transition-all ${
-                                    submitting || !searchQuery.trim()
+                                className={`mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[11px] font-black transition-all ${submitting || !searchQuery.trim()
                                         ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
                                         : 'bg-black text-white hover:bg-gray-900'
-                                }`}
+                                    }`}
                             >
                                 {submitting ? '처리 중...' : `'${searchQuery.trim()}' 새 재료로 생성 후 확정`}
                             </button>

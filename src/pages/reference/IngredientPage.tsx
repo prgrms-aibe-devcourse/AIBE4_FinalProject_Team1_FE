@@ -168,7 +168,12 @@ export default function IngredientPage() {
     };
 
     const renderListView = () => (
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6 pt-10">
+            <div className="mb-8">
+                <h1 className="text-3xl font-black text-black tracking-tight">재료 관리</h1>
+                <p className="text-gray-500 text-sm mt-1 font-medium">매장의 식재료 마스터 데이터를 관리하고 알림 임계치를 설정하세요.</p>
+            </div>
+
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                 <div className="relative w-full lg:w-96 group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
@@ -330,17 +335,6 @@ export default function IngredientPage() {
 
     return (
         <div className="min-h-screen bg-white pb-20">
-            <nav className="bg-white border-b border-slate-200 px-8 py-4 sticky top-0 z-30 shadow-sm">
-                <div className="max-w-6xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-2 text-black font-black text-xl cursor-default uppercase tracking-tighter">
-                        <span>식재료 마스터 관리</span>
-                    </div>
-                    <div className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 uppercase tracking-widest">
-                        Store PID: <span className="text-slate-900 font-mono ml-1">{storePublicId.substring(0, 8)}</span>
-                    </div>
-                </div>
-            </nav>
-
             <main className="max-w-6xl mx-auto px-6">
                 {view === 'LIST' && renderListView()}
                 {view === 'CREATE' && renderFormView('CREATE')}
