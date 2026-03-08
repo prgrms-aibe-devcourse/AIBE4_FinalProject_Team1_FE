@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import {useNavigate} from "react-router-dom";
-import {getStoreStockSummary} from "@/api/stock";
-import type {StockSummaryResponse, StockSearchCondition} from "@/types/stock";
+import {getStoreStockSummary} from "@/api/stock/stock";
+import type {StockSummaryResponse, StockSearchCondition} from "@/types/stock/stock";
 import {requireStorePublicId} from "@/utils/store.ts";
 
 export default function StockPage() {

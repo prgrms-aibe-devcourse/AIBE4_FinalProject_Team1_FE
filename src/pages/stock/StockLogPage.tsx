@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import type {StockLogResponse, TransactionType, StockLogSearchCondition, ReferenceType} from '@/types/stockLog';
-import {getStockLogs} from '@/api/stock';
+import type {StockLogResponse, TransactionType, StockLogSearchCondition, ReferenceType} from '@/types/stock/stockLog';
+import {getStockLogs} from '@/api/stock/stock.ts';
 import {requireStorePublicId} from "@/utils/store.ts";
 
 const StockLogPage: React.FC = () => {

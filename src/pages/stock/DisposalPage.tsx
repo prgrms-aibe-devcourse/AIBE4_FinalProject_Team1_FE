@@ -4,17 +4,17 @@ import {
     getIngredientBatchDetails,
     getWasteRecords,
     recordWaste
-} from "@/api/stock";
+} from "@/api/stock/stock";
 import type {
     StockSummaryResponse,
     StockBatchResponse,
-} from "@/types/stock";
+} from "@/types/stock/stock";
 import type {
     DisposalResponse,
     DisposalSearchCondition,
     DisposalReason,
     DisposalItem
-} from "@/types/disposal";
+} from "@/types/stock/disposal";
 import type {Pagination} from "@/types/common";
 import {requireStorePublicId} from "@/utils/store.ts";
 

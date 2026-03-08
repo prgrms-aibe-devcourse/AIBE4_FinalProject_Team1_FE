@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { logout } from "@/api/auth";
-import { getUserProfile } from "@/api/user";
+import { logout } from "@/api/user/auth.ts";
+import { getUserProfile } from "@/api/user/user.ts";
 import { getAccessToken, removeAccessToken } from "@/utils/auth.ts";
 import type { UserProfileResponse } from "@/types";
 
@@ -249,7 +249,7 @@ export default function Navbar() {
         items: [
           { label: "재료 관리", path: "/stock/ingredients" },
           { label: "메뉴 관리", path: "/sales/menu" },
-          { label: "차감 기준", path: "/sales/deduction-rules" },
+          { label: "거래처 관리", path: "/vendors" },
         ],
       },
       {
@@ -276,33 +276,34 @@ export default function Navbar() {
     [],
   );
 
-    const inventorySections: MenuSection[] = useMemo(
-        () => [
-            {
-                title: "재고",
-                items: [
-                    {label: "재고 현황", path: "/stock"},
-                    {label: "실사 재고 관리", path: "/stock/stocktakes"},
-                    {label: "폐기 관리", path: "/stock/disposal"},
-                ],
-            },
-            {
-                title: "입고",
-                items: [
-                    {label: "입고 목록", path: "/stock/receiving"},
-                    {label: "입고 등록", path: "/stock/receiving/new"},
-                    {label: "증빙 보관함", path: "/stock/receiving/documents"},
-                ],
-            },
-            {
-                title: "이력",
-                items: [
-                    {label: "이력 현황", path: "/stock/log"},
-                ],
-            },
+  const inventorySections: MenuSection[] = useMemo(
+    () => [
+      {
+        title: "재고",
+        items: [
+          { label: "재고 현황", path: "/stock" },
+          { label: "실사 재고 관리", path: "/stock/stocktakes" },
+          { label: "폐기 관리", path: "/stock/disposal" },
         ],
-        [],
-    );
+      },
+      {
+        title: "입고",
+        items: [
+          { label: "입고 목록", path: "/stock/inbound" },
+          { label: "입고 등록", path: "/stock/inbound/new" },
+          { label: "증빙 보관함", path: "/stock/inbound/documents" },
+        ],
+      },
+      {
+        title: "이력",
+        items: [
+          { label: "이력 현황", path: "/stock/log" },
+          { label: "재고 부족 현황", path: "/stock/stocktake/shortages" },
+        ],
+      },
+    ],
+    [],
+  );
 
   const ordersSections: MenuSection[] = useMemo(
     () => [
@@ -311,7 +312,6 @@ export default function Navbar() {
         items: [
           { label: "주문 현황", path: "/orders" },
           { label: "테이블 관리", path: "/orders/tables" },
-          { label: "QR 관리", path: "/orders/qrs" },
         ],
       },
     ],
@@ -326,13 +326,7 @@ export default function Navbar() {
           { label: "발주 목록", path: "/purchase-orders" },
           { label: "발주 등록", path: "/purchase-orders/new" },
         ],
-      },
-      {
-        title: "거래처",
-        items: [
-          { label: "거래처 관리", path: "/vendors" },
-        ],
-      },
+      }
     ],
     [],
   );
