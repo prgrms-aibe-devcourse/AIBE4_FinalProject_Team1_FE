@@ -247,7 +247,7 @@ const DiningTablePage = () => {
                 <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
                     <div className="flex items-center">
                         <div className="text-black">
-                            <h1 className="text-3xl font-black tracking-tight text-gray-900">테이블 마스터 관리</h1>
+                            <h1 className="text-3xl font-black tracking-tight text-gray-900">테이블 관리</h1>
                             <p className="mt-3 text-sm text-gray-500">QR 코드를 생성하고 배치도를 관리하세요.</p>
                         </div>
                     </div>
@@ -283,7 +283,7 @@ const DiningTablePage = () => {
                                 <MapIcon size={24} />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-black tracking-tight text-gray-900">디지털 테이블 배치도</h1>
+                                <h1 className="text-3xl font-black tracking-tight text-gray-900">테이블 배치도</h1>
                                 <p className="mt-3 text-sm text-gray-500">테이블을 클릭하여 상세 정보를 확인하거나 QR 코드를 관리하세요.</p>
                             </div>
                         </div>
