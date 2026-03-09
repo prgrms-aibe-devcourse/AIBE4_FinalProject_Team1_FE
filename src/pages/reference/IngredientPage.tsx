@@ -170,8 +170,8 @@ export default function IngredientPage() {
     const renderListView = () => (
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 space-y-6 pt-10">
             <div className="mb-8">
-                <h1 className="text-3xl font-black text-black tracking-tight">재료 관리</h1>
-                <p className="text-gray-500 text-sm mt-1 font-medium">매장의 식재료 마스터 데이터를 관리하고 알림 임계치를 설정하세요.</p>
+                <h1 className="text-3xl font-black tracking-tight text-gray-900">재료 관리</h1>
+                <p className="mt-3 text-sm text-gray-500">매장의 식재료 마스터 데이터를 관리하고 알림 임계치를 설정하세요.</p>
             </div>
 
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">

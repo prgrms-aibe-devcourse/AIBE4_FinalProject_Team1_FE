@@ -121,8 +121,8 @@ export default function PurchaseOrderCreatePage() {
                         <ArrowLeft className="h-4 w-4" />
                         발주 목록으로
                     </button>
-                    <h1 className="text-3xl font-extrabold text-slate-900">발주서 생성</h1>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <h1 className="text-3xl font-black tracking-tight text-gray-900">발주서 생성</h1>
+                    <p className="mt-3 text-sm text-gray-500">
                         거래처와 발주 항목을 입력하세요
                     </p>
                 </div>

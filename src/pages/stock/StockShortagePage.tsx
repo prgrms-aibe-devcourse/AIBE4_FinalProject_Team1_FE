@@ -166,8 +166,8 @@ const StockShortagePage: React.FC = () => {
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
                     <div className="flex h-20 items-center justify-between">
                         <div>
-                            <h1 className="text-2xl font-black tracking-tight text-black">부족 품목 요약</h1>
-                            <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                            <h1 className="text-3xl font-black tracking-tight text-gray-900">부족 품목 요약</h1>
+                            <p className="mt-3 text-sm text-gray-500">
                                 관리 매장 식재료 실시간 현황
                             </p>
                         </div>
@@ -192,7 +192,7 @@ const StockShortagePage: React.FC = () => {
                             </span>
                         </div>
                         <div className="text-2xl font-black text-black">{data.totalElements}</div>
-                        <p className="mt-1 text-sm text-gray-500">전체 부족 주문 수</p>
+                        <p className="mt-3 text-sm text-gray-500">전체 부족 주문 수</p>
                     </div>
 
                     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -202,7 +202,7 @@ const StockShortagePage: React.FC = () => {
                             </span>
                         </div>
                         <div className="text-2xl font-black text-black">{visibleShortageCount}</div>
-                        <p className="mt-1 text-sm text-gray-500">현재 조건에서 보이는 부족 품목 수</p>
+                        <p className="mt-3 text-sm text-gray-500">현재 조건에서 보이는 부족 품목 수</p>
                     </div>
 
                     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -212,7 +212,7 @@ const StockShortagePage: React.FC = () => {
                             </span>
                         </div>
                         <div className="text-base font-black text-black break-keep">{formatDateRangeLabel()}</div>
-                        <p className="mt-1 text-sm text-gray-500">기간 지정 없으면 전체 조회</p>
+                        <p className="mt-3 text-sm text-gray-500">기간 지정 없으면 전체 조회</p>
                     </div>
                 </section>
 

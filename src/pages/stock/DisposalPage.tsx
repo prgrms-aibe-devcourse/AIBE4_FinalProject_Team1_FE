@@ -165,8 +165,8 @@ export default function DisposalPage() {
                 {/* 상단 헤더: 통일된 스타일 */}
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-black tracking-tight text-gray-900">폐기 관리</h1>
-                        <p className="mt-1 text-sm text-gray-500">품목별 폐기 내역을 조회하고 새로운 폐기 내역을 등록하세요.</p>
+                        <h1 className="text-3xl font-black tracking-tight text-gray-900">폐기 관리</h1>
+                        <p className="mt-3 text-sm text-gray-500">품목별 폐기 내역을 조회하고 새로운 폐기 내역을 등록하세요.</p>
                     </div>
                     <button
                         onClick={() => setIsMainModalOpen(true)}

@@ -72,8 +72,8 @@ const StockLogPage: React.FC = () => {
                 {/* 상단 헤더: 입고/재고 페이지와 동일한 Black & White 테마 */}
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-black tracking-tight text-gray-900">재고 이력</h1>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <h1 className="text-3xl font-black tracking-tight text-gray-900">재고 이력</h1>
+                        <p className="mt-3 text-sm text-gray-500">
                             매장에서 발생한 모든 재고 변동 내역을 시간순으로 확인하세요.
                         </p>
                     </div>

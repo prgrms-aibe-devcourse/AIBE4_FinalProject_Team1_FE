@@ -76,8 +76,8 @@ export default function StockPage() {
                 {/* 상단 헤더: 입고 페이지와 동일한 스타일 */}
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h1 className="text-2xl font-black tracking-tight text-gray-900">재고 현황</h1>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <h1 className="text-3xl font-black tracking-tight text-gray-900">재고 현황</h1>
+                        <p className="mt-3 text-sm text-gray-500">
                             매장의 전체 재고를 확인하고 유통기한별 상세 배치를 관리하세요.
                         </p>
                     </div>

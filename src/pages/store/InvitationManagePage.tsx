@@ -185,9 +185,9 @@ const InvitationManagePage = () => {
             <div className="p-2 bg-black rounded-lg">
               <Ticket className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">초대 코드 관리</h1>
+            <h1 className="text-3xl font-black tracking-tight text-gray-900">초대 코드 관리</h1>
           </div>
-          <p className="text-gray-600">
+          <p className="mt-3 text-sm text-gray-500">
             초대 코드를 생성하여 직원을 매장에 초대하세요
           </p>
         </div>

@@ -144,8 +144,8 @@ export default function VendorPage() {
             <div className="max-w-7xl mx-auto space-y-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-extrabold text-gray-900">거래처 관리</h1>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <h1 className="text-3xl font-black tracking-tight text-gray-900">거래처 관리</h1>
+                        <p className="mt-3 text-sm text-gray-500">
                             거래처 정보를 관리합니다.
                         </p>
                     </div>

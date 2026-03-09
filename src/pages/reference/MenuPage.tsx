@@ -262,8 +262,8 @@ const MenuPage: React.FC = () => {
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
                             <div>
-                                <h1 className="text-3xl font-black tracking-tight text-black">메뉴 관리</h1>
-                                <p className="text-slate-500 mt-1 font-medium italic">
+                                <h1 className="text-3xl font-black tracking-tight text-gray-900">메뉴 관리</h1>
+                                <p className="mt-3 text-sm text-gray-500">
                                     매장 메뉴를 등록하고 구성 식재료 레시피를 관리합니다.
                                 </p>
                             </div>
