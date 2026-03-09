@@ -1,5 +1,15 @@
-import axios from 'axios';
-import {getAccessToken, setAccessToken, removeAccessToken, extractToken} from '@/utils/auth.ts';
+import axios, {
+    type AxiosError,
+    type AxiosResponse,
+    type InternalAxiosRequestConfig
+} from 'axios';
+import {
+    getAccessToken,
+    setAccessToken,
+    removeAccessToken,
+    extractToken
+} from '@/utils/auth.ts';
+import type { ApiResponse } from '@/types/common/common.ts';
 
 const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -10,12 +20,13 @@ const apiClient = axios.create({
     withCredentials: true, // 쿠키 전송 허용
 });
 
-// 토큰 재발급 중인지 확인하는 플래그
 let isRefreshing = false;
-// 재발급 대기 중인 요청 큐
-let failedQueue: any[] = [];
+let failedQueue: Array<{
+    resolve: (token: string | null) => void;
+    reject: (error: unknown) => void;
+}> = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue.forEach((prom) => {
         if (error) {
             prom.reject(error);
@@ -26,36 +37,75 @@ const processQueue = (error: any, token: string | null = null) => {
     failedQueue = [];
 };
 
-// JWT 토큰 자동 첨부
-apiClient.interceptors.request.use((config) => {
+function isApiResponseEnvelope<T>(data: unknown): data is ApiResponse<T> {
+    if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+        return false;
+    }
+
+    const obj = data as Record<string, unknown>;
+
+    return (
+        typeof obj.status === 'string' &&
+        typeof obj.code === 'string' &&
+        typeof obj.path === 'string' &&
+        typeof obj.timestamp === 'string' &&
+        'data' in obj
+    );
+}
+
+function unwrapApiResponse<T>(response: AxiosResponse<T | ApiResponse<T>>): AxiosResponse<T> {
+    if (isApiResponseEnvelope<T>(response.data)) {
+        return {
+            ...response,
+            data: response.data.data as T,
+        };
+    }
+
+    return response as AxiosResponse<T>;
+}
+
+apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const token = getAccessToken();
+
     if (token) {
         const cleanToken = token.replace(/^"(.*)"$/, '$1');
-        // 이미 'Bearer '가 포함되어 있는지 확인하여 중복 방지 (유틸리티에서 처리하지만 인터셉터 수준에서도 안전장치)
-        config.headers.Authorization = cleanToken.startsWith('Bearer ') ? cleanToken : `Bearer ${cleanToken}`;
+        config.headers = config.headers ?? {};
+        config.headers.Authorization = cleanToken.startsWith('Bearer ')
+            ? cleanToken
+            : `Bearer ${cleanToken}`;
     }
+
     return config;
 });
 
-// 응답 인터셉터
 apiClient.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
+    (response) => {
+        return unwrapApiResponse(response);
+    },
+    async (error: AxiosError) => {
+        const originalRequest = error.config as InternalAxiosRequestConfig & {
+            _retry?: boolean;
+        };
 
-        // 401 에러이고 재시도한 적이 없는 경우
+        if (!originalRequest) {
+            return Promise.reject(error);
+        }
+
         if (error.response?.status === 401 && !originalRequest._retry) {
-            // 재발급 요청 자체가 401을 받은 경우 즉시 에러 반환 (무한 루프 방지)
             if (originalRequest.url?.includes('/api/auth/reissue')) {
                 return Promise.reject(error);
             }
 
             if (isRefreshing) {
-                // 이미 재발급 중이면 큐에 추가
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({resolve, reject});
+                return new Promise<string | null>((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
                 })
                     .then((token) => {
+                        if (!token) {
+                            return Promise.reject(error);
+                        }
+
+                        originalRequest.headers = originalRequest.headers ?? {};
                         originalRequest.headers.Authorization = `Bearer ${token}`;
                         return apiClient(originalRequest);
                     })
@@ -66,27 +116,26 @@ apiClient.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                // 토큰 재발급 요청 (auth.ts의 reissue 함수 사용)
-                // 순환 참조 방지를 위해 필요 시점에서 동적 임포트 고려 가능하나,
-                // 여기서는 일단 직접 임포트 대신 axios 정의를 그대로 두거나
-                // 유저 요청대로 auth.ts의 것을 쓰되 루프 방지 처리
-
-                const {reissue} = await import('./auth.ts');
+                const { reissue } = await import('./auth.ts');
                 const response = await reissue();
 
-                // 응답 헤더나 바디에서 access token 추출 (유틸리티 사용)
-                const newAccessToken = extractToken(response.headers['authorization'] || response.headers['Authorization']);
+                const newAccessToken = extractToken(
+                    response.headers['authorization'] || response.headers['Authorization']
+                );
 
-                if (newAccessToken) {
-                    const cleanNewToken = newAccessToken.replace(/^"(.*)"$/, '$1');
-                    setAccessToken(cleanNewToken);
-
-                    apiClient.defaults.headers.common['Authorization'] = `Bearer ${cleanNewToken}`;
-                    originalRequest.headers.Authorization = `Bearer ${cleanNewToken}`;
-
-                    processQueue(null, cleanNewToken);
-                    return apiClient(originalRequest);
+                if (!newAccessToken) {
+                    throw new Error('재발급 응답 헤더에 access token 이 없습니다.');
                 }
+
+                const cleanNewToken = newAccessToken.replace(/^"(.*)"$/, '$1');
+                setAccessToken(cleanNewToken);
+
+                apiClient.defaults.headers.common['Authorization'] = `Bearer ${cleanNewToken}`;
+                originalRequest.headers = originalRequest.headers ?? {};
+                originalRequest.headers.Authorization = `Bearer ${cleanNewToken}`;
+
+                processQueue(null, cleanNewToken);
+                return apiClient(originalRequest);
             } catch (refreshError) {
                 processQueue(refreshError, null);
                 removeAccessToken();

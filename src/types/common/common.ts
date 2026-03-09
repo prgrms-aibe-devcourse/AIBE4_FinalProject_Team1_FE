@@ -1,6 +1,18 @@
 // --- Common API Types ---
 
 /**
+ * 공통 API 응답 래퍼
+ */
+export interface ApiResponse<T> {
+    status: 'success' | 'error';
+    code: string;
+    message: string | null;
+    path: string;
+    timestamp: string;
+    data: T;
+}
+
+/**
  * 페이지네이션 응답
  */
 export interface Pagination<T> {
