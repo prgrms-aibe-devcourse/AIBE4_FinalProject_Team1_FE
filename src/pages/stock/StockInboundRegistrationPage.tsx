@@ -26,7 +26,7 @@ type FieldMeta = {
 type ItemDraft = {
     id: string;
     rawProductName: string;
-    quantity: string;
+    quantity: number;
     unitCost: string;
     expirationDate: string;
     // 필드별 OCR 상태 정보 저장
@@ -48,7 +48,7 @@ function createEmptyItem(): ItemDraft {
     return {
         id: newId(),
         rawProductName: "",
-        quantity: "",
+        quantity: 0,
         unitCost: "",
         expirationDate: "",
         meta: {
@@ -126,7 +126,7 @@ export default function StockInboundRegistrationPage() {
                         return {
                             id: newId(),
                             rawProductName: unwrapField(it.ingredient.name),
-                            quantity: unwrapField(it.quantity),
+                            quantity: Number.parseInt(unwrapField(it.quantity)) || 0,
                             unitCost: unwrapField(it.costPrice),
                             expirationDate: unwrapField(it.expirationDate),
                             meta: {
@@ -169,7 +169,7 @@ export default function StockInboundRegistrationPage() {
                 vendorPublicId: selectedVendor?.vendorPublicId ?? null,
                 items: items.map((it) => ({
                     rawProductName: it.rawProductName.trim(),
-                    quantity: Number(it.quantity.replace(/[^0-9.-]/g, "")),
+                    quantity: it.quantity || 0,
                     unitCost: Number(it.unitCost.replace(/[^0-9.-]/g, "")),
                     expirationDate: it.expirationDate || null,
                     specText: null,
@@ -295,7 +295,12 @@ export default function StockInboundRegistrationPage() {
                                     <td className="px-4 py-4 align-top">
                                         <input
                                             value={it.quantity}
-                                            onChange={(e) => updateRow(it.id, {quantity: e.target.value})}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const numericValue = val === "" ? 0 : Number(val.replace(/[^0-9.-]/g, ""));
+
+                                                updateRow(it.id, {quantity: numericValue});
+                                            }}
                                             className={`w-full rounded-lg border-2 px-3 py-2 text-sm text-right font-medium outline-none transition-all ${getFieldStyles(it.meta.quantity.status)}`}
                                         />
                                         {it.meta.quantity.message && (
