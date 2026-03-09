@@ -166,7 +166,7 @@ const StockShortagePage: React.FC = () => {
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
                     <div className="flex h-20 items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-black tracking-tight text-gray-900">부족 품목 요약</h1>
+                            <h1 className="text-3xl font-black tracking-tight text-gray-900">재고 부족 현황</h1>
                             <p className="mt-3 text-sm text-gray-500">
                                 관리 매장 식재료 실시간 현황
                             </p>
