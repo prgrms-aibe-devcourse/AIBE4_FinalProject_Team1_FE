@@ -7,7 +7,7 @@ export interface Field<T> {
 }
 
 export interface VendorField {
-    id: Field<number>;
+    id: Field<string>;
     name: Field<string>;
 }
 

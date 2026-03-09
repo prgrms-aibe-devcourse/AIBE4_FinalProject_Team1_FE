@@ -12,9 +12,6 @@ import type {ReceiptResponse, Field, FieldStatus} from "@/types/ocr/ocr";
 import type {VendorResponse} from "@/types/reference/vendor";
 import VendorSelectModal from "@/components/stock/VendorSelectModal";
 
-export interface OCRScanResponse {
-    results: ReceiptResponse[];
-}
 
 // 개별 필드의 상태 및 메시지 정보 타입
 type FieldMeta = {
@@ -110,40 +107,63 @@ export default function StockInboundRegistrationPage() {
                 setScanning(true);
                 setErrors([]);
 
-                // API 응답 처리 (배열 구조 대응)
                 const response = await analyzeReceipt(file);
                 const result: ReceiptResponse = response.results
                     ? response.results[0]
                     : (Array.isArray(response) ? response[0] : response);
 
-                if (result && result.items) {
+                if (result) {
                     const ocrWarnings: string[] = [];
 
-                    const newItems: ItemDraft[] = result.items.map((it, idx) => {
-                        // RED 상태인 경우 전역 에러 메시지에 추가
-                        if (it.ingredient.name.status === "RED") ocrWarnings.push(`${idx + 1}행: 품목명 확인 필요`);
+                    // 1. 거래처 자동 매핑 로직 추가 (기존 구조 유지)
+                    if (result.vendor && result.vendor.id?.value) {
+                        setSelectedVendor({
+                            vendorPublicId: result.vendor.id.value,
+                            name: result.vendor.name?.value || "자동 매핑된 거래처",
+                        } as Partial<VendorResponse> as VendorResponse);
 
-                        return {
-                            id: newId(),
-                            rawProductName: unwrapField(it.ingredient.name),
-                            quantity: Number.parseInt(unwrapField(it.quantity)) || 0,
-                            unitCost: unwrapField(it.costPrice),
-                            expirationDate: unwrapField(it.expirationDate),
-                            meta: {
-                                rawProductName: {
-                                    status: it.ingredient.name.status,
-                                    message: it.ingredient.name.message
-                                },
-                                quantity: {status: it.quantity.status, message: it.quantity.message},
-                                unitCost: {status: it.costPrice.status, message: it.costPrice.message},
-                                expirationDate: {status: it.expirationDate.status, message: it.expirationDate.message},
-                            }
-                        };
-                    });
+                    } else if (result.vendor?.name?.status !== "GREEN") {
+                        ocrWarnings.push(`거래처 매칭 실패: ${result.vendor.name.value}`);
+                    }
 
-                    setItems(newItems);
+                    // 2. 입고 일자 설정
                     if (result.date?.value) setInboundDate(String(result.date.value));
-                    if (ocrWarnings.length > 0) setErrors(ocrWarnings);
+
+                    // 3. 품목 리스트 처리
+                    if (result.items) {
+                        const newItems: ItemDraft[] = result.items.map((it, idx) => {
+                            if (it.ingredient.name.status === "RED") ocrWarnings.push(`${idx + 1}행: 품목명 확인 필요`);
+
+                            return {
+                                id: newId(),
+                                rawProductName: unwrapField(it.ingredient.name),
+                                quantity: Number.parseFloat(unwrapField(it.quantity)) || 0,
+                                unitCost: unwrapField(it.costPrice),
+                                expirationDate: unwrapField(it.expirationDate),
+                                meta: {
+                                    rawProductName: {
+                                        status: it.ingredient.name.status,
+                                        message: it.ingredient.name.message
+                                    },
+                                    quantity: {
+                                        status: it.quantity.status,
+                                        message: it.quantity.message
+                                    },
+                                    unitCost: {
+                                        status: it.costPrice.status,
+                                        message: it.costPrice.message
+                                    },
+                                    expirationDate: {
+                                        status: (it.expirationDate?.status) || "GREEN",
+                                        message: it.expirationDate?.message || null
+                                    },
+                                }
+                            };
+                        });
+
+                        setItems(newItems);
+                        if (ocrWarnings.length > 0) setErrors(ocrWarnings);
+                    }
                 }
             } catch (err) {
                 console.error(err);

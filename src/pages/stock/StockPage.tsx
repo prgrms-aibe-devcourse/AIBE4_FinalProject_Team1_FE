@@ -1,11 +1,9 @@
 import {useState, useEffect} from 'react';
-import {useNavigate} from "react-router-dom";
 import {getStoreStockSummary, getIngredientBatchDetails} from "@/api/stock/stock";
 import type {StockSummaryResponse, StockSearchCondition, StockBatchResponse} from "@/types/stock/stock";
 import {requireStorePublicId} from "@/utils/store.ts";
 
 export default function StockPage() {
-    const navigate = useNavigate();
     const storePublicId = requireStorePublicId();
 
     const [items, setItems] = useState<StockSummaryResponse[]>([]);
@@ -88,12 +86,6 @@ export default function StockPage() {
                         >
                             새로고침
                         </button>
-                        <button
-                            onClick={() => navigate(`/stock/${storePublicId}/disposal`)}
-                            className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-sm font-black text-white hover:bg-gray-900 transition"
-                        >
-                            폐기 관리 이동
-                        </button>
                     </div>
                 </div>
 
@@ -149,18 +141,18 @@ export default function StockPage() {
                                                 className="text-sm font-black text-gray-900">{item.ingredientName}</div>
                                             <span
                                                 className="px-2 py-0.5 rounded-lg text-[10px] font-black bg-gray-100 text-gray-600 border border-gray-200">
-                                                {item.batchCount} BATCHES
+                                                품목 {item.batchCount} 개
                                             </span>
                                         </div>
                                         <div className="mt-1 text-xs text-gray-500">
-                                            ID: <span className="font-mono">{item.ingredientId}</span>
+                                            ID: <span
+                                            className="font-mono">{item.ingredientId.substring(0, 8)}...</span>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center gap-8">
                                         <div className="text-right">
-                                            <div className="text-[10px] font-black text-gray-400 uppercase">Total
-                                                Stock
+                                            <div className="text-[10px] font-black text-gray-400 uppercase">전체 재고
                                             </div>
                                             <div className="text-sm font-black text-gray-900">
                                                 {item.totalRemainingQuantity.toLocaleString()} <span
@@ -168,23 +160,13 @@ export default function StockPage() {
                                             </div>
                                         </div>
                                         <div className="text-right min-w-[100px]">
-                                            <div className="text-[10px] font-black text-gray-400 uppercase">Exp.
-                                                Closest
+                                            <div className="text-[10px] font-black text-gray-400 uppercase">유통기한
                                             </div>
                                             <div
                                                 className={`text-sm font-black ${item.minExpirationDate ? 'text-red-600' : 'text-gray-300'}`}>
                                                 {item.minExpirationDate || '-'}
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                navigate(`/stock/${storePublicId}/disposal?id=${item.ingredientId}`);
-                                            }}
-                                            className="px-3 py-2 rounded-xl border border-gray-200 bg-white text-xs font-black text-gray-700 hover:bg-gray-50 transition"
-                                        >
-                                            폐기 관리
-                                        </button>
                                     </div>
                                 </div>
                             </div>
