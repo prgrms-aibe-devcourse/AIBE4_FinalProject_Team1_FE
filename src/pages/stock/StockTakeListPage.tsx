@@ -137,8 +137,8 @@ const StockTakeListPage = () => {
                 <div className="animate-in fade-in duration-500">
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                         <div>
-                            <h1 className="text-3xl font-black text-black tracking-tight">재고 실사 내역</h1>
-                            <p className="text-slate-500 text-sm mt-1 font-medium">
+                            <h1 className="text-3xl font-black tracking-tight text-gray-900">재고 실사 내역</h1>
+                            <p className="mt-3 text-sm text-gray-500">
                                 이전에 작성된 실사 전표를 확인하거나 새로 작성합니다.
                             </p>
                         </div>

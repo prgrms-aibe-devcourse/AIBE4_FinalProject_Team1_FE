@@ -197,8 +197,8 @@ export default function SalesLedgerPage() {
 
                 <section className="space-y-4">
                     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <h1 className="text-2xl font-bold text-slate-900">매출 원장</h1>
-                        <p className="mt-1 text-sm text-slate-600">
+                        <h1 className="text-3xl font-black tracking-tight text-gray-900">매출 원장</h1>
+                        <p className="mt-3 text-sm text-gray-500">
                             {selectedDate.getMonth() + 1}월 {selectedDate.getDate()}일 주문 매출 내역입니다.
                         </p>
 

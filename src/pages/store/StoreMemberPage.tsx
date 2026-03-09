@@ -83,8 +83,8 @@ export default function StoreMemberPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">직원 목록</h1>
-              <p className="text-sm text-gray-600 mt-1">전체 멤버 {activeCount}명</p>
+              <h1 className="text-3xl font-black tracking-tight text-gray-900">직원 목록</h1>
+              <p className="mt-3 text-sm text-gray-500">전체 멤버 {activeCount}명</p>
             </div>
           </div>
         </div>

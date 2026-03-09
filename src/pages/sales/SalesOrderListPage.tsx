@@ -114,8 +114,8 @@ export default function SalesOrderListPage() {
             <div className="mx-auto max-w-7xl">
                 {/* 헤더 */}
                 <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-slate-900">주문 현황</h1>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <h1 className="text-3xl font-black tracking-tight text-gray-900">주문 현황</h1>
+                    <p className="mt-3 text-sm text-gray-500">
                         매장의 모든 주문 내역을 확인할 수 있습니다.
                     </p>
                 </div>

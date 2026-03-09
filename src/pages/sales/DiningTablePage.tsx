@@ -244,11 +244,11 @@ const DiningTablePage = () => {
 
             {/* Header */}
             <header className="bg-white border-b border-gray-200 no-print relative overflow-hidden">
-                <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
+                <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
                     <div className="flex items-center">
                         <div className="text-black">
-                            <h1 className="text-3xl font-black text-black tracking-tight uppercase">테이블 마스터 관리</h1>
-                            <p className="text-gray-500 text-sm mt-1 font-bold">QR 코드를 생성하고 배치도를 관리하세요.</p>
+                            <h1 className="text-3xl font-black tracking-tight text-gray-900">테이블 마스터 관리</h1>
+                            <p className="mt-3 text-sm text-gray-500">QR 코드를 생성하고 배치도를 관리하세요.</p>
                         </div>
                     </div>
 
@@ -283,8 +283,8 @@ const DiningTablePage = () => {
                                 <MapIcon size={24} />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-black text-black tracking-tight uppercase">디지털 테이블 배치도</h1>
-                                <p className="text-gray-500 text-sm mt-1 font-bold">테이블을 클릭하여 상세 정보를 확인하거나 QR 코드를 관리하세요.</p>
+                                <h1 className="text-3xl font-black tracking-tight text-gray-900">디지털 테이블 배치도</h1>
+                                <p className="mt-3 text-sm text-gray-500">테이블을 클릭하여 상세 정보를 확인하거나 QR 코드를 관리하세요.</p>
                             </div>
                         </div>
                         <button

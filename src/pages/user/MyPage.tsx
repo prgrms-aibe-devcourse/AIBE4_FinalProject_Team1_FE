@@ -33,7 +33,7 @@ export default function MyPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="mx-auto max-w-4xl px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">마이페이지</h1>
+        <h1 className="text-3xl font-black tracking-tight text-gray-900 mb-6">마이페이지</h1>
 
         <div className="space-y-6">
           <div className="rounded-lg bg-white p-6 shadow">

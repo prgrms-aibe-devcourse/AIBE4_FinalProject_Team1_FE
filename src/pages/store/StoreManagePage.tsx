@@ -149,8 +149,8 @@ const StoreManagePage = () => {
     <div className="min-h-screen bg-gray-100 py-8">
       <div className="mx-auto max-w-5xl px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">매장 관리</h1>
-          <p className="mt-2 text-gray-600">소속된 매장을 관리하고 새로운 매장을 추가하세요</p>
+          <h1 className="text-3xl font-black tracking-tight text-gray-900">매장 관리</h1>
+          <p className="mt-3 text-sm text-gray-500">소속된 매장을 관리하고 새로운 매장을 추가하세요</p>
         </div>
 
         {/* Tabs */}
