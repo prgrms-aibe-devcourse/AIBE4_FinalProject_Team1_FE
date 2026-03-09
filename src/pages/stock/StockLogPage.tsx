@@ -33,9 +33,24 @@ const StockLogPage: React.FC = () => {
             INBOUND: {label: '입고 (+)', bg: 'bg-blue-50', text: 'text-blue-700'},
             DEDUCTION: {label: '판매 (-)', bg: 'bg-red-50', text: 'text-red-700'},
             WASTE: {label: '폐기 (-)', bg: 'bg-red-50', text: 'text-red-700'},
-            ADJUST: {label: '조정 (±)', bg: 'bg-amber-50', text: 'text-amber-700'}
+            ADJUST: {label: '조정 (+)', bg: 'bg-blue-50', text: 'text-blue-700'} // 보정은 +로 처리
         };
         return configs[type];
+    };
+
+    // 변동량 표시를 위한 헬퍼 함수 (BE 양수 데이터를 UI 기호로 변환)
+    const getChangeDisplay = (type: TransactionType | undefined, qty: number | undefined) => {
+        const amount = qty || 0;
+        switch (type) {
+            case 'INBOUND':
+            case 'ADJUST':
+                return {text: `+${amount}`, color: 'text-blue-600'};
+            case 'DEDUCTION':
+            case 'WASTE':
+                return {text: `-${amount}`, color: 'text-red-600'};
+            default:
+                return {text: `${amount}`, color: 'text-gray-600'};
+        }
     };
 
     const fetchLogs = useCallback(async (page: number) => {
@@ -69,7 +84,7 @@ const StockLogPage: React.FC = () => {
         <div className="min-h-screen bg-gray-50 flex flex-col">
             <div className="mx-auto w-full max-w-6xl px-6 py-8 flex flex-col flex-1">
 
-                {/* 상단 헤더: 입고/재고 페이지와 동일한 Black & White 테마 */}
+                {/* 상단 헤더 */}
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
                         <h1 className="text-3xl font-black tracking-tight text-gray-900">재고 이력</h1>
@@ -87,7 +102,7 @@ const StockLogPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* 필터 영역: 통일된 입력창 스타일 */}
+                {/* 필터 영역 */}
                 <div
                     className="mt-6 flex flex-col gap-4 bg-white p-5 rounded-2xl border border-gray-200 shadow-sm md:flex-row md:items-center">
                     <div className="relative flex-1">
@@ -118,12 +133,12 @@ const StockLogPage: React.FC = () => {
                             <option value="INBOUND">입고 (+)</option>
                             <option value="DEDUCTION">판매 (-)</option>
                             <option value="WASTE">폐기 (-)</option>
-                            <option value="ADJUST">조정 (±)</option>
+                            <option value="ADJUST">조정 (+)</option>
                         </select>
                     </div>
                 </div>
 
-                {/* 이력 리스트: 깔끔한 테이블 디자인 */}
+                {/* 이력 리스트 */}
                 <div
                     className="mt-4 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
                     <div className="overflow-x-auto">
@@ -155,7 +170,8 @@ const StockLogPage: React.FC = () => {
                             ) : (
                                 stockHistory.map((log, index) => {
                                     const config = getTypeConfig(log.type);
-                                    const isPositive = log.changeQuantity && log.changeQuantity > 0;
+                                    const display = getChangeDisplay(log.type, log.changeQuantity);
+
                                     return (
                                         <tr key={index} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 text-gray-400 font-medium whitespace-nowrap">
@@ -164,10 +180,10 @@ const StockLogPage: React.FC = () => {
                                                 }) : '-'}
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                    <span
-                                                        className={`inline-block px-2 py-0.5 rounded-lg text-[9px] font-black border ${config.bg} ${config.text} border-transparent`}>
-                                                        {config.label}
-                                                    </span>
+                                                <span
+                                                    className={`inline-block px-2 py-0.5 rounded-lg text-[9px] font-black border ${config.bg} ${config.text} border-transparent`}>
+                                                    {config.label}
+                                                </span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col gap-0.5">
@@ -176,15 +192,15 @@ const StockLogPage: React.FC = () => {
                                                             className="font-black text-gray-900">{log.ingredientName}</span>
                                                         <span
                                                             className="px-1.5 py-0.5 bg-gray-100 text-gray-400 rounded text-[9px] font-bold border border-gray-200">
-                                                                {getReferenceLabel(log.referenceType)} {log.referenceId ? `#${log.referenceId}` : ''}
-                                                            </span>
+                                                            {getReferenceLabel(log.referenceType)} {log.referenceId ? `#${log.referenceId}` : ''}
+                                                        </span>
                                                     </div>
                                                     <span
                                                         className="text-[9px] text-gray-300 font-mono tracking-tighter">BATCH: {log.batchId?.split('-')[0] || '-'}</span>
                                                 </div>
                                             </td>
-                                            <td className={`px-6 py-4 text-right font-black text-sm ${isPositive ? 'text-blue-600' : log.type === 'ADJUST' ? 'text-amber-600' : 'text-red-600'}`}>
-                                                {isPositive ? `+${log.changeQuantity}` : log.changeQuantity}
+                                            <td className={`px-6 py-4 text-right font-black text-sm ${display.color}`}>
+                                                {display.text}
                                             </td>
                                             <td className="px-6 py-4 text-right font-black text-gray-900">
                                                 {log.balanceAfter?.toLocaleString() ?? 0}
