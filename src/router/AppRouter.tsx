@@ -1,5 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { getAccessToken } from "../utils/auth";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./layout/MainLayout";
 import StoreGuard from "./layout/StoreGuard";
 
@@ -52,25 +51,15 @@ import PurchaseOrderCreatePage from "../pages/purchase/PurchaseOrderCreatePage";
 
 // Common
 import NotFoundPage from "../pages/common/NotFoundPage";
+import RootRedirect from "../pages/common/RootRedirect";
 
 export default function AppRouter() {
-    const isAuthed = !!getAccessToken();
-
     return (
         <BrowserRouter>
             <Routes>
                 <Route element={<MainLayout />}>
-                    {/* 기본 진입 */}
-                    <Route
-                        index
-                        element={
-                            isAuthed ? (
-                                <Navigate to="/dashboard" replace />
-                            ) : (
-                                <Navigate to="/login" replace />
-                            )
-                        }
-                    />
+                    {/* 기본 진입 - API 호출로 유저 정보 확인 후 리다이렉트 */}
+                    <Route index element={<RootRedirect />} />
 
                     {/* 인증 */}
                     <Route path="/login" element={<LoginPage />} />
