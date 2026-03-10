@@ -205,7 +205,7 @@ export default function StockPage() {
                             <div className="flex items-center gap-3">
                                 <span
                                     className="px-2 py-1 rounded-lg bg-black text-white text-[10px] font-black uppercase">Detail</span>
-                                <h2 className="text-xl font-black text-gray-900">{selectedItem.ingredientName} 배치
+                                <h2 className="text-xl font-black text-gray-900">{selectedItem.ingredientName} 품목
                                     내역</h2>
                             </div>
                             <button onClick={() => setSelectedItem(null)} className="text-gray-400 hover:text-gray-900">
@@ -223,8 +223,7 @@ export default function StockPage() {
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <div
-                                                    className="text-[10px] font-black text-gray-400 uppercase">Expiration
-                                                    Date
+                                                    className="text-[10px] font-black text-gray-400 uppercase">유통기한
                                                 </div>
                                                 <div
                                                     className="text-sm font-black text-red-600">{batch.expirationDate}</div>
@@ -232,7 +231,7 @@ export default function StockPage() {
                                                     className="mt-2 text-[10px] text-gray-400 font-medium">{batch.rawProductName}</div>
                                             </div>
                                             <div className="text-right">
-                                                <div className="text-[10px] font-black text-gray-400 uppercase">Stock
+                                                <div className="text-[10px] font-black text-gray-400 uppercase">재고
                                                 </div>
                                                 <div
                                                     className="text-lg font-black text-gray-900">{batch.remainingQuantity}</div>

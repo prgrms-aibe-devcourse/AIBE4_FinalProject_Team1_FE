@@ -226,7 +226,7 @@ const StockLogPage: React.FC = () => {
                     {/* 하단 요약 및 더보기 버튼 */}
                     <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                            Total {totalElements.toLocaleString()} Records
+                            전체 {totalElements.toLocaleString()} 이력
                         </span>
                         {currentPage + 1 < totalPages && (
                             <button
