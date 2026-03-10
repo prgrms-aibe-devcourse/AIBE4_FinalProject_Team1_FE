@@ -398,7 +398,7 @@ export default function DisposalPage() {
                                         <div>
                                             <div className="font-black text-gray-900">{item.ingredientName}</div>
                                             <div className="text-[10px] text-gray-400 mt-1 font-bold uppercase">
-                                                Stock: {item.totalRemainingQuantity} {item.unit} · {item.batchCount} Batch
+                                                재고량: {item.totalRemainingQuantity} {item.unit} · {item.batchCount} 품목
                                             </div>
                                         </div>
                                         <i className="ph ph-caret-right text-gray-300 group-hover:text-black"></i>
@@ -414,16 +414,13 @@ export default function DisposalPage() {
                                         <div className="flex justify-between items-center">
                                             <div>
                                                 <div
-                                                    className="text-[10px] font-black text-red-600 uppercase">Exp. {batch.expirationDate}</div>
+                                                    className="text-[10px] font-black text-red-600 uppercase">유통기한 {batch.expirationDate}</div>
                                                 <div
                                                     className="text-sm font-black text-gray-900 mt-0.5">{batch.rawProductName}</div>
                                             </div>
                                             <div className="text-right">
                                                 <div
-                                                    className="text-sm font-black text-gray-900">{batch.remainingQuantity} EA
-                                                </div>
-                                                <div
-                                                    className="text-[9px] font-bold text-gray-400 uppercase">Available
+                                                    className="text-sm font-black text-gray-900">{batch.remainingQuantity} {selectedIngredient.unit}
                                                 </div>
                                             </div>
                                         </div>

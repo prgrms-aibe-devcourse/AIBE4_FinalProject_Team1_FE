@@ -160,7 +160,7 @@ export default function StockDocumentsPage() {
                     {/* 하단 요약 바 */}
                     <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                            Total {documents.length.toLocaleString()} Archived Documents
+                            전체 {documents.length.toLocaleString()} 문서
                         </span>
                     </div>
                 </div>
@@ -175,7 +175,8 @@ export default function StockDocumentsPage() {
                         className="relative max-w-5xl w-full bg-white shadow-2xl flex flex-col animate-in zoom-in duration-200 rounded-3xl overflow-hidden border border-gray-200">
                         <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-white">
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Document Viewer</span>
+                                <span
+                                    className="text-[10px] font-black text-gray-400 uppercase tracking-widest">미리보기</span>
                                 <h3 className="font-black text-gray-900 truncate">{previewFile.fileName}</h3>
                             </div>
                             <button onClick={() => setPreviewFile(null)}
@@ -196,7 +197,7 @@ export default function StockDocumentsPage() {
                                 onClick={() => setPreviewFile(null)}
                                 className="px-8 py-3 bg-black font-black text-[11px] uppercase tracking-widest text-white rounded-xl hover:bg-gray-800 transition-all shadow-lg shadow-black/10"
                             >
-                                Close Viewer
+                                닫기
                             </button>
                         </div>
                     </div>
