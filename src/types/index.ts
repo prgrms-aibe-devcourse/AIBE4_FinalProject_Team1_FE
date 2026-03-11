@@ -14,6 +14,7 @@ export * from './sales/salesOrder.ts';
 export * from './sales/salesLedger.ts';
 export * from './sales/tableQr.ts';
 export * from './purchase/purchase.ts';
+export * from "./analytics/salesAnalytics.ts";
 
 export * from "./ocr/ocr.ts";
 export * from "./ocr/document.ts";

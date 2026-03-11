@@ -3,6 +3,7 @@ import type {
     SalesLedgerOrderDetailResponse,
     SalesLedgerOrderListResponse,
     SalesLedgerSearchParams,
+    SalesLedgerTotalSummaryResponse,
 } from '@/types/sales/salesLedger';
 
 export const getSalesLedgerOrders = async (
@@ -11,6 +12,17 @@ export const getSalesLedgerOrders = async (
 ): Promise<SalesLedgerOrderListResponse> => {
     const response = await apiClient.get<SalesLedgerOrderListResponse>(
         `/api/sales/${storePublicId}/orders`,
+        { params }
+    );
+    return response.data;
+};
+
+export const getSalesLedgerTotalSummary = async (
+    storePublicId: string,
+    params: SalesLedgerSearchParams
+): Promise<SalesLedgerTotalSummaryResponse> => {
+    const response = await apiClient.get<SalesLedgerTotalSummaryResponse>(
+        `/api/sales/${storePublicId}/orders/summary`,
         { params }
     );
     return response.data;
