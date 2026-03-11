@@ -9,8 +9,9 @@ export interface MyStoreResponse {
   storeName: string;
   businessRegistrationNumber: string;
   myRole: StoreMemberRole;
-  myStatus: StoreMemberStatus;
-  isDefault?: boolean; // 대표 매장 여부
+  memberStatus: StoreMemberStatus; // 백엔드 필드명과 일치
+  isDefault: boolean; // 대표 매장 여부 (필수)
+  storeCreatedAt: string; // 매장 생성 시간
 }
 
 export interface StoreCreateResponse {
