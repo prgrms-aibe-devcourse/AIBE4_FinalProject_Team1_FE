@@ -5,57 +5,60 @@ import MainLayout from "./layout/MainLayout";
 import StoreGuard from "./layout/StoreGuard";
 
 // Auth
-import LoginPage from "../pages/user/LoginPage.tsx";
-import OAuth2RedirectHandler from "../pages/user/OAuth2RedirectHandler.tsx";
+import LoginPage from "@/pages/user/LoginPage.tsx";
+import OAuth2RedirectHandler from "@/pages/user/OAuth2RedirectHandler.tsx";
 
 // Dashboard
-import DashboardPage from "../pages/sales/DashboardPage.tsx";
+import DashboardPage from "@/pages/sales/DashboardPage.tsx";
 
 // User
-import MyPage from "../pages/user/MyPage";
+import MyPage from "@/pages/user/MyPage";
 
 // Store
-import StoreManagePage from "../pages/store/StoreManagePage";
-import OnboardingPage from "../pages/store/OnboardingPage";
-import StoreMemberPage from "../pages/store/StoreMemberPage";
+import StoreManagePage from "@/pages/store/StoreManagePage";
+import OnboardingPage from "@/pages/store/OnboardingPage";
+import StoreMemberPage from "@/pages/store/StoreMemberPage";
 
 // Invitation
-import InviteLandingPage from "../pages/store/InviteLandingPage.tsx";
-import InvitationManagePage from "../pages/store/InvitationManagePage.tsx";
+import InviteLandingPage from "@/pages/store/InviteLandingPage.tsx";
+import InvitationManagePage from "@/pages/store/InvitationManagePage.tsx";
 
 // Inventory (Stock)
-import StockTakePage from "../pages/stock/StockTakePage.tsx";
-import StockTakeListPage from "../pages/stock/StockTakeListPage.tsx";
-import StockShortagePage from "../pages/stock/StockShortagePage.tsx";
-import IngredientPage from "../pages/reference/IngredientPage.tsx";
-import MenuPage from "../pages/reference/MenuPage.tsx";
-import VendorPage from "../pages/reference/VendorPage.tsx";
-import StockInboundPage from "../pages/stock/StockInboundPage";
-import StockInboundRegistrationPage from "../pages/stock/StockInboundRegistrationPage";
-import StockDocumentsPage from "../pages/stock/StockDocumentsPage";
-import DisposalPage from "../pages/stock/DisposalPage";
-import StockPage from "../pages/stock/StockPage";
-import StockLogPage from "../pages/stock/StockLogPage.tsx";
-import InboundDetailPage from "../pages/stock/InboundDetailPage.tsx";
+import StockTakePage from "@/pages/stock/StockTakePage.tsx";
+import StockTakeListPage from "@/pages/stock/StockTakeListPage.tsx";
+import StockShortagePage from "@/pages/stock/StockShortagePage.tsx";
+import IngredientPage from "@/pages/reference/IngredientPage.tsx";
+import MenuPage from "@/pages/reference/MenuPage.tsx";
+import VendorPage from "@/pages/reference/VendorPage.tsx";
+import StockInboundPage from "@/pages/stock/StockInboundPage";
+import StockInboundRegistrationPage from "@/pages/stock/StockInboundRegistrationPage";
+import StockDocumentsPage from "@/pages/stock/StockDocumentsPage";
+import DisposalPage from "@/pages/stock/DisposalPage";
+import StockPage from "@/pages/stock/StockPage";
+import StockLogPage from "@/pages/stock/StockLogPage.tsx";
+import InboundDetailPage from "@/pages/stock/InboundDetailPage.tsx";
 
 // Dining
-import DiningTablePage from "../pages/sales/DiningTablePage.tsx";
+import DiningTablePage from "@/pages/sales/DiningTablePage.tsx";
+
+// Analytics
+import SalesAnalyticsPage from "@/pages/analytics/SalesAnalyticsPage.tsx";
 
 // Sales
-import SalesOrderListPage from "../pages/sales/SalesOrderListPage";
+import SalesOrderListPage from "@/pages/sales/SalesOrderListPage";
 
 // SalesLedger
-import SalesLedgerPage from "../pages/sales/SalesLedgerPage";
+import SalesLedgerPage from "@/pages/sales/SalesLedgerPage";
 
 // Purchases
-import PurchaseOrderListPage from "../pages/purchase/PurchaseOrderListPage";
-import PurchaseOrderCreatePage from "../pages/purchase/PurchaseOrderCreatePage";
+import PurchaseOrderListPage from "@/pages/purchase/PurchaseOrderListPage";
+import PurchaseOrderCreatePage from "@/pages/purchase/PurchaseOrderCreatePage";
 
 // Notification
 import NotificationPage from "../pages/notification/NotificationPage";
 
 // Common
-import NotFoundPage from "../pages/common/NotFoundPage";
+import NotFoundPage from "@/pages/common/NotFoundPage";
 
 export default function AppRouter() {
     const isAuthed = !!getAccessToken();
@@ -125,6 +128,9 @@ export default function AppRouter() {
 
                         {/* 거래처 관리 */}
                         <Route path="/vendors" element={<VendorPage />} />
+
+                        {/* 분석 관리 */}
+                        <Route path="/analytics/sales" element={<SalesAnalyticsPage />} />
 
                         {/* 마이페이지 */}
                         <Route path="/me" element={<MyPage />} />

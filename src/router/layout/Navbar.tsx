@@ -54,7 +54,7 @@ function IconChevronDown({ className }: { className?: string }) {
   );
 }
 
-type MenuKey = "sales" | "inventory" | "orders" | "standards" | "profile" | null;
+type MenuKey = "analytics" | "inventory" | "orders" | "standards" | "profile" | null;
 
 type MenuItem = {
   label: string;
@@ -280,21 +280,15 @@ export default function Navbar() {
     [defaultStoreRole],
   );
 
-  const salesSections: MenuSection[] = useMemo(
+  const ordersSections: MenuSection[] = useMemo(
     () => [
       {
-        title: "매출",
+        title: "주문",
         items: [
+          { label: "주문 현황", path: "/orders" },
           { label: "매출 내역", path: "/sales/list" },
-          { label: "매출 분석", path: "/analytics/sales" },
+          { label: "테이블 관리", path: "/orders/tables" },
         ],
-      },
-      {
-            title: "리포트",
-            items: [
-                { label: "운영 리포트", path: "/reports" },
-                { label: "리포트 발행", path: "/reports/generate" },
-            ],
       },
     ],
     [],
@@ -336,13 +330,20 @@ export default function Navbar() {
     [],
   );
 
-  const ordersSections: MenuSection[] = useMemo(
+  const analyticsSections: MenuSection[] = useMemo(
     () => [
       {
-        title: "주문",
+        title: "분석",
         items: [
-          { label: "주문 현황", path: "/orders" },
-          { label: "테이블 관리", path: "/orders/tables" },
+          { label: "매출 분석", path: "/analytics/sales" },
+          { label: "재고 분석", path: "/analytics/stock" },
+        ],
+      },
+      {
+        title: "리포트",
+        items: [
+          { label: "운영 리포트", path: "/reports" },
+          { label: "리포트 발행", path: "/reports/generate" },
         ],
       },
     ],
@@ -407,7 +408,7 @@ export default function Navbar() {
         >
           <img
             src="/images/logo.png"
-            alt="Don't Worry"
+            alt="Inventory"
             // nav 높이 확장에 맞춰 로고도 살짝 키움
             className="h-16 w-auto object-contain block"
           />
@@ -460,17 +461,17 @@ export default function Navbar() {
             </span>
           </button>
 
-          {/* 매출 */}
+          {/* 분석 */}
           <button
             type="button"
             data-menu-toggle
-            onClick={() => toggleMenu("sales")}
-            className={cn(topItemBase, openMenu === "sales" && topItemOpen)}
-            aria-expanded={openMenu === "sales"}
+            onClick={() => toggleMenu("analytics")}
+            className={cn(topItemBase, openMenu === "analytics" && topItemOpen)}
+            aria-expanded={openMenu === "analytics"}
             aria-haspopup="menu"
           >
             <span className="inline-flex items-center gap-1">
-              매출
+              분석
               <IconChevronDown className="h-4 w-4" />
             </span>
           </button>
@@ -564,8 +565,8 @@ export default function Navbar() {
         <MegaMenu sections={inventorySections} onNavigate={handleMenuNav} />
       )}
 
-      {openMenu === "sales" && (
-        <MegaMenu sections={salesSections} onNavigate={handleMenuNav} />
+      {openMenu === "analytics" && (
+        <MegaMenu sections={analyticsSections} onNavigate={handleMenuNav} />
       )}
 
     </nav>

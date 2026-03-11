@@ -41,6 +41,13 @@ export interface SalesLedgerOrderDetailResponse {
 
 export type SalesLedgerOrderListResponse = Pagination<SalesLedgerOrderSummaryResponse>;
 
+export interface SalesLedgerTotalSummaryResponse {
+    totalOrderCount: number;
+    totalAmount: number;
+    totalRefundAmount: number;
+    totalNetAmount: number;
+}
+
 export interface SalesLedgerSearchParams {
     from: string;
     to: string;
