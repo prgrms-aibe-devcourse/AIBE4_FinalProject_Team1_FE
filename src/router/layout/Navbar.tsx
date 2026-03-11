@@ -54,7 +54,7 @@ function IconChevronDown({ className }: { className?: string }) {
   );
 }
 
-type MenuKey = "sales" | "inventory" | "orders" | "purchases" | "analytics" | "standards" | "profile" | null;
+type MenuKey = "sales" | "inventory" | "orders" | "standards" | "profile" | null;
 
 type MenuItem = {
   label: string;
@@ -289,6 +289,13 @@ export default function Navbar() {
           { label: "매출 분석", path: "/analytics/sales" },
         ],
       },
+      {
+            title: "리포트",
+            items: [
+                { label: "운영 리포트", path: "/reports" },
+                { label: "리포트 발행", path: "/reports/generate" },
+            ],
+      },
     ],
     [],
   );
@@ -304,6 +311,13 @@ export default function Navbar() {
         ],
       },
       {
+        title: "발주",
+        items: [
+          { label: "발주 목록", path: "/purchase-orders" },
+          { label: "발주 등록", path: "/purchase-orders/new" },
+        ],
+      },
+      {
         title: "입고",
         items: [
           { label: "입고 목록", path: "/stock/inbound" },
@@ -314,7 +328,7 @@ export default function Navbar() {
       {
         title: "이력",
         items: [
-          { label: "이력 현황", path: "/stock/log" },
+          { label: "재고 이력", path: "/stock/log" },
           { label: "재고 부족 현황", path: "/stock/shortages" },
         ],
       },
@@ -329,39 +343,6 @@ export default function Navbar() {
         items: [
           { label: "주문 현황", path: "/orders" },
           { label: "테이블 관리", path: "/orders/tables" },
-        ],
-      },
-    ],
-    [],
-  );
-
-  const purchasesSections: MenuSection[] = useMemo(
-    () => [
-      {
-        title: "발주",
-        items: [
-          { label: "발주 목록", path: "/purchase-orders" },
-          { label: "발주 등록", path: "/purchase-orders/new" },
-        ],
-      }
-    ],
-    [],
-  );
-
-  const analyticsSections: MenuSection[] = useMemo(
-    () => [
-      {
-        title: "분석",
-        items: [
-          { label: "재고 분석", path: "/analytics/stock" },
-          { label: "원가 분석", path: "/analytics/cost" },
-        ],
-      },
-      {
-        title: "리포트",
-        items: [
-          { label: "운영 리포트", path: "/reports" },
-          { label: "리포트 발행", path: "/reports/generate" },
         ],
       },
     ],
@@ -464,21 +445,6 @@ export default function Navbar() {
             </span>
           </button>
 
-          {/* 발주 */}
-          <button
-            type="button"
-            data-menu-toggle
-            onClick={() => toggleMenu("purchases")}
-            className={cn(topItemBase, openMenu === "purchases" && topItemOpen)}
-            aria-expanded={openMenu === "purchases"}
-            aria-haspopup="menu"
-          >
-            <span className="inline-flex items-center gap-1">
-              발주
-              <IconChevronDown className="h-4 w-4" />
-            </span>
-          </button>
-
           {/* 재고 */}
           <button
             type="button"
@@ -505,21 +471,6 @@ export default function Navbar() {
           >
             <span className="inline-flex items-center gap-1">
               매출
-              <IconChevronDown className="h-4 w-4" />
-            </span>
-          </button>
-
-          {/* 분석 */}
-          <button
-            type="button"
-            data-menu-toggle
-            onClick={() => toggleMenu("analytics")}
-            className={cn(topItemBase, openMenu === "analytics" && topItemOpen)}
-            aria-expanded={openMenu === "analytics"}
-            aria-haspopup="menu"
-          >
-            <span className="inline-flex items-center gap-1">
-              분석
               <IconChevronDown className="h-4 w-4" />
             </span>
           </button>
@@ -605,10 +556,6 @@ export default function Navbar() {
         <MegaMenu sections={standardsSections} onNavigate={handleMenuNav} />
       )}
 
-      {openMenu === "purchases" && (
-        <MegaMenu sections={purchasesSections} onNavigate={handleMenuNav} />
-      )}
-
       {openMenu === "orders" && (
         <MegaMenu sections={ordersSections} onNavigate={handleMenuNav} />
       )}
@@ -621,9 +568,6 @@ export default function Navbar() {
         <MegaMenu sections={salesSections} onNavigate={handleMenuNav} />
       )}
 
-      {openMenu === "analytics" && (
-        <MegaMenu sections={analyticsSections} onNavigate={handleMenuNav} />
-      )}
     </nav>
   );
 }
