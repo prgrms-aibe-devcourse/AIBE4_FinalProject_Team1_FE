@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { createStore, getMyStores, setDefaultStore } from '@/api/store/store.ts';
 import { acceptInvitation } from '@/api/store/invitation.ts';
+import { setStorePublicId } from '@/utils/store.ts';
 import type { MyStoreResponse, StoreManageTabType } from '@/types';
 import { Store as StoreIcon, Star, Loader2 } from 'lucide-react';
 
@@ -11,22 +12,25 @@ const StoreManagePage = () => {
   const [searchParams] = useSearchParams();
   const [stores, setStores] = useState<MyStoreResponse[]>([]);
   const [_currentStore, setCurrentStore] = useState<MyStoreResponse | null>(null);
+  const [loadingStoreId, setLoadingStoreId] = useState<string | null>(null);
 
   // 쿼리 파라미터에서 초기 탭 설정
   const initialTab = (searchParams.get('tab') as StoreManageTabType) || 'list';
   const [activeTab, setActiveTab] = useState<StoreManageTabType>(initialTab);
 
-  // 매장 목록 조회
+  // 매장 목록 조회 (ACTIVE만 표시)
   useEffect(() => {
     const fetchStores = async () => {
       try {
         const storesData = await getMyStores();
-        setStores(storesData);
-        const defaultStore = storesData.find((s) => s.isDefault);
+        // ACTIVE 상태의 매장만 필터링
+        const activeStores = storesData.filter((s) => s.memberStatus === 'ACTIVE');
+        setStores(activeStores);
+        const defaultStore = activeStores.find((s) => s.isDefault);
         if (defaultStore) {
           setCurrentStore(defaultStore);
-        } else if (storesData.length > 0) {
-          setCurrentStore(storesData[0]);
+        } else if (activeStores.length > 0) {
+          setCurrentStore(activeStores[0]);
         }
       } catch (error) {
         console.error('Failed to fetch stores:', error);
@@ -101,12 +105,13 @@ const StoreManagePage = () => {
         code: inviteCode
       });
 
-      // 가입 후 매장 목록을 다시 가져옴
+      // 가입 후 매장 목록을 다시 가져옴 (ACTIVE만 필터링)
       const updatedStores = await getMyStores();
-      setStores(updatedStores);
+      const activeStores = updatedStores.filter((s) => s.memberStatus === 'ACTIVE');
+      setStores(activeStores);
 
       // 방금 가입한 매장 찾기
-      const joinedStore = updatedStores.find((s) => s.storeId === response.storeId);
+      const joinedStore = activeStores.find((s) => s.storeId === response.storeId);
       if (joinedStore) {
         // 가입한 매장을 기본 매장으로 설정
         await setDefaultStore(joinedStore.storePublicId);
@@ -126,23 +131,30 @@ const StoreManagePage = () => {
   };
 
   const handleSetDefaultStore = async (storePublicId: string) => {
+    setLoadingStoreId(storePublicId);
     try {
+      // 대표 매장 설정 API 호출
       await setDefaultStore(storePublicId);
+
+      // localStorage에 storePublicId 저장
+      setStorePublicId(storePublicId);
+
+      // 매장 목록 다시 조회하여 UI 업데이트
       const updatedStores = await getMyStores();
-      setStores(updatedStores);
-      const newDefault = updatedStores.find((s) => s.storePublicId === storePublicId);
+      const activeStores = updatedStores.filter((s) => s.memberStatus === 'ACTIVE');
+      setStores(activeStores);
+
+      // 새로운 대표 매장을 currentStore로 설정
+      const newDefault = activeStores.find((s) => s.storePublicId === storePublicId);
       if (newDefault) {
         setCurrentStore(newDefault);
       }
     } catch (err) {
       console.error('Failed to set default store:', err);
       alert('대표 매장 설정에 실패했습니다.');
+    } finally {
+      setLoadingStoreId(null);
     }
-  };
-
-  const handleSelectStore = (store: MyStoreResponse) => {
-    setCurrentStore(store);
-    navigate('/dashboard');
   };
 
   return (
@@ -216,12 +228,19 @@ const StoreManagePage = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {stores.map((store: MyStoreResponse) => (
+                  {stores
+                    .sort((a, b) => {
+                      // 대표 매장을 맨 위에 배치
+                      if (a.isDefault && !b.isDefault) return -1;
+                      if (!a.isDefault && b.isDefault) return 1;
+                      return 0;
+                    })
+                    .map((store: MyStoreResponse) => (
                     <div
                       key={store.storeId}
                       className={`rounded-lg border-2 p-4 transition-all ${
                         store.isDefault
-                          ? 'border-black bg-gray-50'
+                          ? 'border-indigo-500 bg-indigo-50/50 shadow-sm'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
@@ -230,7 +249,7 @@ const StoreManagePage = () => {
                           <div className="flex items-center gap-2 mb-2">
                             <h3 className="text-lg font-bold text-gray-900">{store.storeName}</h3>
                             {store.isDefault && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-black px-2.5 py-0.5 text-xs font-semibold text-white">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-600 px-2.5 py-0.5 text-xs font-semibold text-white shadow-sm">
                                 <Star className="w-3 h-3 fill-current" />
                                 대표 매장
                               </span>
@@ -247,20 +266,25 @@ const StoreManagePage = () => {
                         </div>
 
                         <div className="flex gap-2">
-                          {!store.isDefault && (
+                          {store.isDefault ? (
+                            <button
+                              disabled
+                              className="rounded-lg border-2 border-indigo-500 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 cursor-default"
+                            >
+                              현재 대표 매장
+                            </button>
+                          ) : (
                             <button
                               onClick={() => handleSetDefaultStore(store.storePublicId)}
-                              className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                              disabled={loadingStoreId === store.storePublicId}
+                              className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
+                              {loadingStoreId === store.storePublicId && (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              )}
                               대표 매장으로 설정
                             </button>
                           )}
-                          <button
-                            onClick={() => handleSelectStore(store)}
-                            className="rounded-lg bg-black px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800 transition-colors"
-                          >
-                            선택
-                          </button>
                         </div>
                       </div>
                     </div>

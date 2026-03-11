@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { getAccessToken } from "../utils/auth";
+import { NotificationProvider } from "../contexts/NotificationContext";
 import MainLayout from "./layout/MainLayout";
 import StoreGuard from "./layout/StoreGuard";
 
@@ -50,6 +51,9 @@ import SalesLedgerPage from "../pages/sales/SalesLedgerPage";
 import PurchaseOrderListPage from "../pages/purchase/PurchaseOrderListPage";
 import PurchaseOrderCreatePage from "../pages/purchase/PurchaseOrderCreatePage";
 
+// Notification
+import NotificationPage from "../pages/notification/NotificationPage";
+
 // Common
 import NotFoundPage from "../pages/common/NotFoundPage";
 
@@ -58,7 +62,8 @@ export default function AppRouter() {
 
     return (
         <BrowserRouter>
-            <Routes>
+            <NotificationProvider>
+                <Routes>
                 <Route element={<MainLayout />}>
                     {/* 기본 진입 */}
                     <Route
@@ -123,12 +128,16 @@ export default function AppRouter() {
 
                         {/* 마이페이지 */}
                         <Route path="/me" element={<MyPage />} />
+
+                        {/* 알림함 */}
+                        <Route path="/notifications" element={<NotificationPage />} />
                     </Route>
 
                     {/* 404 처리 */}
                     <Route path="*" element={<NotFoundPage />} />
                 </Route>
             </Routes>
+            </NotificationProvider>
         </BrowserRouter>
     );
 }

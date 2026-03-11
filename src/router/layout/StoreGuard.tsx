@@ -59,18 +59,22 @@ export default function StoreGuard() {
         const stores = await getMyStores();
         if (cancelled) return;
 
-        if (!stores || stores.length === 0) {
+        // ACTIVE 상태의 매장만 필터링
+        const activeStores = stores.filter((s) => s.memberStatus === 'ACTIVE');
+
+        // 매장이 없거나 ACTIVE 매장이 하나도 없으면 온보딩으로
+        if (!stores || stores.length === 0 || activeStores.length === 0) {
           setGuardState('onboarding');
           return;
         }
 
         const currentId = getStorePublicId();
         const matched = currentId
-          ? stores.find((store) => store.storePublicId === currentId)
+          ? activeStores.find((store) => store.storePublicId === currentId)
           : undefined;
 
         if (!matched) {
-          const selected = selectStoreByRule(stores);
+          const selected = selectStoreByRule(activeStores);
           setStorePublicId(selected.storePublicId);
         }
 

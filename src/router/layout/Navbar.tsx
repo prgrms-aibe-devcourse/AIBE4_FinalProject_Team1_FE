@@ -2,8 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { logout } from "@/api/user/auth.ts";
 import { getUserProfile } from "@/api/user/user.ts";
+import { getMyStores } from "@/api/store/store.ts";
 import { getAccessToken, removeAccessToken } from "@/utils/auth.ts";
-import type { UserProfileResponse } from "@/types";
+import type { UserProfileResponse, StoreMemberRole } from "@/types";
+import NotificationBell from "@/components/notification/NotificationBell";
+import { useNotifications } from "@/contexts/NotificationContext";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -66,13 +69,11 @@ type MenuSection = {
 function ProfileDropdown({
   name,
   email,
-  onMyPage,
   onStoreManage,
   onLogout,
 }: {
   name: string;
   email: string;
-  onMyPage: () => void;
   onStoreManage: () => void;
   onLogout: () => void;
 }) {
@@ -83,13 +84,6 @@ function ProfileDropdown({
         <div className="text-xs text-slate-500 mt-0.5">{email}</div>
       </div>
       <div className="pt-2 space-y-1">
-        <button
-          type="button"
-          onClick={onMyPage}
-          className="w-full text-left rounded-xl px-2 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
-        >
-          마이페이지
-        </button>
         <button
           type="button"
           onClick={onStoreManage}
@@ -171,25 +165,40 @@ export default function Navbar() {
 
   const isAuthed = !!getAccessToken();
   const [user, setUser] = useState<UserProfileResponse | null>(null);
+  const [defaultStoreRole, setDefaultStoreRole] = useState<StoreMemberRole | null>(null);
 
   const [openMenu, setOpenMenu] = useState<MenuKey>(null);
 
+  const { unreadCount } = useNotifications();
+
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserAndStore = async () => {
       const token = getAccessToken();
       if (!token) {
         setUser(null);
+        setDefaultStoreRole(null);
         return;
       }
       try {
         const userData = await getUserProfile();
         setUser(userData);
+
+        // 대표 매장의 역할 조회
+        const stores = await getMyStores();
+        const activeStores = stores.filter((s) => s.memberStatus === 'ACTIVE');
+        const defaultStore = activeStores.find((s) => s.isDefault);
+        if (defaultStore) {
+          setDefaultStoreRole(defaultStore.myRole);
+        } else {
+          setDefaultStoreRole(null);
+        }
       } catch (error) {
         console.error('Failed to fetch user profile:', error);
         setUser(null);
+        setDefaultStoreRole(null);
       }
     };
-    fetchUser();
+    fetchUserAndStore();
   }, []);
 
   const profileOpen = openMenu === "profile";
@@ -243,24 +252,32 @@ export default function Navbar() {
   };
 
   const standardsSections: MenuSection[] = useMemo(
-    () => [
-      {
-        title: "기준정보",
-        items: [
-          { label: "재료 관리", path: "/stock/ingredients" },
-          { label: "메뉴 관리", path: "/sales/menu" },
-          { label: "거래처 관리", path: "/vendors" },
-        ],
-      },
-      {
-        title: "직원·초대관리",
-        items: [
-          { label: "직원 관리", path: "/stores/members" },
-          { label: "초대 코드", path: "/stores/invitations" },
-        ],
-      },
-    ],
-    [],
+    () => {
+      const sections: MenuSection[] = [
+        {
+          title: "기준정보",
+          items: [
+            { label: "재료 관리", path: "/stock/ingredients" },
+            { label: "메뉴 관리", path: "/sales/menu" },
+            { label: "거래처 관리", path: "/vendors" },
+          ],
+        },
+      ];
+
+      // OWNER만 직원·초대관리 메뉴 표시
+      if (defaultStoreRole === 'OWNER') {
+        sections.push({
+          title: "직원·초대관리",
+          items: [
+            { label: "직원 관리", path: "/stores/members" },
+            { label: "초대 코드", path: "/stores/invitations" },
+          ],
+        });
+      }
+
+      return sections;
+    },
+    [defaultStoreRole],
   );
 
   const salesSections: MenuSection[] = useMemo(
@@ -524,19 +541,18 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {/* Search: 현재 미사용이므로 숨김 */}
           {/* Bell */}
-          <button
-            type="button"
-            className="relative h-10 w-10 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 grid place-items-center transition-colors"
-            onClick={() =>
-              isAuthed
-                ? window.alert("알림 패널 연결 예정")
-                : navigate("/login")
-            }
-            aria-label="알림"
-          >
-            <IconBell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-rose-500 ring-2 ring-white" />
-          </button>
+          {isAuthed ? (
+            <NotificationBell unreadCount={unreadCount} />
+          ) : (
+            <button
+              type="button"
+              className="relative h-10 w-10 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 grid place-items-center transition-colors"
+              onClick={() => navigate("/login")}
+              aria-label="알림"
+            >
+              <IconBell className="h-5 w-5" />
+            </button>
+          )}
 
           {/* Profile */}
           {isAuthed ? (
@@ -564,10 +580,6 @@ export default function Navbar() {
                 <ProfileDropdown
                   name={user?.name || "사용자"}
                   email={user?.email || "로딩 중..."}
-                  onMyPage={() => {
-                    closeAll();
-                    handleProtectedNav("/me");
-                  }}
                   onStoreManage={() => {
                     closeAll();
                     handleProtectedNav("/stores/manage");
