@@ -286,7 +286,7 @@ export default function SalesAnalyticsPage() {
                         return (
                             <>
                                 <KPICard
-                                    title="총 매출액"
+                                    title="순 매출액 (환불 제외)"
                                     value={summaryData ? `${formatAmount(summaryData.totalAmount)}원` : '0원'}
                                     change={summaryData && summaryData.totalAmountGrowthRate !== null ? { 
                                         value: Number(Math.abs(summaryData.totalAmountGrowthRate).toFixed(2)), 
