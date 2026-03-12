@@ -48,8 +48,9 @@ function isApiResponseEnvelope<T>(data: unknown): data is ApiResponse<T> {
         typeof obj.status === 'string' &&
         typeof obj.code === 'string' &&
         typeof obj.path === 'string' &&
-        typeof obj.timestamp === 'string' &&
-        'data' in obj
+        'data' in obj &&
+        // timestamp는 문자열일 수도, Spring Date 직렬화 배열(Array)일 수도 있음
+        (typeof obj.timestamp === 'string' || Array.isArray(obj.timestamp))
     );
 }
 

@@ -33,6 +33,7 @@ export interface PageResponse<T> {
     totalElements: number;
     totalPages: number;
     hasNext: boolean;
+    hasPrevious?: boolean;
 }
 
 /**

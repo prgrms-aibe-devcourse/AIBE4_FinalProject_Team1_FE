@@ -3,12 +3,14 @@ import { requireStorePublicId } from '@/utils/store';
 import {
     getSalesLedgerOrderDetail,
     getSalesLedgerOrders,
+    getSalesLedgerTotalSummary,
 } from '@/api';
 import type {
     SalesLedgerOrderDetailResponse,
     SalesLedgerOrderStatus,
     SalesLedgerOrderSummaryResponse,
     SalesLedgerOrderType,
+    SalesLedgerTotalSummaryResponse,
 } from '@/types/sales/salesLedger.ts';
 
 const KST_OFFSET = '+09:00';
@@ -84,6 +86,7 @@ export default function SalesLedgerPage() {
     const [page, setPage] = useState(0);
 
     const [orders, setOrders] = useState<SalesLedgerOrderSummaryResponse[]>([]);
+    const [summary, setSummary] = useState<SalesLedgerTotalSummaryResponse | null>(null);
     const [totalPages, setTotalPages] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -97,17 +100,17 @@ export default function SalesLedgerPage() {
     const sameDay = (a: Date, b: Date) =>
         a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
-    const daySummary = useMemo(() => {
-        const totalAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
-        const refundAmount = orders.reduce((sum, order) => sum + order.refundAmount, 0);
-        const netAmount = orders.reduce((sum, order) => sum + order.netAmount, 0);
+    const displaySummary = useMemo(() => {
+        if (!summary) {
+            return { count: 0, totalAmount: 0, refundAmount: 0, netAmount: 0 };
+        }
         return {
-            count: orders.length,
-            totalAmount,
-            refundAmount,
-            netAmount,
+            count: summary.totalOrderCount,
+            totalAmount: summary.totalAmount,
+            refundAmount: summary.totalRefundAmount,
+            netAmount: summary.totalNetAmount,
         };
-    }, [orders]);
+    }, [summary]);
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -115,17 +118,23 @@ export default function SalesLedgerPage() {
             setError(null);
             setSelectedOrderDetail(null);
             try {
-                const data = await getSalesLedgerOrders(storePublicId, {
+                const queryParams = {
                     from: toKstDateTime(selectedDate),
                     to: toKstDateTime(selectedDate, true),
                     status: status || undefined,
                     type: type || undefined,
                     page,
                     size: 20,
-                });
+                };
 
-                setOrders(data.content);
-                setTotalPages(data.totalPages);
+                const [orderData, summaryData] = await Promise.all([
+                    getSalesLedgerOrders(storePublicId, queryParams),
+                    getSalesLedgerTotalSummary(storePublicId, queryParams),
+                ]);
+
+                setOrders(orderData.content);
+                setTotalPages(orderData.totalPages);
+                setSummary(summaryData);
             } catch (err) {
                 console.error('매출 원장 조회 실패:', err);
                 setError('매출 원장을 불러오지 못했습니다.');
@@ -203,10 +212,10 @@ export default function SalesLedgerPage() {
                         </p>
 
                         <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                            <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">주문 수</p><p className="mt-1 text-lg font-bold">{daySummary.count}건</p></div>
-                            <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">총 매출</p><p className="mt-1 text-lg font-bold">{formatAmount(daySummary.totalAmount)}원</p></div>
-                            <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">환불 금액</p><p className="mt-1 text-lg font-bold text-rose-600">{formatAmount(daySummary.refundAmount)}원</p></div>
-                            <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">순매출</p><p className="mt-1 text-lg font-bold text-indigo-600">{formatAmount(daySummary.netAmount)}원</p></div>
+                            <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">주문 수</p><p className="mt-1 text-lg font-bold">{displaySummary.count}건</p></div>
+                            <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">총 매출</p><p className="mt-1 text-lg font-bold">{formatAmount(displaySummary.totalAmount)}원</p></div>
+                            <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">환불 금액</p><p className="mt-1 text-lg font-bold text-rose-600">{formatAmount(displaySummary.refundAmount)}원</p></div>
+                            <div className="rounded-xl bg-slate-50 p-3"><p className="text-xs text-slate-500">순매출</p><p className="mt-1 text-lg font-bold text-indigo-600">{formatAmount(displaySummary.netAmount)}원</p></div>
                         </div>
                     </div>
 

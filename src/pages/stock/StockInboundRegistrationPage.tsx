@@ -7,22 +7,26 @@ import {
     normalizeAllProductNames
 } from "@/api/stock/inbound.ts";
 import {analyzeReceipt} from "@/api/ocr/ocr.ts";
+// 정의하신 타입을 기반으로 import
 import type {ReceiptResponse, Field, FieldStatus} from "@/types/ocr/ocr";
 import type {VendorResponse} from "@/types/reference/vendor";
 import VendorSelectModal from "@/components/stock/VendorSelectModal";
 
-// --- Types ---
+
+// 개별 필드의 상태 및 메시지 정보 타입
 type FieldMeta = {
     status: FieldStatus;
     message: string | null;
 };
 
+// 화면 입력 폼을 위한 확장 타입
 type ItemDraft = {
     id: string;
     rawProductName: string;
     quantity: number;
     unitCost: string;
     expirationDate: string;
+    // 필드별 OCR 상태 정보 저장
     meta: {
         rawProductName: FieldMeta;
         quantity: FieldMeta;
@@ -31,7 +35,6 @@ type ItemDraft = {
     };
 };
 
-// --- Utils ---
 function newId() {
     return crypto.randomUUID?.() ?? `${Date.now()}_${Math.random()}`;
 }
@@ -63,12 +66,10 @@ export default function StockInboundRegistrationPage() {
     const navigate = useNavigate();
     const storePublicId = requireStorePublicId();
 
-    // --- State: Core Data ---
     const [selectedVendor, setSelectedVendor] = useState<VendorResponse | null>(null);
     const [inboundDate, setInboundDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [items, setItems] = useState<ItemDraft[]>([createEmptyItem()]);
 
-    // --- State: UI Control ---
     const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);

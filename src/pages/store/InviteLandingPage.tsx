@@ -4,6 +4,7 @@ import { acceptInvitation } from '@/api/store/invitation.ts';
 import { setDefaultStore } from '@/api/store/store.ts';
 import { getAccessToken } from '@/utils/auth.ts';
 import { setStorePublicId } from '@/utils/store.ts';
+import { useNotifications } from '@/contexts/NotificationContext';
 import { CheckCircle, XCircle, Loader2, UserPlus } from 'lucide-react';
 import axios from 'axios';
 import type { ApiError } from '@/types/common/common';
@@ -14,6 +15,7 @@ const InviteLandingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const { refreshUnreadCount } = useNotifications();
   const [status, setStatus] = useState<InviteStatus>('loading');
   const [storeName, setStoreName] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -57,6 +59,11 @@ const InviteLandingPage = () => {
           setStorePublicId(response.storePublicId);
         }
 
+        // 알림 갱신 (SSE로 수신하지 못한 경우를 대비)
+        setTimeout(() => {
+          refreshUnreadCount();
+        }, 500);
+
         // 3초 후 대시보드로 이동
         setTimeout(() => {
           navigate('/dashboard', { replace: true });
@@ -78,7 +85,7 @@ const InviteLandingPage = () => {
     };
 
     processInvitation();
-  }, [searchParams, navigate, location]);
+  }, [searchParams, navigate, location, refreshUnreadCount]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
