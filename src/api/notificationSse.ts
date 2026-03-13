@@ -51,6 +51,12 @@ export function connectNotificationStream(
         return;
       }
 
+      // 401은 토큰 갱신 중일 수 있으므로 조용히 종료
+      if (response.status === 401) {
+        controller.abort();
+        return;
+      }
+
       if (response.status >= 400 && response.status < 500 && response.status !== 429) {
         throw new Error(`Client error: ${response.status}`);
       }
@@ -86,9 +92,15 @@ export function connectNotificationStream(
 
     openWhenHidden: true,
   }).catch((error: unknown) => {
-    if ((error as Error).name !== 'AbortError') {
-      console.error('SSE connection failed:', error);
+    // AbortError는 정상 종료이므로 무시
+    if ((error as Error).name === 'AbortError') {
+      return;
     }
+    // 401 관련 에러는 토큰 갱신 후 재연결되므로 무시
+    if ((error as Error).message?.includes('401')) {
+      return;
+    }
+    console.error('SSE connection failed:', error);
   });
 
   return {

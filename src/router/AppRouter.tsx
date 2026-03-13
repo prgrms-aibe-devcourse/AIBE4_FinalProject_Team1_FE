@@ -57,6 +57,9 @@ import PurchaseOrderCreatePage from "@/pages/purchase/PurchaseOrderCreatePage";
 // Notification
 import NotificationPage from "../pages/notification/NotificationPage";
 
+// Chat
+import ChatPage from "../pages/chat/ChatPage";
+
 // Common
 import NotFoundPage from "@/pages/common/NotFoundPage";
 
@@ -137,6 +140,9 @@ export default function AppRouter() {
 
                         {/* 알림함 */}
                         <Route path="/notifications" element={<NotificationPage />} />
+
+                        {/* 챗봇 */}
+                        <Route path="/chat" element={<ChatPage />} />
                     </Route>
 
                     {/* 404 처리 */}

@@ -7,8 +7,10 @@ export default function MainLayout() {
 
   // 로그인 관련 페이지에서는 Navbar와 Footer 숨기기
   const isAuthPage = ['/login', '/oauth/redirect'].includes(location.pathname);
+  // 챗봇 페이지는 전체 화면 사용
+  const isChatPage = location.pathname === '/chat';
 
-  if (isAuthPage) {
+  if (isAuthPage || isChatPage) {
     return (
       <div className="min-h-screen bg-gray-100 text-slate-900">
         <Outlet />

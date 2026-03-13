@@ -20,3 +20,4 @@ export * from "./ocr/ocr.ts";
 export * from "./ocr/document.ts";
 export * from "./stock/disposal.ts";
 export * from "./notification.ts";
+export * from "./chat/chat.ts";
