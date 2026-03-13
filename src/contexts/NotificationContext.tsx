@@ -240,6 +240,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         void refreshUnreadCount();
       },
       onError: (err: Error) => {
+        // 401 에러는 토큰 갱신 후 재연결되므로 무시
+        if (err.message?.includes('401')) {
+          return;
+        }
         console.error('[NotificationContext] SSE error:', err);
       },
     });
