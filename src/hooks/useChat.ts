@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useChatSocket } from './useChatSocket';
 import { createChatThread, getMyChatThreads, getChatMessages } from '@/api';
+import { getStorePublicId } from '@/utils/store';
 import type {
   ChatThreadSummary,
   ChatMessage,
@@ -121,8 +122,14 @@ export const useChat = () => {
 
   // 새 대화 생성
   const createNewThread = useCallback(async (title: string = '새 대화') => {
+    const storePublicId = getStorePublicId();
+    if (!storePublicId) {
+      console.error('No store selected');
+      return null;
+    }
+
     try {
-      const response = await createChatThread({ title });
+      const response = await createChatThread(storePublicId, { title });
       const newThread = response.data;
 
       // 스레드 목록 갱신
