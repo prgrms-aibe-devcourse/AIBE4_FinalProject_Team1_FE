@@ -7,8 +7,8 @@ import type {
 } from '@/types';
 
 // 채팅 스레드 생성
-export const createChatThread = (request: ChatCreateThreadRequest) =>
-  apiClient.post<ChatThreadCreateResponse>('/api/chat/threads', request);
+export const createChatThread = (storePublicId: string, request: ChatCreateThreadRequest) =>
+  apiClient.post<ChatThreadCreateResponse>(`/api/chat/${storePublicId}/threads`, request);
 
 // 내 채팅 스레드 목록 조회
 export const getMyChatThreads = () =>
