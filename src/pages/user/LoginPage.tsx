@@ -4,8 +4,9 @@ import type { SocialProvider } from "@/types";
 const LoginPage: React.FC = () => {
   const handleLogin = (provider: SocialProvider): void => {
     console.log(`${provider} 로그인 시도`);
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost';
-    window.location.href = `${baseUrl}/oauth2/authorization/${provider}`;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    const redirectUri = `${window.location.origin}/oauth2/callback`;
+    window.location.href = `${baseUrl}/oauth2/authorization/${provider}?redirect_uri=${encodeURIComponent(redirectUri)}`;
   };
 
   return (
