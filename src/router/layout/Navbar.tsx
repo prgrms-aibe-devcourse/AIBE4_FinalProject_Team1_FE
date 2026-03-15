@@ -478,11 +478,7 @@ export default function Navbar() {
 
           <button
             type="button"
-            onClick={() =>
-              isAuthed
-                ? window.alert("챗봇 연결 예정")
-                : navigate("/login")
-            }
+            onClick={() => handleProtectedNav("/chat")}
             className="text-sm font-extrabold px-3 py-2 rounded-md transition-colors text-slate-900 hover:bg-slate-100"
           >
             챗봇

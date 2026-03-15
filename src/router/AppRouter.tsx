@@ -1,6 +1,6 @@
-import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
-import {getAccessToken} from "../utils/auth";
-import {NotificationProvider} from "../contexts/NotificationContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { getAccessToken } from "../utils/auth";
+import { NotificationProvider } from "../contexts/NotificationContext";
 import MainLayout from "./layout/MainLayout";
 import StoreGuard from "./layout/StoreGuard";
 
@@ -58,6 +58,9 @@ import PurchaseOrderCreatePage from "@/pages/purchase/PurchaseOrderCreatePage";
 // Notification
 import NotificationPage from "../pages/notification/NotificationPage";
 
+// Chat
+import ChatPage from "../pages/chat/ChatPage";
+
 // Common
 import NotFoundPage from "@/pages/common/NotFoundPage";
 
@@ -68,83 +71,86 @@ export default function AppRouter() {
         <BrowserRouter>
             <NotificationProvider>
                 <Routes>
-                    <Route element={<MainLayout/>}>
-                        {/* 기본 진입 */}
-                        <Route
-                            index
-                            element={
-                                isAuthed ? (
-                                    <Navigate to="/dashboard" replace/>
-                                ) : (
-                                    <Navigate to="/login" replace/>
-                                )
-                            }
-                        />
+                <Route element={<MainLayout />}>
+                    {/* 기본 진입 */}
+                    <Route
+                        index
+                        element={
+                            isAuthed ? (
+                                <Navigate to="/dashboard" replace />
+                            ) : (
+                                <Navigate to="/login" replace />
+                            )
+                        }
+                    />
 
-                        {/* 인증 */}
-                        <Route path="/login" element={<LoginPage/>}/>
-                        <Route path="/oauth/redirect" element={<OAuth2RedirectHandler/>}/>
+                    {/* 인증 */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/oauth/redirect" element={<OAuth2RedirectHandler />} />
+                    <Route path="/oauth2/callback" element={<OAuth2RedirectHandler />} />
 
-                        {/* 온보딩 */}
-                        <Route path="/onboarding" element={<OnboardingPage/>}/>
+                    {/* 온보딩 */}
+                    <Route path="/onboarding" element={<OnboardingPage />} />
 
-                        {/* 초대 */}
-                        <Route path="/invite" element={<InviteLandingPage/>}/>
+                    {/* 초대 */}
+                    <Route path="/invite" element={<InviteLandingPage />} />
 
-                        {/* 매장 선택이 완료된 후 접근 */}
-                        <Route element={<StoreGuard/>}>
-                            {/* 대시보드 */}
-                            <Route path="/dashboard" element={<DashboardPage/>}/>
+                    {/* 매장 선택이 완료된 후 접근 */}
+                    <Route element={<StoreGuard />}>
+                        {/* 대시보드 */}
+                        <Route path="/dashboard" element={<DashboardPage />} />
 
-                            {/* 매장 관리 */}
-                            <Route path="/stores/manage" element={<StoreManagePage/>}/>
-                            <Route path="/stores/members" element={<StoreMemberPage/>}/>
-                            <Route path="/stores/invitations" element={<InvitationManagePage/>}/>
+                        {/* 매장 관리 */}
+                        <Route path="/stores/manage" element={<StoreManagePage />} />
+                        <Route path="/stores/members" element={<StoreMemberPage />} />
+                        <Route path="/stores/invitations" element={<InvitationManagePage />} />
 
-                            {/* 재고 관리 */}
-                            <Route path="/stock/" element={<StockPage/>}/>
-                            <Route path="/stock/stocktakes" element={<StockTakeListPage/>}/>
-                            <Route path="/stock/stocktakes/new" element={<StockTakePage/>}/>
-                            <Route path="/stock/stocktakes/:sheetPublicId" element={<StockTakePage/>}/>
-                            <Route path="/stock/ingredients" element={<IngredientPage/>}/>
-                            <Route path="/stock/inbound" element={<StockInboundPage/>}/>
-                            <Route path="/stock/inbound/new" element={<StockInboundRegistrationPage/>}/>
-                            <Route path="/stock/inbound/documents" element={<StockDocumentsPage/>}/>
-                            <Route path="/stock/inbound/:inboundPublicId" element={<InboundDetailPage/>}/>
-                            <Route path="/stock/disposal" element={<DisposalPage/>}/>
-                            <Route path="/stock/log" element={<StockLogPage/>}/>
-                            <Route path="/stock/shortages" element={<StockShortagePage/>}/>
+                        {/* 재고 관리 */}
+                        <Route path="/stock/" element={<StockPage />} />
+                        <Route path="/stock/stocktakes" element={<StockTakeListPage />} />
+                        <Route path="/stock/stocktakes/new" element={<StockTakePage />} />
+                        <Route path="/stock/stocktakes/:sheetPublicId" element={<StockTakePage />} />
+                        <Route path="/stock/ingredients" element={<IngredientPage />} />
+                        <Route path="/stock/inbound" element={<StockInboundPage />} />
+                        <Route path="/stock/inbound/new" element={<StockInboundRegistrationPage />} />
+                        <Route path="/stock/inbound/documents" element={<StockDocumentsPage />} />
+                        <Route path="/stock/inbound/:inboundPublicId" element={<InboundDetailPage />} />
+                        <Route path="/stock/disposal" element={<DisposalPage />} />
+                        <Route path="/stock/log" element={<StockLogPage />} />
+                        <Route path="/stock/shortages" element={<StockShortagePage />} />
 
-                            {/* 매출 관리 */}
-                            <Route path="/sales/menu" element={<MenuPage/>}/>
-                            <Route path="/sales/list" element={<SalesLedgerPage/>}/>
+                        {/* 매출 관리 */}
+                        <Route path="/sales/menu" element={<MenuPage />} />
+                        <Route path="/sales/list" element={<SalesLedgerPage />} />
 
-                            {/* 주문 관리 */}
-                            <Route path="/orders" element={<SalesOrderListPage/>}/>
-                            <Route path="/orders/tables" element={<DiningTablePage/>}/>
+                        {/* 주문 관리 */}
+                        <Route path="/orders" element={<SalesOrderListPage />} />
+                        <Route path="/orders/tables" element={<DiningTablePage />} />
 
-                            {/* 발주 관리 */}
-                            <Route path="/purchase-orders" element={<PurchaseOrderListPage/>}/>
-                            <Route path="/purchase-orders/new" element={<PurchaseOrderCreatePage/>}/>
+                        {/* 발주 관리 */}
+                        <Route path="/purchase-orders" element={<PurchaseOrderListPage />} />
+                        <Route path="/purchase-orders/new" element={<PurchaseOrderCreatePage />} />
 
-                            {/* 거래처 관리 */}
-                            <Route path="/vendors" element={<VendorPage/>}/>
+                        {/* 거래처 관리 */}
+                        <Route path="/vendors" element={<VendorPage />} />
 
-                            {/* 분석 관리 */}
-                            <Route path="/analytics/sales" element={<SalesAnalyticsPage/>}/>
-                            <Route path="/analytics/stock" element={<StockAnalyticsPage/>}/>
+                        {/* 분석 관리 */}
+                        <Route path="/analytics/sales" element={<SalesAnalyticsPage />} />
+                        <Route path="/analytics/stock" element={<StockAnalyticsPage/>}/>
+                        {/* 마이페이지 */}
+                        <Route path="/me" element={<MyPage />} />
 
-                            {/* 마이페이지 */}
-                            <Route path="/me" element={<MyPage/>}/>
+                        {/* 알림함 */}
+                        <Route path="/notifications" element={<NotificationPage />} />
 
-                            {/* 알림함 */}
-                            <Route path="/notifications" element={<NotificationPage/>}/>
-                        </Route>
-
-                        {/* 404 처리 */}
-                        <Route path="*" element={<NotFoundPage/>}/>
+                        {/* 챗봇 */}
+                        <Route path="/chat" element={<ChatPage />} />
                     </Route>
-                </Routes>
+
+                    {/* 404 처리 */}
+                    <Route path="*" element={<NotFoundPage />} />
+                </Route>
+            </Routes>
             </NotificationProvider>
         </BrowserRouter>
     );

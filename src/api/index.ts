@@ -17,6 +17,7 @@ export * from "./sales/tableQr.ts";
 export * from "./sales/diningTable.ts";
 export * from "./purchase/purchase.ts";
 export * from "./stock/inbound.ts";
+export * from "./chat/chat.ts";
 
 
 export { default as apiClient } from "./user/client.ts";
