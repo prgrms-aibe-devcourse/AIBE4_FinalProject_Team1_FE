@@ -4,9 +4,32 @@ import type { SocialProvider } from "@/types";
 const LoginPage: React.FC = () => {
   const handleLogin = (provider: SocialProvider): void => {
     console.log(`${provider} 로그인 시도`);
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-    const redirectUri = `${window.location.origin}/oauth2/callback`;
-    window.location.href = `${baseUrl}/oauth2/authorization/${provider}?redirect_uri=${encodeURIComponent(redirectUri)}`;
+
+    const origin = window.location.origin;
+    const isLocal = origin.includes("localhost") || origin.includes("127.0.0.1");
+
+    // API Base URL 결정
+    const baseUrl = isLocal
+      ? 'http://localhost:8080'
+      : (import.meta.env.VITE_API_BASE_URL || 'https://api.inventorykitchen.cloud');
+
+    // Frontend Redirect URL 결정 (포트 제거)
+    const frontendUrl = isLocal
+      ? 'http://localhost'
+      : 'https://inventorykitchen.cloud';
+
+    const redirectUri = `${frontendUrl}/oauth2/callback`;
+    const loginUrl = `${baseUrl}/oauth2/authorization/${provider}?redirect_uri=${encodeURIComponent(redirectUri)}`;
+
+    console.log('🔍 Environment:', import.meta.env.MODE);
+    console.log('🔍 Origin:', origin);
+    console.log('🔍 isLocal:', isLocal);
+    console.log('🔍 baseUrl:', baseUrl);
+    console.log('🔍 frontendUrl:', frontendUrl);
+    console.log('🔍 redirectUri:', redirectUri);
+    console.log('🔍 loginUrl:', loginUrl);
+
+    window.location.href = loginUrl;
   };
 
   return (
