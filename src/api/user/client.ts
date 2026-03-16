@@ -11,7 +11,24 @@ import {
 } from '@/utils/auth.ts';
 import type { ApiResponse } from '@/types/common/common.ts';
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+const resolveApiBaseUrl = (): string => {
+    if (typeof window === 'undefined') {
+        return import.meta.env.VITE_API_BASE_URL || '';
+    }
+
+    const hostname = window.location.hostname;
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+
+    if (isLocal) {
+        // 로컬에서는 nginx가 프록시하므로 빈 문자열 (같은 origin)
+        return '';
+    }
+
+    // 운영에서는 API 서버 URL
+    return import.meta.env.VITE_API_BASE_URL || '';
+};
+
+const apiBaseUrl = resolveApiBaseUrl();
 
 const apiClient = axios.create({
     baseURL: apiBaseUrl,
