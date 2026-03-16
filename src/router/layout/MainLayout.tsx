@@ -6,7 +6,7 @@ export default function MainLayout() {
   const location = useLocation();
 
   // 로그인 관련 페이지에서는 Navbar와 Footer 숨기기
-  const isAuthPage = ['/login', '/oauth/redirect'].includes(location.pathname);
+  const isAuthPage = ['/login', '/oauth/redirect', '/oauth2/callback'].includes(location.pathname);
   // 챗봇 페이지는 전체 화면 사용
   const isChatPage = location.pathname === '/chat';
 

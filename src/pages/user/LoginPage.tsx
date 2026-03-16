@@ -1,31 +1,26 @@
 import React from "react";
 import type { SocialProvider } from "@/types";
 
+const resolveLoginBaseUrl = (): string => {
+  const hostname = window.location.hostname;
+  const isLocal = hostname === "localhost" || hostname === "127.0.0.1";
+
+  if (isLocal) {
+    // 로컬에서는 nginx가 프록시하므로 빈 문자열 (같은 origin)
+    return "";
+  }
+
+  // 운영에서는 API 서버 URL
+  return import.meta.env.VITE_API_BASE_URL || "https://api.inventorykitchen.cloud";
+};
+
 const LoginPage: React.FC = () => {
   const handleLogin = (provider: SocialProvider): void => {
-    console.log(`${provider} 로그인 시도`);
+    const loginBaseUrl = resolveLoginBaseUrl();
+    const redirectUri = `${window.location.origin}/oauth2/callback`;
+    const loginUrl = `${loginBaseUrl}/oauth2/authorization/${provider}?redirect_uri=${encodeURIComponent(redirectUri)}`;
 
-    const origin = window.location.origin;
-    const isLocal = origin.includes("localhost") || origin.includes("127.0.0.1");
-
-    // API Base URL 결정
-    const baseUrl = isLocal
-      ? 'http://localhost:8080'
-      : (import.meta.env.VITE_API_BASE_URL || 'https://api.inventorykitchen.cloud');
-
-    // Frontend Redirect URL 결정 (포트 제거)
-    const frontendUrl = isLocal
-      ? 'http://localhost'
-      : 'https://inventorykitchen.cloud';
-
-    const redirectUri = `${frontendUrl}/oauth2/callback`;
-    const loginUrl = `${baseUrl}/oauth2/authorization/${provider}?redirect_uri=${encodeURIComponent(redirectUri)}`;
-
-    console.log('🔍 Environment:', import.meta.env.MODE);
-    console.log('🔍 Origin:', origin);
-    console.log('🔍 isLocal:', isLocal);
-    console.log('🔍 baseUrl:', baseUrl);
-    console.log('🔍 frontendUrl:', frontendUrl);
+    console.log('🔍 loginBaseUrl:', loginBaseUrl);
     console.log('🔍 redirectUri:', redirectUri);
     console.log('🔍 loginUrl:', loginUrl);
 

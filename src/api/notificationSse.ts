@@ -12,12 +12,27 @@ interface SSEConnection {
     close: () => void;
 }
 
+const resolveApiBaseUrl = (): string => {
+    if (typeof window === 'undefined') {
+        return import.meta.env.VITE_API_BASE_URL || '';
+    }
+
+    const hostname = window.location.hostname;
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+
+    if (isLocal) {
+        return '';
+    }
+
+    return import.meta.env.VITE_API_BASE_URL || '';
+};
+
 export function connectNotificationStream(
     options: SSEConnectionOptions,
 ): SSEConnection {
     const { onConnect, onNotification, onError } = options;
 
-    const baseURL = import.meta.env.VITE_API_BASE_URL || '';
+    const baseURL = resolveApiBaseUrl();
     const url = `${baseURL}/api/notifications/stream`;
 
     let closed = false;
@@ -119,11 +134,15 @@ export function connectNotificationStream(
             }
 
             if (errorObj.message === 'SSE_UNAUTHORIZED') {
-                const refreshedToken = await reissueAccessToken();
-                if (refreshedToken) {
-                    scheduleReconnect(300);
+                const newToken = await reissueAccessToken();
+
+                if (!newToken) {
+                    onError?.(new Error('SSE 재인증 실패'));
                     return;
                 }
+
+                scheduleReconnect(300);
+                return;
             }
 
             onError?.(errorObj);
@@ -138,7 +157,6 @@ export function connectNotificationStream(
             closed = true;
             clearReconnectTimer();
             controller?.abort();
-            controller = null;
         },
     };
 }
